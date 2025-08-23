@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
 {
     Schema::table('users', function (Blueprint $table) {
-        // admin, user.
-        $table->string('role')->default('user')->after('id');
+        $table->string('advertiser_name')->nullable()->after('whatsapp');
+        $table->string('advertiser_type')->nullable()->after('advertiser_name');
+        $table->string('advertiser_logo')->nullable()->after('advertiser_type'); // لتخزين مسار الصورة
+        $table->text('advertiser_location')->nullable()->after('advertiser_logo'); // لتخزين رابط أو بيانات JSON
     });
 }
 

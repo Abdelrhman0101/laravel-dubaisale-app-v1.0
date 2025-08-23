@@ -21,6 +21,7 @@ class CarSalesAdController extends Controller
         return response()->json($ads);
     }
 
+    
     // إنشاء إعلان جديد
     public function store(Request $request)
     {
