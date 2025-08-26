@@ -11,13 +11,45 @@ use Illuminate\Support\Facades\Gate;
 class CarSalesAdController extends Controller
 {
     // عرض جميع الإعلانات
-    public function index()
+        /**
+     * Display a listing of the resource with smart filtering.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(Request $request)
     {
-        // We will only show 'Valid' and 'admin_approved' ads to the public
-        $ads = CarSalesAd::where('add_status', 'Valid')
-                       ->where('admin_approved', true)
-                       ->latest()
-                       ->paginate(15);
+        // 1. نبدأ بالاستعلام الأساسي الذي يعرض الإعلانات المعتمدة فقط
+        $query = CarSalesAd::query()
+                       ->where('add_status', 'Valid')
+                       ->where('admin_approved', true);
+
+        // 2. تطبيق الفلاتر بشكل ديناميكي بناءً على الطلب الوارد
+        // الدالة `when` تقوم بتطبيق الفلتر فقط إذا كانت القيمة موجودة في الطلب
+
+        // Filter by 'make' if provided in the URL query string
+        $query->when($request->query('make'), function ($q, $make) {
+            return $q->filterByMake($make);
+        });
+
+        // Filter by 'model' if provided in the URL query string
+        $query->when($request->query('model'), function ($q, $model) {
+            return $q->filterByModel($model);
+        });
+
+        // Filter by 'trim' if provided in the URL query string
+        $query->when($request->query('trim'), function ($q, $trim) {
+            return $q->filterByTrim($trim);
+        });
+
+        // Filter by 'year' if provided in the URL query string
+        $query->when($request->query('year'), function ($q, $year) {
+            return $q->filterByYear($year);
+        });
+        
+        // 3. الترتيب من الأحدث للأقدم وتقسيم النتائج على صفحات
+        $ads = $query->latest()->paginate(15)->withQueryString();
+
         return response()->json($ads);
     }
 
