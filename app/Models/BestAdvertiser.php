@@ -2,12 +2,25 @@
 
 namespace App\Models;
 
+// === هذا هو السطر المهم الذي يجب تصحيحه ===
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+// ===========================================
 use Illuminate\Database\Eloquent\Model;
 
-// في ملف BestAdvertiser.php
 class BestAdvertiser extends Model
 {
     use HasFactory;
+
+    /**
+     * The attributes that aren't mass assignable.
+     */
     protected $guarded = [];
-    // لا نحتاج لتعريف علاقة عكسية هنا حاليًا
+
+    /**
+     * Get the user that this record belongs to.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
