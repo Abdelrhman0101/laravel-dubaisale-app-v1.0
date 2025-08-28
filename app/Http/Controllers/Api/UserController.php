@@ -43,19 +43,33 @@ class UserController extends Controller
     }
 
     /**
-    * [Admin] تفعيل أو إلغاء تفعيل حالة "The Best" للمستخدم.
-    */
-    public function toggleTheBestStatus(User $user)
+     * [Admin] عرض قائمة بكل المستخدمين مع تقسيم الصفحات.
+     */
+    public function index()
     {
-        // ببساطة، نقوم بعكس القيمة الحالية
-        $user->the_best = !$user->the_best;
-        $user->save();
-
-        $status = $user->the_best ? "marked as 'The Best'" : "removed from 'The Best'";
-
-        return response()->json([
-            'message' => "User '{$user->username}' has been {$status}.",
-            'user' => $user
-        ]);
+        return User::latest()->paginate(20);
     }
+
+    /**
+     * [Admin] عرض التفاصيل الكاملة لمستخدم واحد.
+     */
+    public function show(User $user)
+    {
+        return response()->json($user);
+    }
+
+
+    
+    /**
+     * [Admin] تحديث بيانات مستخدم (مثال: تغيير دوره).
+     */
+    public function update(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'role' => ['sometimes', 'string', Rule::in(['admin', 'user'])],
+        ]);
+        $user->update($data);
+        return response()->json($user);
+    }
+
 }

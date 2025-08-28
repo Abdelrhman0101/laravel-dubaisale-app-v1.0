@@ -2,90 +2,83 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+// --- Controllers ---
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\UploadController;
-use App\Http\Controllers\Api\CarSalesAdController;
-use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\MyAdsController;
-// === استدعاء الـ Controllers الجديدة الخاصة بالفلاتر ===
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\CarSalesAdController;
+use App\Http\Controllers\Api\FeaturedContentController;
+use App\Http\Controllers\UploadController;
+
+// --- Filter Controllers ---
 use App\Http\Controllers\Api\Filters\CarSalesFiltersController;
+
+// --- Admin Controllers ---
+use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Admin\BestAdvertiserController;
 use App\Http\Controllers\Api\Admin\CarSaleFilterManagementController;
+
+// --- Middleware ---
 use App\Http\Middleware\IsAdmin;
-use App\Http\Controllers\Api\FeaturedContentController; // <<< استدعاء في الأعلى
+
 
 /*
 |--------------------------------------------------------------------------
-| Public API Routes
+| Public API Routes (No Authentication Needed)
 |--------------------------------------------------------------------------
-|
-| Routes accessible by anyone, no authentication needed.
-|
 */
 
 // Authentication
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/activate', [AuthController::class, 'activate']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// Featured Content
 Route::get('/best-advertisers', [FeaturedContentController::class, 'getBestAdvertisers']);
+Route::get('/users/{user}/ads/{category}', [FeaturedContentController::class, 'getUserAdsByCategory']);
 
-// ---- Public Routes for Fetching Filter Data ----
-// Endpoint رئيسي لجلب كل الفلاتر في رد واحد منظم للواجهة الأمامية
+// Public Filter Data for Frontend
 Route::get('/car-sales-filters', [CarSalesFiltersController::class, 'index']);
-
-// Endpoints إضافية لجلب أجزاء معينة من الفلاتر (إذا احتاجتها الواجهة ديناميكيًا)
-Route::prefix('filters/car-sale')->group(function () {
-    Route::get('/makes', [CarSaleFilterManagementController::class, 'getMakes']);
-    Route::get('/makes/{make}/models', [CarSaleFilterManagementController::class, 'getModels']);
-    Route::get('/models/{model}/trims', [CarSaleFilterManagementController::class, 'getTrims']);
-     // ==== Years Management ====
-    Route::get('/years', [CarSaleFilterManagementController::class, 'getYears']);
-    Route::post('/years', [CarSaleFilterManagementController::class, 'addYear']);
-    Route::put('/years/{year}', [CarSaleFilterManagementController::class, 'updateYear']);
-    Route::delete('/years/{year}', [CarSaleFilterManagementController::class, 'deleteYear']);
-});
 
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated User Routes
+| Authenticated User Routes (Requires Bearer Token)
 |--------------------------------------------------------------------------
-|
-| Routes that require a valid Bearer Token (for any logged-in user).
-|
 */
 Route::middleware('auth:sanctum')->group(function () {
-    // User & Profile
+    
+    // --- User & Profile Management ---
     Route::get('/user', fn(Request $request) => $request->user());
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/upload', [UploadController::class, 'upload']);
     Route::post('/profile', [ProfileController::class, 'update']);
     Route::post('/profile/password', [ProfileController::class, 'changePassword']);
+    Route::post('/upload', [UploadController::class, 'upload']);
 
-    // Ads Management for the logged-in user
+    // --- User's Ads Management ---
     Route::get('/my-ads', [MyAdsController::class, 'index']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class);
 
 
     /*
     |--------------------------------------------------------------------------
-    | Admin-Only Routes
+    | Admin-Only Routes (Requires Admin Role)
     |--------------------------------------------------------------------------
-    |
-    | Routes protected by IsAdmin middleware.
-    |
     */
     Route::prefix('admin')->middleware(IsAdmin::class)->group(function () {
         
-        // Admin: Ads & Users Management
+        // --- Admin: Full Ads Management ---
         Route::get('/ads', [CarSalesAdController::class, 'indexForAdmin']);
         Route::get('/ads/pending', [CarSalesAdController::class, 'getPendingAds']);
         Route::post('/ads/{carSalesAd}/approve', [CarSalesAdController::class, 'approveAd']);
         Route::post('/ads/{carSalesAd}/reject', [CarSalesAdController::class, 'rejectAd']);
-        Route::post('/users', [UserController::class, 'store']);
-        Route::post('/users/{user}/toggle-best', [UserController::class, 'toggleTheBestStatus']);
 
-        // ===== Admin: Car Sale Filters Management (The Corrected Version) =====
+        // --- Admin: Full Users Management ---
+        Route::apiResource('/users', UserController::class); 
+        Route::post('/users/{user}/toggle-best', [BestAdvertiserController::class, 'toggleStatus']);
+        
+        // --- Admin: Car Sale Filters (CRUD Operations) ---
         Route::prefix('filters/car-sale')->group(function () {
             // Makes Management
             Route::get('/makes', [CarSaleFilterManagementController::class, 'getMakes']);
@@ -104,12 +97,6 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/trims', [CarSaleFilterManagementController::class, 'addTrim']);
             Route::put('/trims/{trim}', [CarSaleFilterManagementController::class, 'updateTrim']);
             Route::delete('/trims/{trim}', [CarSaleFilterManagementController::class, 'deleteTrim']);
-
-            // Years Management
-            Route::get('/years', [CarSaleFilterManagementController::class, 'getYears']);
-            Route::post('/years', [CarSaleFilterManagementController::class, 'addYear']);
-            Route::put('/years/{year}', [CarSaleFilterManagementController::class, 'updateYear']);
-            Route::delete('/years/{year}', [CarSaleFilterManagementController::class, 'deleteYear']);
         });
     });
 });

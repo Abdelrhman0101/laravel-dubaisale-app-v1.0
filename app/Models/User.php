@@ -54,4 +54,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(CarSalesAd::class);
     }
+
+    public function bestCategories()
+    {
+        return $this->hasMany(BestAdvertiser::class);
+    }
 }
