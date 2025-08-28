@@ -1536,7 +1536,7 @@
                                 <a href="/search-filter-settings" class="nav-link submenu-link">
                                     <i class="bi bi-search"></i>
                                     <div class="nav-text">
-                                        <span class="nav-primary">تغيير بيانات البحث والفلتر</span>
+                                        <span class="nav-primary">البحث والفلتر</span>
                                     </div>
                                 </a>
                             </li>
@@ -1558,23 +1558,23 @@
                                 </a>
                             </li>
                             
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                                 <a href="/blocked-users" class="nav-link submenu-link">
                                     <i class="bi bi-person-x"></i>
                                     <div class="nav-text">
                                         <span class="nav-primary">قائمة الحظر</span>
                                     </div>
                                 </a>
-                            </li>
+                            </li> --}}
                             
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                     <a href="/support-messages" class="nav-link submenu-link">
                         <i class="bi bi-headset"></i>
                         <div class="nav-text">
                             <span class="nav-primary">رسائل الدعم الفني</span>
                         </div>
                     </a>
-                </li>
+                </li> --}}
                             
                             <li class="nav-item">
                                 <a href="/ads-approval" class="nav-link submenu-link">
@@ -1588,14 +1588,14 @@
                         </ul>
                     </div>
                 </li>
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                                 <a href="/system-variables" class="nav-link">
                                     <i class="bi bi-sliders"></i>
                                     <div class="nav-text">
                                         <span class="nav-primary">متغيرات النظام</span>
                                     </div>
                                 </a>
-                            </li>
+                            </li> --}}
                <li class="nav-item">
                                 <a href="/best-advertisers" class="nav-link">
                                     <i class="bi bi-star"></i>
@@ -1605,14 +1605,14 @@
                                 </a>
                             </li>
 
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                                 <a href="/users-management" class="nav-link">
                                     <i class="bi bi-people-fill"></i>
                                     <div class="nav-text">
                                         <span class="nav-primary">إدارة المستخدمين</span>
                                     </div>
                                 </a>
-                            </li>
+                            </li> --}}
                             <li class="nav-item">
                                 <a href="/ads-management" class="nav-link">
                                     <i class="bi bi-megaphone"></i>

@@ -55,7 +55,7 @@ class CarSalesAdController extends Controller
 
     
     // إنشاء إعلان جديد
-    public function store(Request $request)
+       public function store(Request $request)
     {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
@@ -68,29 +68,43 @@ class CarSalesAdController extends Controller
             'trans_type' => 'required|string',
             'phone_number' => 'required|string',
             'emirate' => 'required|string',
-            'main_image' => 'required|image|max:5120', // 5MB
-            'thumbnail_images.*' => 'image|max:5120', // 5MB for each image
-            // Add other validations as needed
+            'main_image' => 'required|image|max:5120',
+            'thumbnail_images.*' => 'image|max:5120',
         ]);
 
         $data = $request->all();
 
-        // Handle Main Image Upload
+        // 📌 دالة صغيرة لتظبيط الصلاحيات والملكية
+        $fixPermissions = function ($path) {
+            $fullPath = storage_path('app/public/' . $path);
+            @chmod($fullPath, 0777);
+            @chown($fullPath, 'www-data');
+            @chgrp($fullPath, 'www-data');
+        };
+
+        // رفع الصورة الأساسية
         $mainImagePath = $request->file('main_image')->store('cars/main', 'public');
         $data['main_image'] = $mainImagePath;
+        $fixPermissions($mainImagePath);
 
-        // Handle Thumbnail Images Upload
+        // رفع الصور المصغرة
         if ($request->hasFile('thumbnail_images')) {
             $thumbnailPaths = [];
             foreach ($request->file('thumbnail_images') as $file) {
-                $thumbnailPaths[] = $file->store('cars/thumbnails', 'public');
+                $path = $file->store('cars/thumbnails', 'public');
+                $thumbnailPaths[] = $path;
+                $fixPermissions($path);
             }
             $data['thumbnail_images'] = $thumbnailPaths;
         }
 
-        // Associate with logged-in user
+        // ربط الإعلان بالمستخدم
         $data['user_id'] = $request->user()->id;
-        
+
+        // 👇 إجبار الحالة مؤقتًا
+        $data['add_status'] = 'Valid';
+        $data['admin_approved'] = true;
+
         $ad = CarSalesAd::create($data);
 
         return response()->json($ad, 201);

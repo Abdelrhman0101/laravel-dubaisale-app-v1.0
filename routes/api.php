@@ -6,13 +6,12 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\Api\CarSalesAdController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Middleware\IsAdmin;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\MyAdsController;
 // === استدعاء الـ Controllers الجديدة الخاصة بالفلاتر ===
 use App\Http\Controllers\Api\Filters\CarSalesFiltersController;
 use App\Http\Controllers\Api\Admin\CarSaleFilterManagementController;
-
+use App\Http\Middleware\IsAdmin;
 
 /*
 |--------------------------------------------------------------------------

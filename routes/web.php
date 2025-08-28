@@ -65,21 +65,21 @@ Route::get('/ads-approval', function () {
     return view('ads-approval');
 })->name('ads-approval');
 
-// مسارات إدارة المستخدمين المحظورين
-Route::get('/blocked-users', [App\Http\Controllers\UserController::class, 'blockedUsers'])->name('blocked-users');
-Route::patch('/users/{id}/toggle-block', [App\Http\Controllers\UserController::class, 'toggleBlockStatus'])->name('users.toggle-block');
+// // مسارات إدارة المستخدمين المحظورين
+// Route::get('/blocked-users', [App\Http\Controllers\UserController::class, 'blockedUsers'])->name('blocked-users');
+// Route::patch('/users/{id}/toggle-block', [App\Http\Controllers\UserController::class, 'toggleBlockStatus'])->name('users.toggle-block');
 
 
-// مسارات إدارة المستخدمين
-Route::get('/users-management', [App\Http\Controllers\UserController::class, 'usersManagement'])->name('users-management');
-Route::get('/user-details/{id}', [App\Http\Controllers\UserController::class, 'userDetails'])->name('user-details');
+// // مسارات إدارة المستخدمين
+// Route::get('/users-management', [App\Http\Controllers\UserController::class, 'usersManagement'])->name('users-management');
+// Route::get('/user-details/{id}', [App\Http\Controllers\UserController::class, 'userDetails'])->name('user-details');
 
-// مسار متغيرات النظام
-Route::get('/system-variables', function () {
-    return view('system-variables');
-})->name('system-variables');
+// // مسار متغيرات النظام
+// Route::get('/system-variables', function () {
+//     return view('system-variables');
+// })->name('system-variables');
 
-// مسارات رسائل الدعم الفني
-Route::get('/support-messages', [App\Http\Controllers\SupportMessagesController::class, 'index'])->name('support-messages');
-Route::get('/api/support-messages', [App\Http\Controllers\SupportMessagesController::class, 'getMessages'])->name('api.support-messages');
-Route::patch('/api/support-messages/{id}/mark-read', [App\Http\Controllers\SupportMessagesController::class, 'markAsRead'])->name('api.support-messages.mark-read');
+// // مسارات رسائل الدعم الفني
+// Route::get('/support-messages', [App\Http\Controllers\SupportMessagesController::class, 'index'])->name('support-messages');
+// Route::get('/api/support-messages', [App\Http\Controllers\SupportMessagesController::class, 'getMessages'])->name('api.support-messages');
+// Route::patch('/api/support-messages/{id}/mark-read', [App\Http\Controllers\SupportMessagesController::class, 'markAsRead'])->name('api.support-messages.mark-read');
