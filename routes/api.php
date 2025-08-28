@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\MyAdsController;
 use App\Http\Controllers\Api\Filters\CarSalesFiltersController;
 use App\Http\Controllers\Api\Admin\CarSaleFilterManagementController;
 use App\Http\Middleware\IsAdmin;
+use App\Http\Controllers\Api\FeaturedContentController; // <<< استدعاء في الأعلى
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,7 @@ use App\Http\Middleware\IsAdmin;
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/activate', [AuthController::class, 'activate']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/best-advertisers', [FeaturedContentController::class, 'getBestAdvertisers']);
 
 // ---- Public Routes for Fetching Filter Data ----
 // Endpoint رئيسي لجلب كل الفلاتر في رد واحد منظم للواجهة الأمامية
@@ -81,6 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/ads/{carSalesAd}/approve', [CarSalesAdController::class, 'approveAd']);
         Route::post('/ads/{carSalesAd}/reject', [CarSalesAdController::class, 'rejectAd']);
         Route::post('/users', [UserController::class, 'store']);
+        Route::post('/users/{user}/toggle-best', [UserController::class, 'toggleTheBestStatus']);
 
         // ===== Admin: Car Sale Filters Management (The Corrected Version) =====
         Route::prefix('filters/car-sale')->group(function () {

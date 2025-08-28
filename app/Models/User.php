@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-
+use App\Models\CarSalesAd;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -45,4 +45,13 @@ class User extends Authenticatable
         'is_active' => 'boolean',
         'password' => 'hashed',
     ];
+
+    /**
+     * Get the car sale ads for the user.
+     */
+
+       public function carSalesAds()
+    {
+        return $this->hasMany(CarSalesAd::class);
+    }
 }

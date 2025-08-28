@@ -41,4 +41,21 @@ class UserController extends Controller
             'user' => $user
         ], 201);
     }
+
+    /**
+    * [Admin] تفعيل أو إلغاء تفعيل حالة "The Best" للمستخدم.
+    */
+    public function toggleTheBestStatus(User $user)
+    {
+        // ببساطة، نقوم بعكس القيمة الحالية
+        $user->the_best = !$user->the_best;
+        $user->save();
+
+        $status = $user->the_best ? "marked as 'The Best'" : "removed from 'The Best'";
+
+        return response()->json([
+            'message' => "User '{$user->username}' has been {$status}.",
+            'user' => $user
+        ]);
+    }
 }
