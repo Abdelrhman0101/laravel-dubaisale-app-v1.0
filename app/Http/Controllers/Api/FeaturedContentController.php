@@ -6,7 +6,9 @@ use App\Models\BestAdvertiser;
 use App\Models\CarSalesAd; // كمثال للقسم الأول
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request; // <<< أضف هذا السطر
+use App\Models\User; // <<< أضف هذا السطر
 
+  
   
 class FeaturedContentController extends Controller
 {
