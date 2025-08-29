@@ -75,4 +75,18 @@ class FeaturedContentController extends Controller
     
     return response()->json($ads);
 }
+
+public function getOfferBoxAds($category)
+{
+    // مستقبلاً، سنقوم ببناء نظام ذكي يتعرف على الموديل المناسب
+    if ($category === 'car_sales') {
+        $ads = CarSalesAd::where('add_category', 'Cars Sales')
+                       ->where('active_offers_box_status', true)
+                       ->inRandomOrder() // لعرض الإعلانات بترتيب عشوائي ليكون عادلاً
+                       ->get(); // يمكن إضافة ->limit() إذا أردت
+        return response()->json($ads);
+    }
+    
+    return response()->json([]); // إذا كان القسم غير موجود
+}
 }

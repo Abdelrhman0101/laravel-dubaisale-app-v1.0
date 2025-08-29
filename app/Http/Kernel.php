@@ -67,4 +67,10 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\IsAdmin::class, // <-- أضف هذا السطر
 
     ];
+
+    protected function schedule(Schedule $schedule)
+{
+    // ...
+    $schedule->command('app:deactivate-expired-offers')->daily();
+}
 }

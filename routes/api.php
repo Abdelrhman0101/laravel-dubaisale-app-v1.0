@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\CarSalesAdController;
 use App\Http\Controllers\Api\FeaturedContentController;
 use App\Http\Controllers\UploadController;
+use App\Http\Controllers\Api\OfferBoxActivationController;
+
 
 // --- Filter Controllers ---
 use App\Http\Controllers\Api\Filters\CarSalesFiltersController;
@@ -18,6 +20,8 @@ use App\Http\Controllers\Api\Filters\CarSalesFiltersController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\BestAdvertiserController;
 use App\Http\Controllers\Api\Admin\CarSaleFilterManagementController;
+use App\Http\Controllers\Api\Admin\OfferBoxSettingsController;
+
 
 // --- Middleware ---
 use App\Http\Middleware\IsAdmin;
@@ -48,7 +52,7 @@ Route::prefix('filters/car-sale')->group(function () {
     Route::get('/makes/{make}/models', [CarSaleFilterManagementController::class, 'getModels']);
     Route::get('/models/{model}/trims', [CarSaleFilterManagementController::class, 'getTrims']);
 });
-
+Route::get('/offers-box/{category}', [FeaturedContentController::class, 'getOfferBoxAds']);
 
 /*
 |--------------------------------------------------------------------------
@@ -67,7 +71,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // --- User's Ads Management ---
     Route::get('/my-ads', [MyAdsController::class, 'index']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class);
-
+    Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
 
     /*
     |--------------------------------------------------------------------------
@@ -103,5 +107,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/trims/{trim}', [CarSaleFilterManagementController::class, 'updateTrim']);
             Route::delete('/trims/{trim}', [CarSaleFilterManagementController::class, 'deleteTrim']);
         });
+
+        Route::get('/offer-box-settings', [OfferBoxSettingsController::class, 'index']);
+        Route::post('/offer-box-settings', [OfferBoxSettingsController::class, 'store']);
     });
 });
