@@ -111,9 +111,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/offer-box-settings', [OfferBoxSettingsController::class, 'index']);
         Route::post('/offer-box-settings', [OfferBoxSettingsController::class, 'store']);
+        Route::get('/system-settings', [SystemSettingsController::class, 'index']);
+        Route::post('/system-settings', [SystemSettingsController::class, 'store']);
+        Route::put('/system-settings/{setting:key}', [SystemSettingsController::class, 'update']);
     });
-    Route::get('/system-settings', [SystemSettingsController::class, 'index']);
-    Route::post('/system-settings', [SystemSettingsController::class, 'store']);
-    Route::put('/system-settings/{setting:key}', [SystemSettingsController::class, 'update']);
 
 });
