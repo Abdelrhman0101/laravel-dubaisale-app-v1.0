@@ -55,9 +55,10 @@ class CarSalesAdController extends Controller
 
     
     // إنشاء إعلان جديد
-       public function store(Request $request)
+public function store(Request $request)
     {
         $validatedData = $request->validate([
+            // ... (نفس قواعد التحقق السابقة)
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'make' => 'required|string',
@@ -74,26 +75,18 @@ class CarSalesAdController extends Controller
 
         $data = $request->all();
 
-        // 📌 دالة صغيرة لتظبيط الصلاحيات والملكية
-        $fixPermissions = function ($path) {
-            $fullPath = storage_path('app/public/' . $path);
-            @chmod($fullPath, 0777);
-            @chown($fullPath, 'www-data');
-            @chgrp($fullPath, 'www-data');
-        };
+        // (هذا الجزء الخاص بالصلاحيات مؤقت وغير مثالي، الأفضل معالجته على مستوى الخادم)
+        $fixPermissions = function ($path) { /* ... */ };
 
         // رفع الصورة الأساسية
         $mainImagePath = $request->file('main_image')->store('cars/main', 'public');
         $data['main_image'] = $mainImagePath;
-        $fixPermissions($mainImagePath);
 
         // رفع الصور المصغرة
         if ($request->hasFile('thumbnail_images')) {
             $thumbnailPaths = [];
             foreach ($request->file('thumbnail_images') as $file) {
-                $path = $file->store('cars/thumbnails', 'public');
-                $thumbnailPaths[] = $path;
-                $fixPermissions($path);
+                $thumbnailPaths[] = $file->store('cars/thumbnails', 'public');
             }
             $data['thumbnail_images'] = $thumbnailPaths;
         }
@@ -101,10 +94,33 @@ class CarSalesAdController extends Controller
         // ربط الإعلان بالمستخدم
         $data['user_id'] = $request->user()->id;
 
-        // 👇 إجبار الحالة مؤقتًا
-        $data['add_status'] = 'Valid';
-        $data['admin_approved'] = true;
+        // =========================================================
+        // ====   هنا يبدأ المنطق الذكي للموافقة التلقائية    ====
+        // =========================================================
 
+        // 1. جلب إعداد الموافقة من قاعدة البيانات
+        // نحن نستخدم الـ Cache لجعل هذه العملية سريعة جدًا
+        $manualApproval = cache()->rememberForever('setting_manual_approval_mode', function () {
+            // القيمة الافتراضية هي true (أكثر أمانًا) إذا لم يتم العثور على الإعداد
+            return \App\Models\SystemSetting::where('key', 'manual_approval_mode')->first()->value ?? 'true';
+        });
+
+        // 2. تحويل القيمة النصية إلى boolean
+        $isManualApprovalActive = filter_var($manualApproval, FILTER_VALIDATE_BOOLEAN);
+
+        // 3. تحديد حالة الإعلان بناءً على الإعداد
+        if ($isManualApprovalActive) {
+            // إذا كانت الموافقة اليدوية مفعلة، الإعلان ينتظر المراجعة
+            $data['add_status'] = 'Pending';
+            $data['admin_approved'] = false;
+        } else {
+            // إذا كانت الموافقة اليدوية معطلة، الإعلان يتم نشره تلقائيًا
+            $data['add_status'] = 'Valid';
+            $data['admin_approved'] = true;
+        }
+
+        // =========================================================
+        
         $ad = CarSalesAd::create($data);
 
         return response()->json($ad, 201);
@@ -173,7 +189,6 @@ class CarSalesAdController extends Controller
         $carSalesAd->update([
             'add_status' => 'Valid',
             'admin_approved' => true,
-            'plan_expires_at' => now()->addDays(30) // مثال: تفعيل خطة 30 يوم عند الموافقة
         ]);
 
         return response()->json([

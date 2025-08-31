@@ -35,6 +35,7 @@ class SystemSettingsController extends Controller
             SystemSetting::where('key', $settingData['key'])
                          ->update(['value' => $settingData['value']]);
         }
+        cache()->forget('setting_manual_approval_mode');
 
         return response()->json([
             'message' => 'System settings updated successfully.'
@@ -52,6 +53,7 @@ class SystemSettingsController extends Controller
         ]);
         
         $setting->update(['value' => $validatedData['value']]);
+        cache()->forget('setting_manual_approval_mode');
 
         return response()->json([
             'message' => "Setting '{$setting->key}' updated successfully.",
