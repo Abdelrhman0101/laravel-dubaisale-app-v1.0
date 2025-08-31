@@ -1,58 +1,99 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Dashboard\LoginController;
-use App\Http\Controllers\Dashboard\AdApprovalController;
-use App\Http\Controllers\Dashboard\DashboardController; // <<< سننشئ هذا
-use App\Http\Middleware\IsAdminWeb; // <<< أضف هذا السطر
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 |
-| هذه الروابط خاصة بواجهة الويب (الداش بورد) وتستخدم نظام مصادقة الجلسات (Sessions).
+| هذه الروابط وظيفتها فقط عرض ملفات Blade الخاصة بالداش بورد.
+| الحماية والتحقق من الصلاحيات ستتم بالكامل عبر JavaScript والـ API
+| من خلال "حارس الحماية" الذي نضعه في بداية كل صفحة.
 |
 */
 
-// --- Routes متاحة للجميع (تسجيل الدخول) ---
-// الـ middleware 'guest' يضمن أن هذه الصفحات لا يمكن الوصول إليها إلا إذا كان المستخدم "ضيفًا" (غير مسجل دخوله)
-Route::middleware('guest')->group(function () {
-Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('login', [LoginController::class, 'authenticate']); // <<< الـ Route الجديد
-});
+// --- صفحة تسجيل الدخول (Route عام) ---
+// هذه الصفحة هي الوحيدة التي لا تحتاج إلى "حارس حماية" في الـ JavaScript.
+Route::get('/login', function () {
+    // تأكد من أن ملفك موجود في `resources/views/auth/login-custom.blade.php`
+    return view('auth.login-custom');
+})->name('login');
 
 
-// --- Routes محمية (تتطلب تسجيل دخول كـ Admin) ---
-// هذه المجموعة تحمي كل ما بداخلها وتضمن أن المستخدم مسجل دخوله وأنه admin.
-Route::middleware(['auth'])->group(function () {
+// --- صفحات الداش بورد (Routes محمية عبر JavaScript) ---
 
-    // تسجيل الخروج
-    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+// الصفحة الرئيسية للداش بورد
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard');
 
-    // الصفحة الرئيسية للداش بورد
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+// صفحة الموافقة على الإعلانات
+Route::get('/ads-approval', function () {
+    return view('ads-approval');
+})->name('ads-approval');
 
-    // صفحة الموافقة على الإعلانات
-    Route::get('/ads-approval', [AdApprovalController::class, 'index'])->name('ads-approval');
+// صفحة إدارة الحسابات
+Route::get('/accounts', function () {
+    return view('accounts');
+})->name('accounts');
 
-    // باقي صفحات الداش بورد (باستخدام Controller ليكون الكود نظيفًا)
-    // سننشئ DashboardController ليتولى عرض هذه الصفحات
-    Route::get('/accounts', [DashboardController::class, 'accounts'])->name('accounts');
-    Route::get('/requests', [DashboardController::class, 'requests'])->name('requests');
-    Route::get('/securityPermits', [DashboardController::class, 'securityPermits'])->name('securityPermits');
-    Route::get('/appController', [DashboardController::class, 'appController'])->name('appController');
-    Route::get('/AppSettings', [DashboardController::class, 'appSettings'])->name('AppSettings');
-    Route::get('/chat', [DashboardController::class, 'chat'])->name('chat');
-    Route::get('/search-filter-settings', [DashboardController::class, 'searchFilterSettings'])->name('search-filter-settings');
-    Route::get('/section-banners', [DashboardController::class, 'sectionBanners'])->name('section-banners');
-    Route::get('/ads-management', [DashboardController::class, 'adsManagement'])->name('ads-management');
-    Route::get('/best-advertisers', [DashboardController::class, 'bestAdvertisers'])->name('best-advertisers');
-    Route::get('/send-notification', [DashboardController::class, 'sendNotification'])->name('send-notification');
+// صفحة الطلبات (Requests)
+Route::get('/requests', function () {
+    return view('requests');
+})->name('requests');
 
-});
+// صفحة التصاريح الأمنية
+Route::get('/securityPermits', function () {
+    return view('securityPermits');
+})->name('securityPermits');
 
-// --- Redirect a Root URL ---
+// صفحة التحكم بالتطبيق
+Route::get('/appController', function () {
+    return view('appController');
+})->name('appController');
+
+// صفحة إعدادات التطبيق (متغيرات النظام)
+Route::get('/AppSettings', function () {
+    return view('AppSettings'); // تأكد من تطابق اسم الملف
+})->name('AppSettings');
+
+// صفحة المحادثات
+Route::get('/chat', function () {
+    return view('chat');
+})->name('chat');
+
+// صفحة إعدادات فلاتر البحث
+Route::get('/search-filter-settings', function () {
+    return view('search-filter-settings');
+})->name('search-filter-settings');
+
+// صفحة بنرات الأقسام
+Route::get('/section-banners', function () {
+    return view('section-banners');
+})->name('section-banners');
+
+// صفحة إدارة الإعلانات
+Route::get('/ads-management', function () {
+    return view('ads-management');
+})->name('ads-management');
+
+// صفحة أفضل المعلنين
+Route::get('/best-advertisers', function () {
+    return view('best-advertisers');
+})->name('best-advertisers');
+
+// صفحة إرسال الإشعارات
+Route::get('/send-notification', function () {
+    return view('send-notification');
+})->name('send-notification');
+
+
+// --- التوجيه الافتراضي ---
+// إذا حاول أي شخص الوصول إلى المسار الرئيسي /، سيتم توجيهه إلى صفحة تسجيل الدخول.
 Route::get('/', function () {
     return redirect()->route('login');
 });
+
+// --- لا يوجد Route لتسجيل الخروج هنا ---
+// عملية تسجيل الخروج ستتم عبر JavaScript عن طريق حذف التوكن من localStorage وتوجيه المستخدم لصفحة الدخول.

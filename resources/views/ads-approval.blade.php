@@ -629,6 +629,39 @@
 </style>
 
 <script>
+
+        // =========================================================
+    // ====      حارس الحماية الخاص بالواجهة الأمامية      ====
+    // =========================================================
+    (function() {
+        const token = localStorage.getItem('token');
+        const userJson = localStorage.getItem('user');
+        
+        let user = null;
+        try {
+            if (userJson) {
+                user = JSON.parse(userJson);
+            }
+        } catch (e) {
+            console.error("Error parsing user data from localStorage", e);
+        }
+
+        // شروط عدم السماح بالدخول:
+        // 1. لا يوجد توكن
+        // 2. لا توجد بيانات مستخدم
+        // 3. المستخدم ليس له دور 'admin'
+        if (!token || !user || user.role !== 'admin') {
+            // امسح أي بيانات قديمة وغير صالحة
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            
+            // قم بتوجيه المستخدم فورًا إلى صفحة تسجيل الدخول
+            window.location.href = '{{ route("login") }}';
+        }
+    })();
+    // =========================================================
+
+    
     // =========================================================================
     // SECTION 1: CONFIGURATION & INITIAL DATA (FROM LARAVEL CONTROLLER)
     // =========================================================================
