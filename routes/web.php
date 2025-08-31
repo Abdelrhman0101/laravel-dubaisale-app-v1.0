@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Dashboard\LoginController;
 use App\Http\Controllers\Dashboard\AdApprovalController;
 use App\Http\Controllers\Dashboard\DashboardController; // <<< سننشئ هذا
+use App\Http\Middleware\IsAdminWeb; // <<< أضف هذا السطر
 
 /*
 |--------------------------------------------------------------------------
