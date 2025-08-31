@@ -893,14 +893,24 @@
     
     /**
      * دالة مساعدة لإنشاء Headers المصادقة.
+     * النسخة المصححة التي تقرأ التوكن من Local Storage.
      */
     function getAuthHeaders() {
-        return {
+        // 1. اقرأ التوكن الحقيقي من Local Storage الذي وضعه نظام تسجيل الدخول.
+        const token = localStorage.getItem('token');
+
+        const headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Authorization': `Bearer ${ADMIN_TOKEN}`,
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         };
+
+        // 2. أضف الـ Authorization header فقط إذا كان التوكن موجودًا.
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        return headers;
     }
 
     /**

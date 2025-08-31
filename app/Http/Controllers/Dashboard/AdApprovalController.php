@@ -11,27 +11,19 @@ class AdApprovalController extends Controller
 {
     public function index(Request $request)
     {
-        // --- هنا يجب عليك توفير توكن الـ Admin ---
-        // الطريقة المثالية هي أن يكون للـ Admin توكن ثابت ومحفوظ
-        // كحل مؤقت للتجربة، يمكنك وضعه هنا مباشرة
-        $adminUser = Auth::user(); // افتراض أن المستخدم المسجل هو Admin
-        
-        // تحقق من وجود التوكن، إذا لم يكن، قم بإنشاء واحد
-        // ملاحظة: هذا الكود سيعيد إنشاء التوكن في كل مرة، ليس مثاليًا للإنتاج
-        $adminToken = $adminUser->createToken('dashboard-token')->plainTextToken;
+        // لم نعد بحاجة لإنشاء توكن هنا
+        // $adminUser = Auth::user(); 
+        // $adminToken = $adminUser->createToken('dashboard-token')->plainTextToken;
 
-        // إنشاء نسخة من الـ Service مع التوكن
-        $approvalService = new AdApprovalService($adminToken);
+        // سنقوم بجلب البيانات فقط
+        // ملاحظة: بما أننا سنعتمد على API بالكامل، يمكننا إزالة هذا المنطق
+        // وجعل الـ JavaScript يقوم بجلب كل شيء عند تحميل الصفحة
+        $isManualApprovalActive = true; // قيمة ابتدائية
+        $pendingAds = ['car_sales' => []]; // مصفوفة فارغة ابتدائية
 
-        // جلب البيانات
-        $isManualApprovalActive = $approvalService->getManualApprovalStatus();
-        $pendingAds = $approvalService->getPendingAds();
-
-        // تمرير البيانات إلى الـ View
         return view('ads-approval', [
             'isManualApprovalActive' => $isManualApprovalActive,
             'pendingAds' => $pendingAds,
-            'adminToken' => $adminToken, // تمرير التوكن للـ Javascript
         ]);
     }
 }
