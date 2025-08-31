@@ -58,7 +58,7 @@ class FeaturedContentController extends Controller
             $ads = CarSalesAd::where('user_id', $userId)
                          ->where('add_status', 'Valid')
                          ->latest()->take(8)
-                         ->get(['price', 'year', 'km', 'main_image', 'make', 'model', 'trim'])
+                         ->get(['id','price', 'year', 'km', 'main_image', 'make', 'model', 'trim'])
                          ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
         } 
         // else if ($categorySlug === 'real_estate') {
