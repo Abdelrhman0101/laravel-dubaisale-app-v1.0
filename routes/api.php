@@ -73,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-ads', [MyAdsController::class, 'index']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class);
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
+    Route::get('/system-settings', [SystemSettingsController::class, 'index']);
 
     /*
     |--------------------------------------------------------------------------
