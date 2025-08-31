@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\CarSalesAdController;
 use App\Http\Controllers\Api\FeaturedContentController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\Api\OfferBoxActivationController;
+use App\Http\Controllers\Api\PublicSettingsController;
 
 
 // --- Filter Controllers ---
@@ -54,6 +55,7 @@ Route::prefix('filters/car-sale')->group(function () {
     Route::get('/models/{model}/trims', [CarSaleFilterManagementController::class, 'getTrims']);
 });
 Route::get('/offers-box/{category}', [FeaturedContentController::class, 'getOfferBoxAds']);
+Route::get('/settings', [PublicSettingsController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------
@@ -73,7 +75,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-ads', [MyAdsController::class, 'index']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class);
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
-    Route::get('/system-settings', [SystemSettingsController::class, 'index']);
 
     /*
     |--------------------------------------------------------------------------
@@ -112,6 +113,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/offer-box-settings', [OfferBoxSettingsController::class, 'index']);
         Route::post('/offer-box-settings', [OfferBoxSettingsController::class, 'store']);
+        
         Route::get('/system-settings', [SystemSettingsController::class, 'index']);
         Route::post('/system-settings', [SystemSettingsController::class, 'store']);
         Route::put('/system-settings/{setting:key}', [SystemSettingsController::class, 'update']);
