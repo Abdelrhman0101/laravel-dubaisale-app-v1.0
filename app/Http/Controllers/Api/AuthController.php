@@ -113,7 +113,7 @@ class AuthController extends Controller
      * تسجيل دخول مستخدم موجود وإصدار token.
      * النسخة المطورة التي تدعم إنشاء جلسة ويب للمشرفين (عند استدعائها من route الويب).
      */
-    public function login(Request $request)
+   public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'identifier' => 'required|string',
@@ -137,14 +137,9 @@ class AuthController extends Controller
             return response()->json(['message' => 'Your account is not activated.'], 403);
         }
         
-        // --- "الجسر" الذي يربط بين عالمي الـ API والـ Web (مهم جدًا) ---
-        // سيتم تنفيذه فقط عندما يتم استدعاء هذا الـ Controller من خلال route يدعم الجلسات (مثل route /login الخاص بالويب)
-        if ($user->role === 'admin') {
-            Auth::guard('web')->login($user);
-            $request->session()->regenerate();
-        }
+        // --- لقد قمنا بحذف منطق إنشاء الجلسة من هنا بالكامل ---
         
-        // إصدار توكن الـ API (هذه الخطوة تتم لكل المستخدمين وفي كل الحالات)
+        // إصدار توكن الـ API (المنطق الأصلي والمستقر)
         $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 
