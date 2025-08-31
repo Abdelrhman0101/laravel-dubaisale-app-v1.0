@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Dashboard\AdApprovalController;
 
 // صفحة تسجيل الدخول
 Route::get('/login', function () {
@@ -59,10 +60,10 @@ Route::get('/send-notification', function () {
     return view('send-notification');
 })->name('send-notification');
 
-Route::get('/ads-approval', function () {
-    return view('ads-approval');
-})->name('ads-approval');
-
+Route::get('/ads-approval', [AdApprovalController::class, 'index'])
+     ->middleware(['auth', 'admin.web']) // ستحتاج لإنشاء admin.web middleware
+     ->name('ads-approval');
+     
 // // مسارات إدارة المستخدمين المحظورين
 // Route::get('/blocked-users', [App\Http\Controllers\UserController::class, 'blockedUsers'])->name('blocked-users');
 // Route::patch('/users/{id}/toggle-block', [App\Http\Controllers\UserController::class, 'toggleBlockStatus'])->name('users.toggle-block');
