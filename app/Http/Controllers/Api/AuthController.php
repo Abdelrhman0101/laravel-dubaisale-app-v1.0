@@ -24,9 +24,9 @@ class AuthController extends Controller
         // تم إزالة الثغرة الأمنية للسماح للمستخدم بتحديد دوره بنفسه
         $validator = Validator::make($request->all(), [
             'username' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
-            'phone' => 'required|string|max:20|unique:users,phone',
-            'whatsapp' => 'required|string|max:20|unique:users,whatsapp',
+            'email' => 'nullable|email|max:255|unique:users,email',
+            'phone' => 'nullable|string|max:20|unique:users,phone',
+            'whatsapp' => 'nullable|string|max:20|unique:users,whatsapp',
             'password' => 'required|string|min:8',
             'referral_code' => 'nullable|string',
         ]);
