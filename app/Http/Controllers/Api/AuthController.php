@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Services\WhatsAppService;
-use App\Mail\SendActivationCode;
+use App\Services\WhatsAppService; // (إذا كنت تستخدمه)
+use App\Mail\SendActivationCode;   // (إذا كنت تستخدمه)
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -17,7 +17,7 @@ use Exception;
 class AuthController extends Controller
 {
     /**
-     * تسجيل حساب جديد وتفعيله تلقائياً (مؤقتاً).
+     * تسجيل حساب جديد وتفعيله تلقائياً.
      */
     public function signup(Request $request)
     {
@@ -111,9 +111,9 @@ class AuthController extends Controller
 
     /**
      * تسجيل دخول مستخدم موجود وإصدار token.
-     * النسخة المطورة التي تدعم إنشاء جلسة ويب للمشرفين.
+     * النسخة المطورة التي تدعم إنشاء جلسة ويب للمشرفين (عند استدعائها من route الويب).
      */
-  public function login(Request $request)
+    public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'identifier' => 'required|string',
@@ -137,10 +137,14 @@ class AuthController extends Controller
             return response()->json(['message' => 'Your account is not activated.'], 403);
         }
         
-        // --- لقد قمنا بحذف منطق إنشاء الجلسة من هنا بالكامل ---
-        // if ($user->role === 'admin') { ... } // << هذا الجزء تم حذفه
+        // --- "الجسر" الذي يربط بين عالمي الـ API والـ Web (مهم جدًا) ---
+        // سيتم تنفيذه فقط عندما يتم استدعاء هذا الـ Controller من خلال route يدعم الجلسات (مثل route /login الخاص بالويب)
+        if ($user->role === 'admin') {
+            Auth::guard('web')->login($user);
+            $request->session()->regenerate();
+        }
         
-        // إصدار توكن الـ API (المنطق الأصلي والمستقر)
+        // إصدار توكن الـ API (هذه الخطوة تتم لكل المستخدمين وفي كل الحالات)
         $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -152,13 +156,11 @@ class AuthController extends Controller
         ], 200);
     }
 
-
     /**
-     * تسجيل خروج المستخدم وإبطال التوكن الحالي.
+     * تسجيل خروج المستخدم وإبطال التوكن الحالي (للـ API).
      */
     public function logout(Request $request)
     {
-        // هذا يسجل الخروج من الـ API فقط عن طريق حذف التوكن
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
