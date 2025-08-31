@@ -24,7 +24,7 @@ Route::middleware('guest')->group(function () {
 
 // --- Routes محمية (تتطلب تسجيل دخول كـ Admin) ---
 // هذه المجموعة تحمي كل ما بداخلها وتضمن أن المستخدم مسجل دخوله وأنه admin.
-Route::middleware(['auth', 'admin.web'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
     // تسجيل الخروج
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
