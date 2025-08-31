@@ -2,7 +2,6 @@
 
 namespace App\Http;
 
-use Illuminate\Console\Scheduling\Schedule; // <<< أضفت هذا السطر لتعريف Schedule
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -11,6 +10,8 @@ class Kernel extends HttpKernel
      * The application's global HTTP middleware stack.
      *
      * These middleware are run during every request to your application.
+     *
+     * @var array<int, class-string|string>
      */
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
@@ -20,28 +21,25 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-
-        // ====================================================================
-        // === الخطوة 1: تم نقل `StartSession` إلى هنا ليكون عامًا ===
-        // ====================================================================
-        \Illuminate\Session\Middleware\StartSession::class,
     ];
 
     /**
      * The application's route middleware groups.
+     *
+     * @var array<string, array<int, class-string|string>>
      */
     protected $middlewareGroups = [
         'web' => [
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-            // \Illuminate\Session\Middleware\StartSession::class, // <-- الخطوة 2: تم إزالته من هنا
-            // \Illuminate\Session\Middleware\AuthenticateSession::class, // يفضل إبقاؤه معطلًا للـ API
+            \Illuminate\Session\Middleware\StartSession::class, // <-- أعدناه إلى مكانه الأصلي والآمن
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
 
         'api' => [
+            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
@@ -49,6 +47,10 @@ class Kernel extends HttpKernel
 
     /**
      * The application's route middleware.
+     *
+     * These middleware may be assigned to groups or used individually.
+     *
+     * @var array<string, class-string|string>
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
@@ -61,16 +63,14 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'admin' => \App\Http\Middleware\IsAdmin::class,
+        'admin' => \App\Http\Middleware\IsAdmin::class, // <-- أضف هذا السطر
         'admin.web' => \App\Http\Middleware\IsAdminWeb::class,
+
     ];
 
-    /**
-     * Define the application's command schedule.
-     * تم نقلها لتكون دالة مستقلة كما يجب.
-     */
-    protected function schedule(Schedule $schedule): void // <<< تحديد النوع الصحيح
-    {
-        $schedule->command('app:deactivate-expired-offers')->daily();
-    }
+    protected function schedule(Schedule $schedule)
+{
+    // ...
+    $schedule->command('app:deactivate-expired-offers')->daily();
+}
 }

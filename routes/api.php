@@ -35,33 +35,37 @@ use App\Http\Middleware\IsAdmin;
 |--------------------------------------------------------------------------
 */
 
-// Authentication
+// --- Authentication ---
+// هذا هو التغيير الرئيسي: نحن نطبق middleware 'web' على هذا الـ route مباشرة
+// لضمان تشغيل الجلسات (Sessions) له
+Route::post('/login', [AuthController::class, 'login'])->middleware('web');
+
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/activate', [AuthController::class, 'activate']);
-Route::post('/login', [AuthController::class, 'login']);
 
-// Featured & Public Content
+
+// --- Featured & Public Content ---
 Route::get('/best-advertisers', [FeaturedContentController::class, 'getBestAdvertisers']);
 Route::get('/users/{user}/ads/{category}', [FeaturedContentController::class, 'getUserAdsByCategory']);
+Route::get('/offers-box/{category}', [FeaturedContentController::class, 'getOfferBoxAds']);
+Route::get('/settings', [PublicSettingsController::class, 'index']);
 
-// Public Filter Data for Frontend
-// الطريقة الأكثر كفاءة: Endpoint رئيسي لجلب كل الفلاتر مرة واحدة
+
+// --- Public Filter Data ---
 Route::get('/car-sales-filters', [CarSalesFiltersController::class, 'index']);
-
-// ===== Endpoints إضافية لجلب أجزاء معينة من الفلاتر (إذا احتاجتها الواجهة ديناميكيًا) =====
 Route::prefix('filters/car-sale')->group(function () {
     Route::get('/makes', [CarSaleFilterManagementController::class, 'getMakes']);
     Route::get('/makes/{make}/models', [CarSaleFilterManagementController::class, 'getModels']);
     Route::get('/models/{model}/trims', [CarSaleFilterManagementController::class, 'getTrims']);
 });
-Route::get('/offers-box/{category}', [FeaturedContentController::class, 'getOfferBoxAds']);
-Route::get('/settings', [PublicSettingsController::class, 'index']);
+
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated User Routes (Requires Bearer Token)
+| Authenticated User Routes (Requires Bearer Token from Sanctum)
 |--------------------------------------------------------------------------
 */
+// هذه المجموعة محمية بـ 'auth:sanctum' وهي لا تدعم الجلسات بشكل افتراضي
 Route::middleware('auth:sanctum')->group(function () {
     
     // --- User & Profile Management ---
@@ -71,7 +75,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/password', [ProfileController::class, 'changePassword']);
     Route::post('/upload', [UploadController::class, 'upload']);
 
-    // --- User's Ads Management ---
+    // --- User's Ads & Offers Management ---
     Route::get('/my-ads', [MyAdsController::class, 'index']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class);
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
@@ -111,9 +115,9 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/trims/{trim}', [CarSaleFilterManagementController::class, 'deleteTrim']);
         });
 
+        // --- Admin: Offer Box & System Settings ---
         Route::get('/offer-box-settings', [OfferBoxSettingsController::class, 'index']);
         Route::post('/offer-box-settings', [OfferBoxSettingsController::class, 'store']);
-        
         Route::get('/system-settings', [SystemSettingsController::class, 'index']);
         Route::post('/system-settings', [SystemSettingsController::class, 'store']);
         Route::put('/system-settings/{setting:key}', [SystemSettingsController::class, 'update']);
