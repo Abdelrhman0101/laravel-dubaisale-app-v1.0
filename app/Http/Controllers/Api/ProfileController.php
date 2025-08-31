@@ -6,38 +6,57 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
     /**
      * تحديث بيانات الملف الشخصي للمستخدم الحالي.
      */
-    public function update(Request $request)
+   public function update(Request $request)
     {
+        // 1. احصل على المستخدم الحالي
         $user = $request->user();
 
+        // 2. التحقق من صحة البيانات المدخلة
+        // 'sometimes' تعني أن الحقل ليس إجباريًا، ولكن إذا وُجد، يجب أن يتبع القواعد
         $validatedData = $request->validate([
+            // unique يتأكد من أن اسم المستخدم فريد، ويتجاهل الـ id الخاص بالمستخدم الحالي
             'username' => 'sometimes|required|string|max:255|unique:users,username,' . $user->id,
             'advertiser_name' => 'nullable|string|max:255',
             'advertiser_type' => 'nullable|string|max:255',
-            'advertiser_logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // صورة بحجم أقصى 2MB
+            // صورة بحجم أقصى 2MB
+            'advertiser_logo' => 'sometimes|image|mimes:jpg,jpeg,png|max:2048', 
             'advertiser_location' => 'nullable|string',
         ]);
 
+        // 3. قم بتجهيز البيانات النصية للتحديث
         $updateData = $request->except('advertiser_logo');
 
-        // التعامل مع رفع صورة الشعار
+        // ==============================================================
+        // ====        المنطق الذكي لرفع وتحديث صورة الشعار        ====
+        // ==============================================================
+        
+        // 4. تحقق مما إذا كان المستخدم قد أرسل ملف صورة جديد
         if ($request->hasFile('advertiser_logo')) {
-            // يمكنك هنا حذف الشعار القديم إذا كان موجوداً
-            // if ($user->advertiser_logo) { Storage::disk('public')->delete($user->advertiser_logo); }
-
+            // أ. إذا كان لدى المستخدم شعار قديم، قم بحذفه من الـ storage
+            if ($user->advertiser_logo) {
+                Storage::disk('public')->delete($user->advertiser_logo);
+            }
+            
+            // ب. قم برفع الشعار الجديد إلى مجلد 'logos' داخل 'storage/app/public'
             $path = $request->file('advertiser_logo')->store('logos', 'public');
+            
+            // ج. قم بإضافة مسار الشعار الجديد إلى البيانات التي سيتم تحديثها
             $updateData['advertiser_logo'] = $path;
         }
 
+        // 5. قم بتحديث بيانات المستخدم في قاعدة البيانات
         $user->update($updateData);
-
-        // نرجع بيانات المستخدم المحدثة بالكامل
+        
+        // 6. أرجع بيانات المستخدم المحدثة بالكامل
+        // ->fresh() لجلب أحدث نسخة من البيانات من قاعدة البيانات
+        // toArray() لتحويل مسار الصورة إلى رابط كامل إذا كان لديك accessor (خطوة متقدمة)
         return response()->json($user->fresh());
     }
 
