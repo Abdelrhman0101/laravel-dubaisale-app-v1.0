@@ -18,7 +18,8 @@ use App\Http\Middleware\IsAdminWeb; // <<< أضف هذا السطر
 // --- Routes متاحة للجميع (تسجيل الدخول) ---
 // الـ middleware 'guest' يضمن أن هذه الصفحات لا يمكن الوصول إليها إلا إذا كان المستخدم "ضيفًا" (غير مسجل دخوله)
 Route::middleware('guest')->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('login', [LoginController::class, 'authenticate']); // <<< الـ Route الجديد
 });
 
 

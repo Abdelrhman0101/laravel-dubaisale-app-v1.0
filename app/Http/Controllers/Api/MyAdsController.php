@@ -27,6 +27,9 @@ class MyAdsController extends Controller
             return [
                 'id' => $ad->id,
                 'title' => $ad->title,
+                'make' => $ad->make,
+                'model' => $ad->model,
+                'trim' => $ad->trim,
                 'plan_type' => $ad->plan_type,
                 'main_image_url' => asset('storage/' . $ad->main_image),
                 'price' => $ad->price,
