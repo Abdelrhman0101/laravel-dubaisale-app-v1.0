@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\BestAdvertiserController;
 use App\Http\Controllers\Api\Admin\CarSaleFilterManagementController;
 use App\Http\Controllers\Api\Admin\OfferBoxSettingsController;
+use App\Http\Controllers\Api\Admin\SystemSettingsController;
 
 
 // --- Middleware ---
@@ -111,4 +112,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/offer-box-settings', [OfferBoxSettingsController::class, 'index']);
         Route::post('/offer-box-settings', [OfferBoxSettingsController::class, 'store']);
     });
+    Route::get('/system-settings', [SystemSettingsController::class, 'index']);
+    Route::post('/system-settings', [SystemSettingsController::class, 'store']);
+    Route::put('/system-settings/{setting:key}', [SystemSettingsController::class, 'update']);
+
 });
