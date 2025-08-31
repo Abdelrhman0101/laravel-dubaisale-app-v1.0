@@ -628,265 +628,147 @@
 
 </style>
 
+@push('scripts')
 <script>
-
-        // =========================================================
-    // ====      حارس الحماية الخاص بالواجهة الأمامية      ====
+    // =========================================================
+    // SECTION 0: PAGE GUARD
     // =========================================================
     (function() {
         const token = localStorage.getItem('token');
         const userJson = localStorage.getItem('user');
-        
         let user = null;
-        try {
-            if (userJson) {
-                user = JSON.parse(userJson);
-            }
-        } catch (e) {
-            console.error("Error parsing user data from localStorage", e);
-        }
+        try { user = JSON.parse(userJson); } catch (e) { /* ignore */ }
 
-        // شروط عدم السماح بالدخول:
-        // 1. لا يوجد توكن
-        // 2. لا توجد بيانات مستخدم
-        // 3. المستخدم ليس له دور 'admin'
         if (!token || !user || user.role !== 'admin') {
-            // امسح أي بيانات قديمة وغير صالحة
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            
-            // قم بتوجيه المستخدم فورًا إلى صفحة تسجيل الدخول
             window.location.href = '{{ route("login") }}';
         }
     })();
     // =========================================================
 
-    
-    // =========================================================================
-    // SECTION 1: CONFIGURATION & INITIAL DATA (FROM LARAVEL CONTROLLER)
-    // =========================================================================
-
-    // قراءة البيانات الديناميكية التي تم تمريرها من الـ Controller
+    // =========================================================
+    // SECTION 1: CONFIGURATION & GLOBAL STATE
+    // =========================================================
     const BASE_URL = '{{ config("app.url") }}';
-    const ADMIN_TOKEN = '{{ $adminToken }}';
-    let isManualApprovalActive = {{ $isManualApprovalActive ? 'true' : 'false' }};
-    
-    // تحويل مصفوفة PHP الخاصة بالإعلانات المعلقة إلى كائن JavaScript
-    // هذا يسرع تحميل الصفحة لأن البيانات الأولية تكون جاهزة فورًا
-    let pendingAdsData = @json($pendingAds); 
+    let pendingAdsData = {}; // سيتم ملؤه من الـ API
 
-    // تعريف كل نقاط النهاية (API Endpoints) التي سنحتاجها في مكان واحد
     const API_ENDPOINTS = {
-        settings: `${BASE_URL}/api/admin/system-settings/manual_approval_mode`,
+        settings: `${BASE_URL}/api/admin/system-settings`,
         pendingAds: `${BASE_URL}/api/admin/ads/pending`,
         approveAd: `${BASE_URL}/api/admin/ads/{id}/approve`,
         rejectAd: `${BASE_URL}/api/admin/ads/{id}/reject`,
-        adDetails: `${BASE_URL}/api/car-sales-ads/{id}` // لعرض تفاصيل الإعلان الكاملة
+        adDetails: `${BASE_URL}/api/car-sales-ads/{id}`
     };
 
-
-    // =========================================================================
-    // SECTION 2: EVENT LISTENERS & INITIALIZATION
-    // =========================================================================
-
+    // =========================================================
+    // SECTION 2: INITIALIZATION & EVENT LISTENERS
+    // =========================================================
     document.addEventListener('DOMContentLoaded', function() {
-        const approvalSwitch = document.getElementById('approvalModeSwitch');
+        initializeApp();
         
-        // --- 1. التهيئة الأولية للصفحة عند تحميلها ---
-        approvalSwitch.checked = isManualApprovalActive;
-        updateUIBasedOnApprovalMode();
-        renderAllTablesInitially();
-        updateAllBadges();
+        document.getElementById('approvalModeSwitch').addEventListener('change', handleApprovalSwitchToggle);
 
-        // --- 2. ربط الأحداث (Event Listeners) ---
-        // تغيير حالة مفتاح الموافقة اليدوية
-        approvalSwitch.addEventListener('change', handleApprovalSwitchToggle);
-
-        // استخدام Event Delegation لمعالجة كل أزرار الإجراءات في الجداول
         document.getElementById('adsCategoryTabContent').addEventListener('click', function(event) {
             const button = event.target.closest('button[data-ad-id]');
-            if (!button) return; // تجاهل أي ضغطة ليست على زر يحمل data-ad-id
+            if (!button) return;
 
             const adId = button.dataset.adId;
-            const category = button.closest('.tab-pane').id.replace('-tab-pane', '');
-            
-            if (button.title.includes('Approve')) {
-                handleAdAction(adId, category, 'approve');
-            } else if (button.title.includes('Reject')) {
-                handleAdAction(adId, category, 'reject');
-            } else if (button.title.includes('View')) {
-                showAdDetails(adId, category);
-            }
+            const category = 'car_sales'; // حاليًا قسم واحد فقط
+
+            if (button.title.includes('View')) showAdDetails(adId, category);
+            else if (button.title.includes('Approve')) handleAdAction(adId, category, 'approve');
+            else if (button.title.includes('Reject')) handleAdAction(adId, category, 'reject');
         });
     });
 
-
-    // =========================================================================
+    // =========================================================
     // SECTION 3: CORE LOGIC & API HANDLERS
-    // =========================================================================
+    // =========================================================
+    async function initializeApp() {
+        await fetchInitialSettings();
+        const isManualApproval = document.getElementById('approvalModeSwitch').checked;
+        if (isManualApproval) {
+            await fetchAllPendingAds();
+            renderAllTables();
+            updateAllBadges();
+        }
+        updateUIBasedOnApprovalMode();
+    }
 
-    /**
-     * دالة مركزية لتحديث واجهة المستخدم بناءً على وضع الموافقة.
-     */
-    function updateUIBasedOnApprovalMode() {
-        const switchLabel = document.getElementById('switchLabel');
-        const autoApprovalCard = document.getElementById('autoApprovalCard');
-        const tabsAndContent = document.getElementById('adsCategoryTabContent');
-
-        if (isManualApprovalActive) {
-            switchLabel.textContent = 'مفعل - Enabled';
-            switchLabel.className = 'form-check-label fw-bold text-success';
-            autoApprovalCard.style.display = 'none';
-            tabsAndContent.style.display = 'block';
-        } else {
-            switchLabel.textContent = 'معطل - Disabled';
-            switchLabel.className = 'form-check-label fw-bold text-danger';
-            autoApprovalCard.style.display = 'block';
-            tabsAndContent.style.display = 'none';
+    async function fetchInitialSettings() {
+        try {
+            const response = await fetch(API_ENDPOINTS.settings, { headers: getAuthHeaders() });
+            if (!response.ok) throw new Error('Failed to fetch settings');
+            const settings = await response.json();
+            const manualApprovalValue = settings['manual_approval_mode']?.value ?? 'true';
+            document.getElementById('approvalModeSwitch').checked = (manualApprovalValue === 'true' || manualApprovalValue === '1');
+        } catch (error) {
+            console.error('Initialization Error:', error);
+            showAlert('فشل تحميل الإعدادات الأولية.', 'danger');
+            document.getElementById('approvalModeSwitch').checked = true; // Default to safe mode
         }
     }
-    
-    /**
-     * دالة مركزية لمعالجة تغيير حالة مفتاح الموافقة.
-     */
+
+    async function fetchAllPendingAds() {
+        try {
+            const response = await fetch(API_ENDPOINTS.pendingAds, { headers: getAuthHeaders() });
+            if (!response.ok) throw new Error('Failed to fetch pending ads');
+            const data = await response.json();
+            pendingAdsData['car_sales'] = data.data || [];
+        } catch (error) {
+            console.error('Error fetching pending ads:', error);
+            showAlert('فشل تحميل الإعلانات المعلقة.', 'danger');
+            pendingAdsData['car_sales'] = [];
+        }
+    }
+
     async function handleApprovalSwitchToggle() {
         const isChecked = this.checked;
-        const newValue = isChecked ? 'true' : 'false';
-
         try {
-            const response = await fetch(API_ENDPOINTS.settings, {
+            const response = await fetch(`${API_ENDPOINTS.settings}/manual_approval_mode`, {
                 method: 'PUT',
                 headers: getAuthHeaders(),
-                body: JSON.stringify({ value: newValue })
+                body: JSON.stringify({ value: String(isChecked) })
             });
-            const result = await response.json();
-
-            if (!response.ok) throw new Error(result.message || 'Failed to update setting');
-            
-            isManualApprovalActive = isChecked;
+            if (!response.ok) throw new Error('Failed to update setting');
             showAlert('تم تحديث إعدادات الموافقة بنجاح.', 'success');
+            
+            // Re-fetch data if manual approval is turned on
+            if(isChecked) {
+                await fetchAllPendingAds();
+                renderAllTables();
+                updateAllBadges();
+            }
             updateUIBasedOnApprovalMode();
 
         } catch (error) {
-            console.error('Error updating approval mode:', error);
-            showAlert('حدث خطأ أثناء تحديث الإعدادات.', 'danger');
-            this.checked = !isChecked; // إعادة السويتش لحالته السابقة عند الفشل
+            this.checked = !isChecked;
+            showAlert('فشل تحديث الإعدادات.', 'danger');
         }
     }
-    
-    /**
-     * دالة مركزية لمعالجة الموافقة أو الرفض.
-     */
+
     async function handleAdAction(adId, category, actionType) {
-        const confirmMessages = {
-            approve: 'هل أنت متأكد من الموافقة على هذا الإعلان؟',
-            reject: 'هل أنت متأكد من رفض هذا الإعلان؟'
-        };
-        const successMessages = {
-            approve: 'تمت الموافقة على الإعلان بنجاح.',
-            reject: 'تم رفض الإعلان بنجاح.'
-        };
-        
-        if (confirm(confirmMessages[actionType])) {
+        if (confirm(`هل أنت متأكد من ${actionType === 'approve' ? 'الموافقة على' : 'رفض'} هذا الإعلان؟`)) {
             try {
                 const endpoint = API_ENDPOINTS[`${actionType}Ad`].replace('{id}', adId);
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: getAuthHeaders()
-                });
-
+                const response = await fetch(endpoint, { method: 'POST', headers: getAuthHeaders() });
+                
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || 'An unknown error occurred.');
+                    throw new Error(errorData.message || 'An unknown error occurred');
                 }
-
-                showAlert(successMessages[actionType], actionType === 'approve' ? 'success' : 'warning');
-                removeAdFromLocalData(adId, category);
-                renderAdsTable(category, pendingAdsData[category]);
+                
+                showAlert(`تم ${actionType === 'approve' ? 'الموافقة على' : 'رفض'} الإعلان بنجاح.`, 'success');
+                pendingAdsData[category] = pendingAdsData[category].filter(ad => ad.id != adId);
+                renderAllTables();
                 updateAllBadges();
             } catch (error) {
-                console.error(`Error ${actionType} ad:`, error);
-                showAlert(`حدث خطأ: ${error.message}`, 'danger');
+                showAlert(`فشل الإجراء: ${error.message}`, 'danger');
             }
         }
     }
 
-
-    // =========================================================================
-    // SECTION 4: RENDERING & UI HELPERS
-    // =========================================================================
-
-    /**
-     * عرض الجداول بالبيانات الأولية المحملة من الخادم.
-     */
-    function renderAllTablesInitially() {
-        for (const category in pendingAdsData) {
-            if (pendingAdsData.hasOwnProperty(category)) {
-                renderAdsTable(category, pendingAdsData[category]);
-            }
-        }
-    }
-
-    /**
-     * تحديث كل شارات الأرقام في التابات وفي الهيدر.
-     */
-    function updateAllBadges() {
-         let totalCount = 0;
-         for (const category in pendingAdsData) {
-             const count = pendingAdsData[category]?.length || 0;
-             updateCategoryBadge(category, count);
-             totalCount += count;
-         }
-         updatePendingAdsCountBadge(totalCount);
-    }
-
-    /**
-     * عرض الإعلانات في الجدول الخاص بكل قسم.
-     */
-    function renderAdsTable(category, ads) {
-        const tableBody = document.getElementById(`adsTableBody-${category}`);
-        const noAdsMessage = document.getElementById(`noAdsMessage-${category}`);
-        if (!tableBody || !noAdsMessage) return;
-
-        tableBody.innerHTML = ''; 
-
-        if (!ads || ads.length === 0) {
-            noAdsMessage.style.display = 'block';
-            return;
-        }
-
-        noAdsMessage.style.display = 'none';
-
-        ads.forEach(ad => {
-            const row = document.createElement('tr');
-            row.id = `ad-row-${ad.id}`; // Add a unique ID for easy removal
-            const adImage = ad.main_image ? `${BASE_URL}/storage/${ad.main_image}` : `https://via.placeholder.com/60x60/eee/999?text=N/A`;
-            const submissionDate = new Date(ad.created_at).toLocaleDateString('ar-EG');
-            const planType = ad.plan_type || 'Free';
-
-            row.innerHTML = `
-                <td class="text-center"><img src="${adImage}" alt="Ad Image" class="rounded ad-image"></td>
-                <td><div class="fw-bold">${ad.title}</div><small class="text-muted">ID: ${ad.id}</small></td>
-                <td>${ad.advertiser_name}</td>
-                <td>${parseFloat(ad.price).toFixed(2)} AED</td>
-                <td>${ad.add_category}</td>
-                <td><span class="badge bg-info">${planType}</span></td>
-                <td>${submissionDate}</td>
-                <td class="text-center">
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-sm btn-info" title="View Details" data-ad-id="${ad.id}"><i class="bi bi-eye"></i></button>
-                        <button class="btn btn-sm btn-success" title="Approve Ad" data-ad-id="${ad.id}"><i class="bi bi-check-lg"></i></button>
-                        <button class="btn btn-sm btn-danger" title="Reject Ad" data-ad-id="${ad.id}"><i class="bi bi-x-lg"></i></button>
-                    </div>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-    }
-
-    /**
-     * عرض تفاصيل الإعلان الكاملة في نافذة منبثقة (Modal).
-     */
     async function showAdDetails(adId, category) {
         const modalBody = document.getElementById('adDetailsModalBody');
         modalBody.innerHTML = `<div class="text-center p-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Loading...</p></div>`;
@@ -899,17 +781,16 @@
             
             const ad = await response.json();
             
-            // Build a detailed HTML string from the 'ad' object
-            // This can be customized to show as many details as you want
             modalBody.innerHTML = `
-                <h5>${ad.title}</h5>
-                <p>${ad.description}</p>
+                <h5>${ad.title || ''}</h5>
+                <p>${ad.description || 'No description provided.'}</p>
+                <hr>
                 <ul class="list-group">
-                    <li class="list-group-item"><strong>Price:</strong> ${ad.price} AED</li>
-                    <li class="list-group-item"><strong>Make:</strong> ${ad.make}</li>
-                    <li class="list-group-item"><strong>Model:</strong> ${ad.model}</li>
-                    <li class="list-group-item"><strong>Year:</strong> ${ad.year}</li>
-                    <li class="list-group-item"><strong>KM:</strong> ${ad.km}</li>
+                    <li class="list-group-item"><strong>السعر:</strong> ${ad.price || 'N/A'} AED</li>
+                    <li class="list-group-item"><strong>الشركة:</strong> ${ad.make || 'N/A'}</li>
+                    <li class="list-group-item"><strong>الموديل:</strong> ${ad.model || 'N/A'}</li>
+                    <li class="list-group-item"><strong>السنة:</strong> ${ad.year || 'N/A'}</li>
+                    <li class="list-group-item"><strong>المسافة المقطوعة:</strong> ${ad.km || 'N/A'} KM</li>
                 </ul>
             `;
 
@@ -918,77 +799,114 @@
             modalBody.innerHTML = `<p class="text-danger">Failed to load ad details. ${error.message}</p>`;
         }
     }
-
-
-    // =========================================================================
-    // SECTION 5: UTILITY & HELPER FUNCTIONS
-    // =========================================================================
     
-    /**
-     * دالة مساعدة لإنشاء Headers المصادقة.
-     * النسخة المصححة التي تقرأ التوكن من Local Storage.
-     */
-    function getAuthHeaders() {
-        // 1. اقرأ التوكن الحقيقي من Local Storage الذي وضعه نظام تسجيل الدخول.
-        const token = localStorage.getItem('token');
+    // =========================================================
+    // SECTION 4: RENDERING & UI HELPERS
+    // =========================================================
 
+    function updateUIBasedOnApprovalMode() {
+        const isManualApproval = document.getElementById('approvalModeSwitch').checked;
+        const switchLabel = document.getElementById('switchLabel');
+        const autoApprovalCard = document.getElementById('autoApprovalCard');
+        const approvalContentWrapper = document.getElementById('approvalContentWrapper');
+
+        if (isManualApproval) {
+            switchLabel.textContent = 'مفعل - Enabled';
+            switchLabel.className = 'form-check-label fw-bold text-success';
+            autoApprovalCard.style.display = 'none';
+            approvalContentWrapper.style.display = 'block';
+        } else {
+            switchLabel.textContent = 'معطل - Disabled';
+            switchLabel.className = 'form-check-label fw-bold text-danger';
+            autoApprovalCard.style.display = 'block';
+            approvalContentWrapper.style.display = 'none';
+        }
+        document.getElementById('approvalModeSwitch').disabled = false;
+    }
+
+    function renderAllTables() {
+        for (const category in pendingAdsData) {
+            renderAdsTable(category, pendingAdsData[category]);
+        }
+    }
+
+    function updateAllBadges() {
+         let totalCount = 0;
+         Object.values(pendingAdsData).forEach(adsArray => {
+             totalCount += adsArray.length;
+         });
+         
+         for (const category in pendingAdsData) {
+             const count = pendingAdsData[category]?.length || 0;
+             updateCategoryBadge(category, count);
+         }
+         updatePendingAdsCountBadge(totalCount);
+    }
+
+    function renderAdsTable(category, ads) {
+        const tableBody = document.getElementById(`adsTableBody-${category}`);
+        const noAdsMessage = document.getElementById(`noAdsMessage-${category}`);
+        if (!tableBody || !noAdsMessage) return;
+
+        tableBody.innerHTML = '';
+        if (!ads || ads.length === 0) {
+            noAdsMessage.style.display = 'block';
+            return;
+        }
+
+        noAdsMessage.style.display = 'none';
+        ads.forEach(ad => {
+            const row = document.createElement('tr');
+            const adImage = ad.main_image ? `${BASE_URL}/storage/${ad.main_image}` : `https://via.placeholder.com/60x60/eee/999?text=N/A`;
+            
+            row.innerHTML = `
+                <td class="text-center align-middle"><img src="${adImage}" alt="Ad Image" class="rounded ad-image"></td>
+                <td class="align-middle"><div class="fw-bold">${ad.title}</div><small class="text-muted">ID: ${ad.id}</small></td>
+                <td class="align-middle">${ad.advertiser_name || 'N/A'}</td>
+                <td class="align-middle">${parseFloat(ad.price).toFixed(2)} AED</td>
+                <td class="align-middle"><span class="badge bg-secondary">${ad.plan_type || 'Free'}</span></td>
+                <td class="align-middle">${new Date(ad.created_at).toLocaleDateString('ar-EG')}</td>
+                <td class="text-center align-middle">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-info" title="View Details" data-ad-id="${ad.id}"><i class="bi bi-eye"></i></button>
+                        <button class="btn btn-sm btn-success" title="Approve Ad" data-ad-id="${ad.id}"><i class="bi bi-check-lg"></i></button>
+                        <button class="btn btn-sm btn-danger" title="Reject Ad" data-ad-id="${ad.id}"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function getAuthHeaders() {
+        const token = localStorage.getItem('token');
         const headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         };
-
-        // 2. أضف الـ Authorization header فقط إذا كان التوكن موجودًا.
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-
         return headers;
     }
 
-    /**
-     * إزالة الإعلان من البيانات المحلية بعد الموافقة أو الرفض.
-     */
-    function removeAdFromLocalData(adId, category) {
-        if (pendingAdsData[category]) {
-            pendingAdsData[category] = pendingAdsData[category].filter(ad => ad.id != adId);
-        }
-    }
-    
-    /**
-     * تحديث شارة الأرقام الخاصة بقسم معين.
-     */
     function updateCategoryBadge(category, count) {
         const badge = document.getElementById(`badge-${category}`);
-        if (badge) {
-            badge.textContent = count;
-        }
+        if (badge) badge.textContent = count;
     }
 
-    /**
-     * تحديث شارة الأرقام العامة في أعلى الصفحة.
-     */
     function updatePendingAdsCountBadge(totalCount) {
         const badge = document.getElementById('pendingAdsCountBadge');
-        if (badge) {
-            badge.innerHTML = `<i class="bi bi-clock me-1"></i> في انتظار الموافقة: ${totalCount}`;
-        }
+        if (badge) badge.innerHTML = `<i class="bi bi-clock me-1"></i> في انتظار الموافقة: ${totalCount}`;
     }
-    
-    /**
-     * عرض رسالة تنبيه ديناميكية للمستخدم.
-     */
+
     function showAlert(message, type = 'info') {
         const alertContainer = document.getElementById('alertContainer');
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show m-3`;
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
+        alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
         alertContainer.prepend(alertDiv);
         setTimeout(() => bootstrap.Alert.getOrCreateInstance(alertDiv).close(), 5000);
     }
-
 </script>
-@endsection
+@endpush
