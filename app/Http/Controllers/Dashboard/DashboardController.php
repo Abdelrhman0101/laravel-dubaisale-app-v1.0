@@ -4,9 +4,18 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // <<< مهم جدًا
 
 class DashboardController extends Controller
 {
+     public function __construct()
+    {
+        // هذا السطر يتحقق مما إذا كان المستخدم admin.
+        // إذا لم يكن، يقوم بإطلاق خطأ 403 (Forbidden)
+        if (Auth::user() && Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+    }
     public function index() { return view('dashboard'); }
     public function accounts() { return view('accounts'); }
     public function requests() { return view('requests'); }

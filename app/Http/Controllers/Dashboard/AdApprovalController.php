@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Auth;
 
 class AdApprovalController extends Controller
 {
+
+        public function __construct()
+    {
+        if (Auth::user() && Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
+        }
+    }
+
     public function index(Request $request)
     {
         // لم نعد بحاجة لإنشاء توكن هنا
