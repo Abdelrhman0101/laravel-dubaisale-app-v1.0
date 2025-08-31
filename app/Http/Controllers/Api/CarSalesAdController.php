@@ -133,22 +133,78 @@ public function store(Request $request)
     }
 
     // تحديث إعلان
+/**
+     * تحديث بيانات إعلان موجود.
+     */
     public function update(Request $request, CarSalesAd $carSalesAd)
     {
-        // Authorization Check: Only the owner can update
+        // 1. التحقق من أن المستخدم هو صاحب الإعلان
         if ($request->user()->id !== $carSalesAd->user_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         
-        // Validate incoming data
-        $validatedData = $request->validate([ 'title' => 'sometimes|required|string|max:255', /*...*/]);
+        // 2. التحقق من صحة البيانات المدخلة
+        // 'sometimes' تعني أن الحقل ليس إجباريًا، ولكن إذا وُجد، يجب أن يتبع القواعد
+        $validatedData = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|required|string',
+            'make' => 'sometimes|required|string',
+            'model' => 'sometimes|required|string',
+            'year' => 'sometimes|required|digits:4',
+            'km' => 'sometimes|required|integer',
+            'price' => 'sometimes|required|numeric',
+            // --- قواعد التحقق الخاصة بالصور ---
+            'main_image' => 'sometimes|image|max:5120', // صورة واحدة، ليست مصفوفة
+            'thumbnail_images.*' => 'sometimes|image|max:5120',
+        ]);
 
-        // For this example, we'll just update simple fields
+        // 3. تحديث الحقول النصية
+        // نقوم باستثناء حقول الصور من التحديث التلقائي
         $carSalesAd->update($request->except(['main_image', 'thumbnail_images']));
 
-        // Logic to update images can be added here (delete old, upload new)
+        // =========================================================
+        // ====        المنطق الذكي لتحديث الصور          ====
+        // =========================================================
+        
+        $updateData = [];
 
-        return response()->json($carSalesAd);
+        // 4. تحديث الصورة الرئيسية (إذا تم رفع صورة جديدة)
+        if ($request->hasFile('main_image')) {
+            // أ. حذف الصورة القديمة من الـ storage
+            Storage::disk('public')->delete($carSalesAd->main_image);
+            
+            // ب. رفع الصورة الجديدة
+            $path = $request->file('main_image')->store('cars/main', 'public');
+            
+            // ج. تجهيز المسار الجديد للحفظ في قاعدة البيانات
+            $updateData['main_image'] = $path;
+        }
+
+        // 5. تحديث الصور المصغرة (إذا تم رفع صور جديدة)
+        if ($request->hasFile('thumbnail_images')) {
+            // أ. حذف كل الصور المصغرة القديمة
+            if (is_array($carSalesAd->thumbnail_images)) {
+                Storage::disk('public')->delete($carSalesAd->thumbnail_images);
+            }
+            
+            // ب. رفع الصور الجديدة وتجميع مساراتها
+            $thumbnailPaths = [];
+            foreach ($request->file('thumbnail_images') as $file) {
+                $thumbnailPaths[] = $file->store('cars/thumbnails', 'public');
+            }
+            
+            // ج. تجهيز مصفوفة المسارات الجديدة للحفظ
+            $updateData['thumbnail_images'] = $thumbnailPaths;
+        }
+
+        // 6. تحديث قاعدة البيانات بمسارات الصور الجديدة (إذا وُجدت)
+        if (!empty($updateData)) {
+            $carSalesAd->update($updateData);
+        }
+        
+        // 7. إرجاع بيانات الإعلان المحدثة بالكامل
+        // ->fresh() لجلب أحدث نسخة من البيانات من قاعدة البيانات
+        return response()->json($carSalesAd->fresh());
     }
 
     // حذف إعلان
