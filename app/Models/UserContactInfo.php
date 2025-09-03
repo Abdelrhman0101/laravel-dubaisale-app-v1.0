@@ -101,14 +101,55 @@ class UserContactInfo extends Model
     }
 
     /**
-     * Get formatted contact info for API response
+     * Get formatted data for API responses.
      */
-    public function getFormattedData(): array
+    public function getFormattedData()
     {
         return [
             'advertiser_names' => $this->advertiser_names ?? [],
             'phone_numbers' => $this->phone_numbers ?? [],
-            'whatsapp_numbers' => $this->whatsapp_numbers ?? []
+            'whatsapp_numbers' => $this->whatsapp_numbers ?? [],
         ];
+    }
+
+    /**
+     * Sync a field value change from user profile.
+     * Replaces old value with new value if old value exists.
+     * Adds new value if old value doesn't exist but new value is provided.
+     */
+    public function syncFieldValue(string $fieldName, ?string $oldValue, ?string $newValue): bool
+    {
+        $currentValues = $this->{$fieldName} ?? [];
+        $updated = false;
+        
+        // If old value exists, replace it with new value
+        if (!empty($oldValue)) {
+            $index = array_search($oldValue, $currentValues);
+            if ($index !== false) {
+                if (!empty($newValue)) {
+                    // Replace old value with new value
+                    $currentValues[$index] = $newValue;
+                } else {
+                    // Remove old value if new value is empty
+                    array_splice($currentValues, $index, 1);
+                }
+                $updated = true;
+            }
+        }
+        
+        // If old value doesn't exist but new value is provided, add it
+        if (empty($oldValue) && !empty($newValue)) {
+            if (!in_array($newValue, $currentValues)) {
+                $currentValues[] = $newValue;
+                $updated = true;
+            }
+        }
+        
+        // Update the field if changes were made
+        if ($updated) {
+            $this->{$fieldName} = array_values($currentValues); // Re-index array
+        }
+        
+        return $updated;
     }
 }
