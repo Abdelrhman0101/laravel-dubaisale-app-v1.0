@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Support\Facades\DB;
 use App\Models\BestAdvertiser;
 use App\Models\CarSalesAd; // كمثال للقسم الأول
+use App\Models\CarServicesAd;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request; // <<< أضف هذا السطر
 use App\Models\User; // <<< أضف هذا السطر
@@ -60,7 +61,13 @@ class FeaturedContentController extends Controller
                          ->latest()->take(8)
                          ->get(['id','price', 'year', 'km', 'main_image', 'make', 'model', 'trim'])
                          ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
-        } 
+        } elseif ($categorySlug === 'car_services') {
+            $ads = CarServicesAd::where('user_id', $userId)
+                         ->where('add_status', 'Valid')
+                         ->latest()->take(8)
+                         ->get(['id', 'title', 'service_name', 'price', 'main_image', 'emirate', 'district', 'area'])
+                         ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+        }
         // else if ($categorySlug === 'real_estate') {
         //     // منطق جلب إعلانات العقارات
         // }
@@ -84,6 +91,9 @@ public function getOfferBoxAds($category)
                        ->where('active_offers_box_status', true)
                        ->inRandomOrder() // لعرض الإعلانات بترتيب عشوائي ليكون عادلاً
                        ->get(); // يمكن إضافة ->limit() إذا أردت
+        return response()->json($ads);
+    } elseif ($category === 'car_services') {
+        $ads = CarServicesAd::getOffersBoxAds();
         return response()->json($ads);
     }
     

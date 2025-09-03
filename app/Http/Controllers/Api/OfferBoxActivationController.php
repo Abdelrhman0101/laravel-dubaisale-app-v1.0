@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CarSalesAd;
+use App\Models\CarServicesAd;
 use App\Models\OfferBoxSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -13,15 +14,20 @@ class OfferBoxActivationController extends Controller
     {
         $data = $request->validate([
             'ad_id' => 'required|integer',
-            'category_slug' => 'required|string|in:car_sales', // حاليًا قسم السيارات فقط
+            'category_slug' => 'required|string|in:car_sales,car_services',
             'days' => 'required|integer|min:1',
         ]);
 
         // 1. جلب الإعلان والتحقق من الملكية
-        $ad = CarSalesAd::findOrFail($data['ad_id']);
+        $ad = $this->getAdByCategory($data['category_slug'], $data['ad_id']);
+        if (!$ad) {
+            return response()->json(['error' => 'Ad not found'], 404);
+        }
+        
         if ($request->user()->id !== $ad->user_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
+        
         if ($ad->active_offers_box_status) {
              return response()->json(['error' => 'This ad is already in the Offers Box.'], 422);
         }
@@ -33,8 +39,7 @@ class OfferBoxActivationController extends Controller
         }
         
         // 3. التحقق من العدد الأقصى (الخطوة الأهم)
-        $currentActiveOffers = CarSalesAd::where('add_category', 'Cars Sales') // سيتم استبدالها بـ category_slug
-                                         ->where('active_offers_box_status', true)->count();
+        $currentActiveOffers = $this->getCurrentActiveOffersCount($data['category_slug']);
 
         if ($currentActiveOffers >= $settings->max_ads) {
             return response()->json(['error' => 'The Offers Box for this category is full. Please try again later.'], 422);
@@ -55,5 +60,35 @@ class OfferBoxActivationController extends Controller
             'total_price' => $totalPrice,
             'expires_at' => $ad->active_offers_box_expires_at,
         ]);
+    }
+
+    /**
+     * Get ad by category and ID.
+     */
+    private function getAdByCategory($categorySlug, $adId)
+    {
+        switch ($categorySlug) {
+            case 'car_sales':
+                return CarSalesAd::find($adId);
+            case 'car_services':
+                return CarServicesAd::find($adId);
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Get current active offers count by category.
+     */
+    private function getCurrentActiveOffersCount($categorySlug)
+    {
+        switch ($categorySlug) {
+            case 'car_sales':
+                return CarSalesAd::where('active_offers_box_status', true)->count();
+            case 'car_services':
+                return CarServicesAd::where('active_offers_box_status', true)->count();
+            default:
+                return 0;
+        }
     }
 }

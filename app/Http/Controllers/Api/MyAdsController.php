@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CarSalesAd;
+use App\Models\CarServicesAd;
 // في المستقبل، ستضيف الـ Models الأخرى هنا
 // use App\Models\RealEstateAd;
 // use App\Models\JobAd;
@@ -19,6 +20,7 @@ class MyAdsController extends Controller
 
         // --- الخطوة 1: جلب الإعلانات من كل قسم ---
         $carAds = CarSalesAd::where('user_id', $user->id)->get();
+        $carServicesAds = CarServicesAd::where('user_id', $user->id)->get();
         // $realEstateAds = RealEstateAd::where('user_id', $user->id)->get(); // للمستقبل
         // $jobAds = JobAd::where('user_id', $user->id)->get(); // للمستقبل
 
@@ -39,11 +41,30 @@ class MyAdsController extends Controller
             ];
         });
         
-        // --- الخطوة 3 و 4: دمج كل القوائم وترتيبها ---
-        // حالياً لدينا قسم واحد فقط. في المستقبل ستدمج الباقي هكذا:
-        // $allAds = $formattedCarAds->merge($formattedRealEstateAds)->merge($formattedJobAds);
+        $formattedCarServicesAds = $carServicesAds->map(function ($ad) {
+            return [
+                'id' => $ad->id,
+                'title' => $ad->title,
+                'service_type' => $ad->service_type,
+                'service_name' => $ad->service_name,
+                'emirate' => $ad->emirate,
+                'district' => $ad->district,
+                'area' => $ad->area,
+                'plan_type' => $ad->plan_type,
+                'main_image_url' => asset('storage/' . $ad->main_image),
+                'price' => $ad->price,
+                'status' => $ad->add_status,
+                'category' => 'Car Services', // نوع القسم
+                'created_at' => $ad->created_at,
+            ];
+        });
         
-        $allAds = $formattedCarAds; // حاليًا
+        // --- الخطوة 3 و 4: دمج كل القوائم وترتيبها ---
+        // دمج إعلانات السيارات وخدمات السيارات
+        // في المستقبل ستدمج الباقي هكذا:
+        // $allAds = $formattedCarAds->merge($formattedCarServicesAds)->merge($formattedRealEstateAds)->merge($formattedJobAds);
+        
+        $allAds = $formattedCarAds->merge($formattedCarServicesAds);
         $sortedAds = $allAds->sortByDesc('created_at');
 
         // --- الخطوة 5: تنفيذ التقسيم على الصفحات (Pagination) يدويًا ---

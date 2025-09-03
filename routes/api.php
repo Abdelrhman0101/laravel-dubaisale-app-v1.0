@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MyAdsController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\CarSalesAdController;
+use App\Http\Controllers\Api\CarServicesAdController;
 use App\Http\Controllers\Api\FeaturedContentController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\Api\OfferBoxActivationController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Api\PublicSettingsController;
 
 // --- Filter Controllers ---
 use App\Http\Controllers\Api\Filters\CarSalesFiltersController;
+use App\Http\Controllers\Api\CarServiceTypeController;
 
 // --- Admin Controllers ---
 use App\Http\Controllers\Api\Admin\UserController;
@@ -64,6 +66,16 @@ Route::prefix('filters/car-sale')->group(function () {
 // --- Car Sales Ad Specifications (Public) ---
 Route::get('/car-sales-ad-specs', [CarSalesAdSpecController::class, 'getClientSpecs']);
 
+// --- Car Service Types (Public) ---
+Route::get('/car-service-types', [CarServiceTypeController::class, 'getClientOptions']);
+
+// --- Car Services Search & Filters (Public) ---
+Route::get('/car-services/search', [CarServicesAdController::class, 'search']);
+Route::get('/car-services/filters', [CarServicesAdController::class, 'getSearchFilters']);
+Route::get('/car-services', [CarServicesAdController::class, 'index']);
+Route::get('/car-services/{carServicesAd}', [CarServicesAdController::class, 'show']);
+Route::get('/car-services/offers-box/ads', [CarServicesAdController::class, 'getOffersBoxAds']);
+
 
 /*
 |--------------------------------------------------------------------------
@@ -83,6 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // --- User's Ads & Offers Management ---
     Route::get('/my-ads', [MyAdsController::class, 'index']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class);
+    Route::apiResource('car-services-ads', CarServicesAdController::class);
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
 
     // --- User Contact Information Management ---
@@ -101,11 +114,16 @@ Route::middleware('auth:sanctum')->group(function () {
     */
     Route::prefix('admin')->middleware(IsAdmin::class)->group(function () {
         
-        // --- Admin: Full Ads Management ---
-        Route::get('/ads', [CarSalesAdController::class, 'indexForAdmin']);
-        Route::get('/ads/pending', [CarSalesAdController::class, 'getPendingAds']);
-        Route::post('/ads/{carSalesAd}/approve', [CarSalesAdController::class, 'approveAd']);
-        Route::post('/ads/{carSalesAd}/reject', [CarSalesAdController::class, 'rejectAd']);
+        // --- Admin: Car Sales Ads Management ---
+        Route::get('/car-sales-ads', [CarSalesAdController::class, 'indexForAdmin']);
+        Route::get('/car-sales-ads/pending', [CarSalesAdController::class, 'getPendingAds']);
+        Route::post('/car-sales-ads/{carSalesAd}/approve', [CarSalesAdController::class, 'approveAd']);
+        Route::post('/car-sales-ads/{carSalesAd}/reject', [CarSalesAdController::class, 'rejectAd']);
+        
+        // --- Admin: Car Services Ads Management ---
+        Route::get('/car-services-ads', [CarServicesAdController::class, 'indexForAdmin']);
+        Route::post('/car-services-ads/{carServicesAd}/approve', [CarServicesAdController::class, 'approveAd']);
+        Route::post('/car-services-ads/{carServicesAd}/reject', [CarServicesAdController::class, 'rejectAd']);
 
         // --- Admin: Full Users Management ---
         Route::apiResource('/users', UserController::class); 
@@ -136,6 +154,11 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{fieldName}', [CarSalesAdSpecController::class, 'updateSpec']);
             Route::post('/bulk-update', [CarSalesAdSpecController::class, 'bulkUpdateSpecs']);
         });
+        
+        // --- Admin: Car Service Types Management ---
+        Route::apiResource('car-service-types', CarServiceTypeController::class);
+        Route::post('/car-service-types/bulk-update', [CarServiceTypeController::class, 'bulkUpdate']);
+        Route::post('/car-service-types/{carServiceType}/toggle-active', [CarServiceTypeController::class, 'toggleActive']);
 
         // --- Admin: Offer Box & System Settings ---
         Route::get('/offer-box-settings', [OfferBoxSettingsController::class, 'index']);
