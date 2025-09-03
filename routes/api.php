@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\Admin\CarSaleFilterManagementController;
 use App\Http\Controllers\Api\Admin\OfferBoxSettingsController;
 use App\Http\Controllers\Api\Admin\SystemSettingsController;
 use App\Http\Controllers\CarSalesAdSpecController;
+use App\Http\Controllers\UserContactInfoController;
 
 
 // --- Middleware ---
@@ -83,6 +84,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-ads', [MyAdsController::class, 'index']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class);
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
+
+    // --- User Contact Information Management ---
+    Route::prefix('contact-info')->group(function () {
+        Route::get('/', [UserContactInfoController::class, 'getContactInfo']);
+        Route::post('/add-item', [UserContactInfoController::class, 'addContactItem']);
+        Route::delete('/remove-item', [UserContactInfoController::class, 'removeContactItem']);
+        Route::put('/bulk-update', [UserContactInfoController::class, 'bulkUpdateContactInfo']);
+        Route::post('/initialize', [UserContactInfoController::class, 'initializeFromUserData']);
+    });
 
     /*
     |--------------------------------------------------------------------------

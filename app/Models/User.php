@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\CarSalesAd;
+use App\Models\UserContactInfo;
 
 class User extends Authenticatable
 {
@@ -59,5 +60,13 @@ class User extends Authenticatable
     public function bestCategories()
     {
         return $this->hasMany(BestAdvertiser::class);
+    }
+
+    /**
+     * Get the contact information for the user.
+     */
+    public function contactInfo()
+    {
+        return $this->hasOne(UserContactInfo::class);
     }
 }
