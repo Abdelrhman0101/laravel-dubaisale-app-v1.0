@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\Admin\BestAdvertiserController;
 use App\Http\Controllers\Api\Admin\CarSaleFilterManagementController;
 use App\Http\Controllers\Api\Admin\OfferBoxSettingsController;
 use App\Http\Controllers\Api\Admin\SystemSettingsController;
+use App\Http\Controllers\CarSalesAdSpecController;
 
 
 // --- Middleware ---
@@ -58,6 +59,9 @@ Route::prefix('filters/car-sale')->group(function () {
     Route::get('/makes/{make}/models', [CarSaleFilterManagementController::class, 'getModels']);
     Route::get('/models/{model}/trims', [CarSaleFilterManagementController::class, 'getTrims']);
 });
+
+// --- Car Sales Ad Specifications (Public) ---
+Route::get('/car-sales-ad-specs', [CarSalesAdSpecController::class, 'getClientSpecs']);
 
 
 /*
@@ -113,6 +117,14 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/trims', [CarSaleFilterManagementController::class, 'addTrim']);
             Route::put('/trims/{trim}', [CarSaleFilterManagementController::class, 'updateTrim']);
             Route::delete('/trims/{trim}', [CarSaleFilterManagementController::class, 'deleteTrim']);
+        });
+
+        // --- Admin: Car Sales Ad Specifications Management ---
+        Route::prefix('car-sales-ad-specs')->group(function () {
+            Route::get('/', [CarSalesAdSpecController::class, 'getAdminSpecs']);
+            Route::get('/{fieldName}', [CarSalesAdSpecController::class, 'getSpecByField']);
+            Route::put('/{fieldName}', [CarSalesAdSpecController::class, 'updateSpec']);
+            Route::post('/bulk-update', [CarSalesAdSpecController::class, 'bulkUpdateSpecs']);
         });
 
         // --- Admin: Offer Box & System Settings ---
