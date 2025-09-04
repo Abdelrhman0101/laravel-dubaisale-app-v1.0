@@ -9,7 +9,6 @@ use App\Models\CarServicesAd;
 // في المستقبل، ستضيف الـ Models الأخرى هنا
 // use App\Models\RealEstateAd;
 // use App\Models\JobAd;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class MyAdsController extends Controller
@@ -26,7 +25,7 @@ class MyAdsController extends Controller
 
         // --- الخطوة 2: توحيد شكل البيانات لكل قسم ---
         $formattedCarAds = $carAds->map(function ($ad) {
-            return (object) [
+            return [
                 'id' => $ad->id,
                 'title' => $ad->title,
                 'make' => $ad->make,
@@ -37,12 +36,13 @@ class MyAdsController extends Controller
                 'price' => $ad->price,
                 'status' => $ad->add_status,
                 'category' => 'Cars Sales', // نوع القسم
-                'created_at' => $ad->created_at,
+                'created_at' => $ad->created_at->toDateTimeString(),
+                'created_at_timestamp' => $ad->created_at->timestamp,
             ];
         });
         
         $formattedCarServicesAds = $carServicesAds->map(function ($ad) {
-            return (object) [
+            return [
                 'id' => $ad->id,
                 'title' => $ad->title,
                 'service_type' => $ad->service_type,
@@ -55,7 +55,8 @@ class MyAdsController extends Controller
                 'price' => $ad->price,
                 'status' => $ad->add_status,
                 'category' => 'Car Services', // نوع القسم
-                'created_at' => $ad->created_at,
+                'created_at' => $ad->created_at->toDateTimeString(),
+                'created_at_timestamp' => $ad->created_at->timestamp,
             ];
         });
         
@@ -65,7 +66,7 @@ class MyAdsController extends Controller
         // $allAds = $formattedCarAds->merge($formattedCarServicesAds)->merge($formattedRealEstateAds)->merge($formattedJobAds);
         
         $allAds = $formattedCarAds->merge($formattedCarServicesAds);
-        $sortedAds = $allAds->sortByDesc('created_at');
+        $sortedAds = $allAds->sortByDesc('created_at_timestamp');
 
         // --- الخطوة 5: تنفيذ التقسيم على الصفحات (Pagination) يدويًا ---
         $perPage = 10;
