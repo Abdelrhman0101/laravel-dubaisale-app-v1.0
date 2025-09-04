@@ -84,7 +84,6 @@ class CarServicesAdController extends Controller
             'thumbnail_images.*' => 'image|max:5120',
         ]);
 
-        $data = $request->all();
         $user = $request->user();
 
         // Get contact info from user's contact info
@@ -94,6 +93,21 @@ class CarServicesAdController extends Controller
                 'error' => 'Contact information is required. Please update your profile first.'
             ], 400);
         }
+
+        // Prepare data array with only actual database columns
+        $data = [
+            'title' => $validatedData['title'],
+            'description' => $validatedData['description'],
+            'emirate' => $validatedData['emirate'],
+            'district' => $validatedData['district'],
+            'area' => $validatedData['area'],
+            'service_type' => $validatedData['service_type'],
+            'service_name' => $validatedData['service_name'],
+            'price' => $validatedData['price'],
+            'location' => $validatedData['location'] ?? null,
+            'user_id' => $user->id,
+            'add_category' => 'Car Services',
+        ];
 
         // Set contact info from user profile
         $data['advertiser_name'] = $contactInfo->name ?? $user->name;
@@ -112,10 +126,6 @@ class CarServicesAdController extends Controller
             }
             $data['thumbnail_images'] = $thumbnailPaths;
         }
-
-        // ربط الإعلان بالمستخدم
-        $data['user_id'] = $user->id;
-        $data['add_category'] = 'Car Services';
 
         // =========================================================
         // ====   هنا يبدأ المنطق الذكي للموافقة التلقائية    ====
