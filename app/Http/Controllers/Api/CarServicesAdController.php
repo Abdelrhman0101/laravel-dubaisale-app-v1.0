@@ -109,10 +109,28 @@ class CarServicesAdController extends Controller
             'add_category' => 'Car Services',
         ];
 
-        // Set contact info from user profile
-        $data['advertiser_name'] = $contactInfo->name ?? $user->name;
-        $data['phone_number'] = $contactInfo->phone_number;
-        $data['whatsapp'] = $contactInfo->whatsapp;
+        // Set contact info from user profile (handle array structure)
+        $advertiserNames = $contactInfo->advertiser_names ?? [];
+        $phoneNumbers = $contactInfo->phone_numbers ?? [];
+        $whatsappNumbers = $contactInfo->whatsapp_numbers ?? [];
+        
+        // Get first available values or fallback to user data
+        $data['advertiser_name'] = !empty($advertiserNames) ? $advertiserNames[0] : ($user->advertiser_name ?? $user->username);
+        $data['phone_number'] = !empty($phoneNumbers) ? $phoneNumbers[0] : $user->phone;
+        $data['whatsapp'] = !empty($whatsappNumbers) ? $whatsappNumbers[0] : $user->whatsapp;
+        
+        // Validate required contact information
+        if (empty($data['advertiser_name'])) {
+            return response()->json([
+                'error' => 'Advertiser name is required. Please update your profile first.'
+            ], 400);
+        }
+        
+        if (empty($data['phone_number'])) {
+            return response()->json([
+                'error' => 'Phone number is required. Please update your profile first.'
+            ], 400);
+        }
 
         // رفع الصورة الأساسية
         $mainImagePath = $request->file('main_image')->store('car_services/main', 'public');
