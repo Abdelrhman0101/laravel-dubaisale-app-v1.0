@@ -138,11 +138,11 @@ class CarServicesAdController extends Controller
         // 3. تحديد حالة الإعلان بناءً على الإعداد
         if ($isManualApprovalActive) {
             // إذا كانت الموافقة اليدوية مفعلة، الإعلان ينتظر المراجعة
-            $data['add_status'] = 'pending';
+            $data['add_status'] = 'Pending';
             $data['admin_approved'] = false;
         } else {
             // إذا كانت الموافقة اليدوية معطلة، الإعلان يتم نشره تلقائيًا
-            $data['add_status'] = 'active';
+            $data['add_status'] = 'Valid';
             $data['admin_approved'] = true;
         }
 
