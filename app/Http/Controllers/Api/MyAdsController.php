@@ -61,18 +61,23 @@ class MyAdsController extends Controller
         });
         
         // --- الخطوة 3 و 4: دمج كل القوائم وترتيبها ---
-        // دمج إعلانات السيارات وخدمات السيارات
-        // في المستقبل ستدمج الباقي هكذا:
-        // $allAds = $formattedCarAds->merge($formattedCarServicesAds)->merge($formattedRealEstateAds)->merge($formattedJobAds);
+        // تحويل Collections إلى arrays لتجنب مشاكل getKey()
+        $allAdsArray = array_merge(
+            $formattedCarAds->toArray(),
+            $formattedCarServicesAds->toArray()
+        );
         
-        $allAds = $formattedCarAds->merge($formattedCarServicesAds);
-        $sortedAds = $allAds->sortByDesc('created_at_timestamp');
+        // ترتيب البيانات حسب created_at_timestamp
+        usort($allAdsArray, function($a, $b) {
+            return $b['created_at_timestamp'] <=> $a['created_at_timestamp'];
+        });
 
         // --- الخطوة 5: تنفيذ التقسيم على الصفحات (Pagination) يدويًا ---
         $perPage = 10;
         $currentPage = $request->input('page', 1);
-        $totalItems = $sortedAds->count();
-        $currentPageItems = $sortedAds->slice(($currentPage - 1) * $perPage, $perPage)->values();
+        $totalItems = count($allAdsArray);
+        $offset = ($currentPage - 1) * $perPage;
+        $currentPageItems = array_slice($allAdsArray, $offset, $perPage);
 
         // إنشاء استجابة pagination مخصصة
         $paginationData = [
