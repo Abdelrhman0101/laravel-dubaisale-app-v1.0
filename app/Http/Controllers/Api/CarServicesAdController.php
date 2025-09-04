@@ -79,20 +79,15 @@ class CarServicesAdController extends Controller
             'service_type' => 'required|string|exists:car_service_types,name',
             'service_name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
-            'location' => 'nullable|string|max:500',
+            'location' => 'required|string|max:500',
+            'advertiser_name' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:20',
+            'whatsapp' => 'required|string|max:20',
             'main_image' => 'required|image|max:5120', // 5MB max
             'thumbnail_images.*' => 'image|max:5120',
         ]);
 
         $user = $request->user();
-
-        // Get contact info from user's contact info
-        $contactInfo = $user->contactInfo;
-        if (!$contactInfo) {
-            return response()->json([
-                'error' => 'Contact information is required. Please update your profile first.'
-            ], 400);
-        }
 
         // Prepare data array with only actual database columns
         $data = [
@@ -109,41 +104,24 @@ class CarServicesAdController extends Controller
             'add_category' => 'Car Services',
         ];
 
-        // Set contact info from user profile (handle array structure)
-        $advertiserNames = $contactInfo->advertiser_names ?? [];
-        $phoneNumbers = $contactInfo->phone_numbers ?? [];
-        $whatsappNumbers = $contactInfo->whatsapp_numbers ?? [];
-        
-        // Get first available values or fallback to user data
-        $data['advertiser_name'] = !empty($advertiserNames) ? $advertiserNames[0] : ($user->advertiser_name ?? $user->username);
-        $data['phone_number'] = !empty($phoneNumbers) ? $phoneNumbers[0] : $user->phone;
-        $data['whatsapp'] = !empty($whatsappNumbers) ? $whatsappNumbers[0] : $user->whatsapp;
-        
-        // Validate required contact information
-        if (empty($data['advertiser_name'])) {
-            return response()->json([
-                'error' => 'Advertiser name is required. Please update your profile first.'
-            ], 400);
-        }
-        
-        if (empty($data['phone_number'])) {
-            return response()->json([
-                'error' => 'Phone number is required. Please update your profile first.'
-            ], 400);
-        }
+        // Set contact info from request data
+        $data['advertiser_name'] = $validatedData['advertiser_name'];
+        $data['phone_number'] = $validatedData['phone_number'];
+        $data['whatsapp'] = $validatedData['whatsapp'];
 
         // رفع الصورة الأساسية
         $mainImagePath = $request->file('main_image')->store('car_services/main', 'public');
         $data['main_image'] = $mainImagePath;
 
         // رفع الصور المصغرة
-        if ($request->hasFile('thumbnail_images')) {
-            $thumbnailPaths = [];
-            foreach ($request->file('thumbnail_images') as $file) {
-                $thumbnailPaths[] = $file->store('car_services/thumbnails', 'public');
+        $thumbnailPaths = [];
+        if ($request->hasFile('thumbnail_images_urls')) {
+            foreach ($request->file('thumbnail_images_urls') as $thumbnailImage) {
+                $thumbnailPath = $thumbnailImage->store('car_services/thumbnails', 'public');
+                $thumbnailPaths[] = $thumbnailPath;
             }
-            $data['thumbnail_images'] = $thumbnailPaths;
         }
+        $data['thumbnail_images'] = json_encode($thumbnailPaths);
 
         // =========================================================
         // ====   هنا يبدأ المنطق الذكي للموافقة التلقائية    ====
@@ -160,17 +138,31 @@ class CarServicesAdController extends Controller
         // 3. تحديد حالة الإعلان بناءً على الإعداد
         if ($isManualApprovalActive) {
             // إذا كانت الموافقة اليدوية مفعلة، الإعلان ينتظر المراجعة
-            $data['add_status'] = 'Pending';
+            $data['add_status'] = 'pending';
             $data['admin_approved'] = false;
         } else {
             // إذا كانت الموافقة اليدوية معطلة، الإعلان يتم نشره تلقائيًا
-            $data['add_status'] = 'Valid';
+            $data['add_status'] = 'active';
             $data['admin_approved'] = true;
         }
 
         $ad = CarServicesAd::create($data);
 
-        return response()->json($ad, 201);
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إضافة الإعلان بنجاح',
+            'data' => [
+                'id' => $ad->id,
+                'title' => $ad->title,
+                'service_type' => $ad->service_type,
+                'advertiser_name' => $ad->advertiser_name,
+                'phone_number' => $ad->phone_number,
+                'whatsapp' => $ad->whatsapp,
+                'price' => $ad->price,
+                'main_image' => $ad->main_image,
+                'thumbnail_images_urls' => $thumbnailPaths
+            ]
+        ], 201);
     }
 
     /**
