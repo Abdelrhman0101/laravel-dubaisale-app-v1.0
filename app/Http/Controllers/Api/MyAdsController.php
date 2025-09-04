@@ -26,7 +26,7 @@ class MyAdsController extends Controller
 
         // --- الخطوة 2: توحيد شكل البيانات لكل قسم ---
         $formattedCarAds = $carAds->map(function ($ad) {
-            return [
+            return (object) [
                 'id' => $ad->id,
                 'title' => $ad->title,
                 'make' => $ad->make,
@@ -42,7 +42,7 @@ class MyAdsController extends Controller
         });
         
         $formattedCarServicesAds = $carServicesAds->map(function ($ad) {
-            return [
+            return (object) [
                 'id' => $ad->id,
                 'title' => $ad->title,
                 'service_type' => $ad->service_type,
