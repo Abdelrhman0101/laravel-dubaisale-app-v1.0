@@ -474,4 +474,62 @@ class CarServicesAdController extends Controller
 
         return response()->json($ads);
     }
+
+    /**
+     * [Admin] Get comprehensive statistics for car services ads.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getStats()
+    {
+        try {
+            // إجمالي الإعلانات
+            $totalAds = CarServicesAd::count();
+            
+            // الإعلانات المعلقة
+            $pendingAds = CarServicesAd::where('add_status', 'Pending')->count();
+            
+            // الإعلانات المعتمدة
+            $approvedAds = CarServicesAd::where('admin_approved', true)
+                                       ->where('add_status', 'Valid')
+                                       ->count();
+            
+            // الإعلانات المرفوضة
+            $rejectedAds = CarServicesAd::where('add_status', 'Rejected')->count();
+            
+            // الإعلانات في صندوق العروض النشط
+            $activeOffersBox = CarServicesAd::where('active_offers_box_days', '>', 0)
+                                           ->where('admin_approved', true)
+                                           ->count();
+            
+            // إجمالي المشاهدات
+            $totalViews = CarServicesAd::sum('views');
+            
+            // إعلانات هذا الشهر
+            $thisMonthAds = CarServicesAd::whereMonth('created_at', now()->month)
+                                        ->whereYear('created_at', now()->year)
+                                        ->count();
+            
+            // عدد أنواع الخدمات المختلفة
+            $serviceTypesCount = CarServicesAd::distinct('service_type')->count('service_type');
+            
+            return response()->json([
+                'total_ads' => $totalAds,
+                'pending_ads' => $pendingAds,
+                'approved_ads' => $approvedAds,
+                'rejected_ads' => $rejectedAds,
+                'active_offers_box' => $activeOffersBox,
+                'total_views' => $totalViews,
+                'this_month_ads' => $thisMonthAds,
+                'service_types_count' => $serviceTypesCount
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve statistics',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

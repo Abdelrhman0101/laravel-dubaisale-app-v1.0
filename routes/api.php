@@ -117,11 +117,13 @@ Route::middleware('auth:sanctum')->group(function () {
         // --- Admin: Car Sales Ads Management ---
         Route::get('/car-sales-ads', [CarSalesAdController::class, 'indexForAdmin']);
         Route::get('/car-sales-ads/pending', [CarSalesAdController::class, 'getPendingAds']);
+        Route::get('/car-sales/stats', [CarSalesAdController::class, 'getStats']);
         Route::post('/car-sales-ads/{carSalesAd}/approve', [CarSalesAdController::class, 'approveAd']);
         Route::post('/car-sales-ads/{carSalesAd}/reject', [CarSalesAdController::class, 'rejectAd']);
         
         // --- Admin: Car Services Ads Management ---
         Route::get('/car-services-ads', [CarServicesAdController::class, 'indexForAdmin']);
+        Route::get('/car-services/stats', [CarServicesAdController::class, 'getStats']);
         Route::post('/car-services-ads/{carServicesAd}/approve', [CarServicesAdController::class, 'approveAd']);
         Route::post('/car-services-ads/{carServicesAd}/reject', [CarServicesAdController::class, 'rejectAd']);
 

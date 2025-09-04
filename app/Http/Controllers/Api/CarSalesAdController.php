@@ -281,4 +281,62 @@ public function indexForAdmin()
 
     return response()->json($allAds);
 }
+
+/**
+ * [Admin] Get comprehensive statistics for car sales ads.
+ *
+ * @return \Illuminate\Http\JsonResponse
+ */
+public function getStats()
+{
+    try {
+        // إجمالي الإعلانات
+        $totalAds = CarSalesAd::count();
+        
+        // الإعلانات المعلقة
+        $pendingAds = CarSalesAd::where('add_status', 'Pending')->count();
+        
+        // الإعلانات المعتمدة
+        $approvedAds = CarSalesAd::where('admin_approved', true)
+                                 ->where('add_status', 'Valid')
+                                 ->count();
+        
+        // الإعلانات المرفوضة
+        $rejectedAds = CarSalesAd::where('add_status', 'Rejected')->count();
+        
+        // الإعلانات في صندوق العروض النشط
+        $activeOffersBox = CarSalesAd::where('active_offers_box_days', '>', 0)
+                                     ->where('admin_approved', true)
+                                     ->count();
+        
+        // إجمالي المشاهدات
+        $totalViews = CarSalesAd::sum('views');
+        
+        // إعلانات هذا الشهر
+        $thisMonthAds = CarSalesAd::whereMonth('created_at', now()->month)
+                                  ->whereYear('created_at', now()->year)
+                                  ->count();
+        
+        // عدد الماركات المختلفة
+        $brandsCount = CarSalesAd::distinct('make')->count('make');
+        
+        return response()->json([
+            'total_ads' => $totalAds,
+            'pending_ads' => $pendingAds,
+            'approved_ads' => $approvedAds,
+            'rejected_ads' => $rejectedAds,
+            'active_offers_box' => $activeOffersBox,
+            'total_views' => $totalViews,
+            'this_month_ads' => $thisMonthAds,
+            'brands_count' => $brandsCount
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to retrieve statistics',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 }
