@@ -70,16 +70,25 @@ class MyAdsController extends Controller
         // --- الخطوة 5: تنفيذ التقسيم على الصفحات (Pagination) يدويًا ---
         $perPage = 10;
         $currentPage = $request->input('page', 1);
+        $totalItems = $sortedAds->count();
         $currentPageItems = $sortedAds->slice(($currentPage - 1) * $perPage, $perPage)->values();
 
-        $paginatedAds = new LengthAwarePaginator(
-            $currentPageItems,
-            $sortedAds->count(),
-            $perPage,
-            $currentPage,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
+        // إنشاء استجابة pagination مخصصة
+        $paginationData = [
+            'data' => $currentPageItems,
+            'current_page' => $currentPage,
+            'per_page' => $perPage,
+            'total' => $totalItems,
+            'last_page' => ceil($totalItems / $perPage),
+            'from' => ($currentPage - 1) * $perPage + 1,
+            'to' => min($currentPage * $perPage, $totalItems),
+            'path' => $request->url(),
+            'first_page_url' => $request->url() . '?page=1',
+            'last_page_url' => $request->url() . '?page=' . ceil($totalItems / $perPage),
+            'next_page_url' => $currentPage < ceil($totalItems / $perPage) ? $request->url() . '?page=' . ($currentPage + 1) : null,
+            'prev_page_url' => $currentPage > 1 ? $request->url() . '?page=' . ($currentPage - 1) : null,
+        ];
         
-        return response()->json($paginatedAds);
+        return response()->json($paginationData);
     }
 }
