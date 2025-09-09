@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\CarServicesAd;
 use App\Models\CarServiceType;
+// use App\Models\SystemSetting; // removed: no longer needed here
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
@@ -367,32 +368,14 @@ class CarServicesAdController extends Controller
      */
     public function getSearchFilters()
     {
-        // Get unique emirates from car services ads
-        $emirates = CarServicesAd::select('emirate')
-                                 ->distinct()
-                                 ->whereNotNull('emirate')
-                                 ->where('emirate', '!=', '')
-                                 ->orderBy('emirate')
-                                 ->pluck('emirate');
-
-        // Get active service types
+        // Return only service types; emirates & districts are served from /api/locations/emirates
         $serviceTypes = CarServiceType::where('is_active', true)
                                       ->orderBy('sort_order')
                                       ->orderBy('name')
                                       ->get(['name', 'display_name']);
 
-        // Get unique districts from car services ads
-        $districts = CarServicesAd::select('district')
-                                  ->distinct()
-                                  ->whereNotNull('district')
-                                  ->where('district', '!=', '')
-                                  ->orderBy('district')
-                                  ->pluck('district');
-
         return response()->json([
-            'emirates' => $emirates,
             'service_types' => $serviceTypes,
-            'districts' => $districts,
         ]);
     }
 
