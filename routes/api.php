@@ -168,6 +168,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/system-settings', [SystemSettingsController::class, 'index']);
         Route::post('/system-settings', [SystemSettingsController::class, 'store']);
         Route::put('/system-settings/{setting:key}', [SystemSettingsController::class, 'update']);
+
+        // Locations (Emirates & Districts)
+        Route::get('/locations/emirates', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'index']);
+        Route::post('/locations/emirates', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'upsertEmirate']);
+        Route::post('/locations/emirates/{emirate}/districts', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'upsertDistricts']);
+        Route::delete('/locations/emirates/{emirate}/district', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'deleteDistrict']);
+        Route::put('/locations/emirates/{emirate}', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'renameEmirate']);
     });
 
 });
