@@ -53,6 +53,7 @@ Route::get('/best-advertisers', [FeaturedContentController::class, 'getBestAdver
 Route::get('/users/{user}/ads/{category}', [FeaturedContentController::class, 'getUserAdsByCategory']);
 Route::get('/offers-box/{category}', [FeaturedContentController::class, 'getOfferBoxAds']);
 Route::get('/settings', [PublicSettingsController::class, 'index']);
+Route::get('/locations/emirates', [\App\Http\Controllers\Api\LocationsController::class, 'index']);
 
 
 // --- Public Filter Data ---

@@ -105,7 +105,12 @@ class UserContactInfo extends Model
      */
     public function getFormattedData()
     {
+        // Location is a static value coming directly from the user's profile.
+        // It is not stored/managed inside user_contact_info and will only change when the user profile changes.
+        $location = $this->user ? $this->user->advertiser_location : null;
+
         return [
+            'location' => $location,
             'advertiser_names' => $this->advertiser_names ?? [],
             'phone_numbers' => $this->phone_numbers ?? [],
             'whatsapp_numbers' => $this->whatsapp_numbers ?? [],
