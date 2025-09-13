@@ -71,6 +71,10 @@ public function store(Request $request)
             'emirate' => 'required|string',
             'main_image' => 'required|image|max:5120',
             'thumbnail_images.*' => 'image|max:5120',
+            // --- Plan fields: optional and open for client control ---
+            'plan_type' => 'nullable|string|max:50',
+            'plan_days' => 'nullable|integer|min:0',
+            'plan_expires_at' => 'nullable|date',
         ]);
 
         $data = $request->all();
@@ -89,6 +93,20 @@ public function store(Request $request)
                 $thumbnailPaths[] = $file->store('cars/thumbnails', 'public');
             }
             $data['thumbnail_images'] = $thumbnailPaths;
+        }
+
+        // --- Plan fields: allow client to set or override values ---
+        if ($request->filled('plan_type')) {
+            $data['plan_type'] = $request->input('plan_type');
+        }
+        if ($request->has('plan_days')) { // allow 0
+            $data['plan_days'] = (int) $request->input('plan_days');
+            if (!$request->filled('plan_expires_at')) {
+                $data['plan_expires_at'] = now()->addDays($data['plan_days']);
+            }
+        }
+        if ($request->filled('plan_expires_at')) {
+            $data['plan_expires_at'] = $request->input('plan_expires_at');
         }
 
         // ربط الإعلان بالمستخدم
@@ -156,11 +174,22 @@ public function store(Request $request)
             // --- قواعد التحقق الخاصة بالصور ---
             'main_image' => 'sometimes|image|max:5120', // صورة واحدة، ليست مصفوفة
             'thumbnail_images.*' => 'sometimes|image|max:5120',
+            // --- Plan fields: optional and open for client control ---
+            'plan_type' => 'sometimes|nullable|string|max:50',
+            'plan_days' => 'sometimes|nullable|integer|min:0',
+            'plan_expires_at' => 'sometimes|nullable|date',
         ]);
 
         // 3. تحديث الحقول النصية
-        // نقوم باستثناء حقول الصور من التحديث التلقائي
-        $carSalesAd->update($request->except(['main_image', 'thumbnail_images']));
+        // نقوم باستثناء حقول الصور من التحديث التلقائي وبناء مصفوفة قابلة للتعديل لإضافة منطق plan
+        $updateFields = $request->except(['main_image', 'thumbnail_images']);
+
+        // إذا تم تمرير plan_days بدون plan_expires_at، احسب تاريخ الانتهاء تلقائياً
+        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+            $updateFields['plan_expires_at'] = now()->addDays((int) $request->input('plan_days'));
+        }
+
+        $carSalesAd->update($updateFields);
 
         // =========================================================
         // ====        المنطق الذكي لتحديث الصور          ====
