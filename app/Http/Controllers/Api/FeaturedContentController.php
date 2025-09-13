@@ -8,6 +8,7 @@ use App\Models\CarServicesAd;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request; // <<< أضف هذا السطر
 use App\Models\User; // <<< أضف هذا السطر
+use App\Models\RestaurantAd; // أضف الموديل الخاص بالمطاعم
 
   
   
@@ -67,6 +68,12 @@ class FeaturedContentController extends Controller
                          ->latest()->take(8)
                          ->get(['id', 'title', 'service_name', 'price', 'main_image', 'emirate', 'district', 'area'])
                          ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+        } elseif ($categorySlug === 'restaurant') {
+            $ads = RestaurantAd::where('user_id', $userId)
+                         ->where('add_status', 'Valid')
+                         ->latest()->take(8)
+                         ->get(['id', 'title', 'price_range', 'main_image', 'emirate', 'district', 'area'])
+                         ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
         }
         // else if ($categorySlug === 'real_estate') {
         //     // منطق جلب إعلانات العقارات
@@ -94,6 +101,19 @@ public function getOfferBoxAds($category)
         return response()->json($ads);
     } elseif ($category === 'car_services') {
         $ads = CarServicesAd::getOffersBoxAds();
+        return response()->json($ads);
+    } elseif ($category === 'restaurant') {
+        // محاكاة نفس أسلوب CarServicesAd::getOffersBoxAds()
+        $ads = RestaurantAd::where('add_status', 'Valid')
+                    ->where('admin_approved', true)
+                    ->where('active_offers_box_status', true)
+                    ->where(function($q){
+                        $q->whereNull('active_offers_box_expires_at')
+                          ->orWhere('active_offers_box_expires_at', '>', now());
+                    })
+                    ->inRandomOrder()
+                    ->limit(10)
+                    ->get();
         return response()->json($ads);
     }
     

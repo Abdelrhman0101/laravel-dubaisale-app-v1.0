@@ -17,10 +17,12 @@ class RestaurantAd extends Model
         'thumbnail_images' => 'array',
         'admin_approved' => 'boolean',
         'active_offers_box_status' => 'boolean',
+        'active_offers_box_expires_at' => 'datetime',
         'views' => 'integer',
         'rank' => 'integer',
         'plan_days' => 'integer',
         'plan_expires_at' => 'datetime',
+        'active_offers_box_days' => 'integer',
     ];
 
     protected $hidden = [
@@ -58,7 +60,6 @@ class RestaurantAd extends Model
         return $this->add_status;
     }
 
-    // Previously, getCategoryAttribute() returned add_category. We now expose this as 'section'
     public function getSectionAttribute()
     {
         return $this->add_category;
@@ -78,6 +79,15 @@ class RestaurantAd extends Model
     public function scopeActive(Builder $query): void
     {
         $query->valid()->approved();
+    }
+
+    public function scopeInOffersBox(Builder $query): void
+    {
+        $query->where('active_offers_box_status', true)
+              ->where(function ($q) {
+                  $q->whereNull('active_offers_box_expires_at')
+                    ->orWhere('active_offers_box_expires_at', '>', now());
+              });
     }
 
     public function scopeByEmirate(Builder $query, string $emirate): void
@@ -123,5 +133,20 @@ class RestaurantAd extends Model
     public function incrementViews(): void
     {
         $this->increment('views');
+    }
+
+    public function isInActiveOffersBox(): bool
+    {
+        return $this->active_offers_box_status &&
+            (is_null($this->active_offers_box_expires_at) || $this->active_offers_box_expires_at->isFuture());
+    }
+
+    public static function getOffersBoxAds($limit = 10)
+    {
+        return self::active()
+            ->inOffersBox()
+            ->inRandomOrder()
+            ->limit($limit)
+            ->get();
     }
 }
