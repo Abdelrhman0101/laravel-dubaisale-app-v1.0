@@ -58,8 +58,19 @@ Route::get('/settings', [PublicSettingsController::class, 'index']);
 Route::get('/locations/emirates', [\App\Http\Controllers\Api\LocationsController::class, 'index']);
 
 // --- Restaurants (Public) ---
-Route::get('/restaurants', [RestaurantAdController::class, 'index']);
-Route::get('/restaurants/{restaurantAd}', [RestaurantAdController::class, 'show']);
+Route::get('/restaurants', [\App\Http\Controllers\Api\RestaurantAdController::class, 'index']);
+Route::get('/restaurants/{restaurantAd}', [\App\Http\Controllers\Api\RestaurantAdController::class, 'show']);
+
+// --- Restaurant Categories (Public) ---
+Route::get('/restaurant-categories', function (Request $request) {
+    $onlyActive = $request->boolean('only_active', true);
+    $query = \App\Models\RestaurantCategory::query();
+    if ($onlyActive) {
+        $query->where('active', true);
+    }
+    $categories = $query->orderBy('sort_order')->orderBy('name')->get(['id','name','active','sort_order']);
+    return response()->json($categories);
+});
 
 
 // --- Public Filter Data ---
