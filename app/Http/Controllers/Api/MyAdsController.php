@@ -31,6 +31,7 @@ class MyAdsController extends Controller
                 'make' => $ad->make,
                 'model' => $ad->model,
                 'trim' => $ad->trim,
+                'year' => $ad->year,
                 'plan_type' => $ad->plan_type,
                 'main_image_url' => asset('storage/' . $ad->main_image),
                 'price' => $ad->price,

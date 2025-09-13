@@ -48,6 +48,14 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    // Expose `location` alias for `advertiser_location` in all JSON responses
+    protected $appends = ['location'];
+
+    public function getLocationAttribute()
+    {
+        return $this->advertiser_location;
+    }
+
     /**
      * Get the car sale ads for the user.
      */
