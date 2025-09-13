@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\FeaturedContentController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\Api\OfferBoxActivationController;
 use App\Http\Controllers\Api\PublicSettingsController;
+use App\Http\Controllers\Api\RestaurantAdController;
 
 
 // --- Filter Controllers ---
@@ -54,6 +55,10 @@ Route::get('/users/{user}/ads/{category}', [FeaturedContentController::class, 'g
 Route::get('/offers-box/{category}', [FeaturedContentController::class, 'getOfferBoxAds']);
 Route::get('/settings', [PublicSettingsController::class, 'index']);
 Route::get('/locations/emirates', [\App\Http\Controllers\Api\LocationsController::class, 'index']);
+
+// --- Restaurants (Public) ---
+Route::get('/restaurants', [RestaurantAdController::class, 'index']);
+Route::get('/restaurants/{restaurantAd}', [RestaurantAdController::class, 'show']);
 
 
 // --- Public Filter Data ---
@@ -97,6 +102,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-ads', [MyAdsController::class, 'index']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class);
     Route::apiResource('car-services-ads', CarServicesAdController::class);
+    
+    // --- Restaurants (CRUD Authenticated) ---
+    Route::post('/restaurants', [RestaurantAdController::class, 'store']);
+    Route::put('/restaurants/{restaurantAd}', [RestaurantAdController::class, 'update']);
+    Route::patch('/restaurants/{restaurantAd}', [RestaurantAdController::class, 'update']);
+    Route::delete('/restaurants/{restaurantAd}', [RestaurantAdController::class, 'destroy']);
+
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
 
     // --- User Contact Information Management ---
