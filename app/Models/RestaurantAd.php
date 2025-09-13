@@ -32,7 +32,7 @@ class RestaurantAd extends Model
         'main_image_url',
         'thumbnail_images_urls',
         'status',
-        'category',
+        'section',
     ];
 
     public function user()
@@ -58,7 +58,8 @@ class RestaurantAd extends Model
         return $this->add_status;
     }
 
-    public function getCategoryAttribute()
+    // Previously, getCategoryAttribute() returned add_category. We now expose this as 'section'
+    public function getSectionAttribute()
     {
         return $this->add_category;
     }
@@ -97,6 +98,11 @@ class RestaurantAd extends Model
     public function scopeByPriceRange(Builder $query, string $priceRange): void
     {
         $query->where('price_range', $priceRange);
+    }
+
+    public function scopeByCategory(Builder $query, string $category): void
+    {
+        $query->where('category', $category);
     }
 
     public function scopeLatest(Builder $query): void

@@ -22,6 +22,7 @@ class RestaurantAdController extends Controller
         $query->when($request->query('district'), fn($q, $v) => $q->byDistrict($v));
         $query->when($request->query('area'), fn($q, $v) => $q->byArea($v));
         $query->when($request->query('price_range'), fn($q, $v) => $q->byPriceRange($v));
+        $query->when($request->query('category'), fn($q, $v) => $q->byCategory($v));
 
         // Sorting options (optional): latest, most_viewed, rank
         $sort = $request->query('sort', 'latest');
@@ -54,6 +55,7 @@ class RestaurantAdController extends Controller
             'district' => 'required|string|max:100',
             'area' => 'nullable|string|max:100',
             'price_range' => 'required|string|max:100',
+            'category' => 'nullable|string|max:100|exists:restaurant_categories,name',
             'main_image' => 'required|image|max:5120',
             'thumbnail_images.*' => 'image|max:5120',
             'advertiser_name' => 'required|string|max:255',
@@ -73,6 +75,7 @@ class RestaurantAdController extends Controller
             'district' => $validated['district'],
             'area' => $validated['area'] ?? null,
             'price_range' => $validated['price_range'],
+            'category' => $validated['category'] ?? null,
             'advertiser_name' => $validated['advertiser_name'],
             'whatsapp_number' => $validated['whatsapp_number'],
             'phone_number' => $validated['phone_number'] ?? null,
@@ -138,6 +141,7 @@ class RestaurantAdController extends Controller
             'district' => 'sometimes|required|string|max:100',
             'area' => 'sometimes|nullable|string|max:100',
             'price_range' => 'sometimes|required|string|max:100',
+            'category' => 'sometimes|nullable|string|max:100|exists:restaurant_categories,name',
             'main_image' => 'sometimes|image|max:5120',
             'thumbnail_images.*' => 'sometimes|image|max:5120',
             'advertiser_name' => 'sometimes|required|string|max:255',

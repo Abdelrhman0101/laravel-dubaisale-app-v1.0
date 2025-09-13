@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\Admin\BestAdvertiserController;
 use App\Http\Controllers\Api\Admin\CarSaleFilterManagementController;
 use App\Http\Controllers\Api\Admin\OfferBoxSettingsController;
 use App\Http\Controllers\Api\Admin\SystemSettingsController;
+use App\Http\Controllers\Api\Admin\RestaurantCategoryController;
 use App\Http\Controllers\CarSalesAdSpecController;
 use App\Http\Controllers\UserContactInfoController;
 
@@ -174,6 +175,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('car-service-types', CarServiceTypeController::class);
         Route::post('/car-service-types/bulk-update', [CarServiceTypeController::class, 'bulkUpdate']);
         Route::post('/car-service-types/{carServiceType}/toggle-active', [CarServiceTypeController::class, 'toggleActive']);
+
+        // --- Admin: Restaurant Categories Management ---
+        Route::apiResource('restaurant-categories', RestaurantCategoryController::class);
 
         // --- Admin: Offer Box & System Settings ---
         Route::get('/offer-box-settings', [OfferBoxSettingsController::class, 'index']);
