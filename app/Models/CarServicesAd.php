@@ -36,7 +36,6 @@ class CarServicesAd extends Model
      * @var array<int, string>
      */
     protected $hidden = [
-        'created_at',
         'updated_at',
     ];
 
@@ -45,6 +44,7 @@ class CarServicesAd extends Model
      *
      * @var array<int, string>
      */
+
     protected $appends = [
         'main_image_url',
         'thumbnail_images_urls',
