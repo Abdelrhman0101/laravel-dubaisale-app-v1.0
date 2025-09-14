@@ -23,7 +23,7 @@ class User extends Authenticatable
     'referral_code', 'is_active', 'email_verified_at', 'role',
     'advertiser_name', 'advertiser_type', 'advertiser_logo', 'advertiser_location',
 
-];
+    ];
 
     /**
      * The attributes that should be hidden for serialization.
