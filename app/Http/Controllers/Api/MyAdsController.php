@@ -72,7 +72,7 @@ class MyAdsController extends Controller
                 'district' => $ad->district,
                 'area' => $ad->area,
                 'price_range' => $ad->price_range,
-                'category' => $ad->category,
+                'restaurant_category' => $ad->category,
                 'plan_type' => $ad->plan_type,
                 'main_image_url' => asset('storage/' . $ad->main_image),
                 'price' => $ad->price_range,
