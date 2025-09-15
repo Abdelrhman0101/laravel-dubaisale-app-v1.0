@@ -39,6 +39,7 @@ class MyAdsController extends Controller
                 'price' => $ad->price,
                 'status' => $ad->add_status,
                 'category' => 'Cars Sales', // نوع القسم
+                'category_slug' => 'car_sales', // إضافة category_slug
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
             ];
@@ -58,6 +59,7 @@ class MyAdsController extends Controller
                 'price' => $ad->price,
                 'status' => $ad->add_status,
                 'category' => 'Car Services', // نوع القسم
+                'category_slug' => 'car_services', // إضافة category_slug
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
             ];
@@ -78,6 +80,7 @@ class MyAdsController extends Controller
                 'price' => $ad->price_range,
                 'status' => $ad->add_status,
                 'category' => 'Restaurants', // نوع القسم
+                'category_slug' => 'restaurant', // إضافة category_slug
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
             ];
