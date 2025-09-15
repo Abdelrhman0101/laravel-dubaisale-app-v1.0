@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CarSalesAd;
 use App\Models\CarServicesAd;
+use App\Models\RestaurantAd;
 // في المستقبل، ستضيف الـ Models الأخرى هنا
 // use App\Models\RealEstateAd;
 // use App\Models\JobAd;
@@ -20,6 +21,7 @@ class MyAdsController extends Controller
         // --- الخطوة 1: جلب الإعلانات من كل قسم ---
         $carAds = CarSalesAd::where('user_id', $user->id)->get();
         $carServicesAds = CarServicesAd::where('user_id', $user->id)->get();
+        $restaurantAds = RestaurantAd::where('user_id', $user->id)->get();
         // $realEstateAds = RealEstateAd::where('user_id', $user->id)->get(); // للمستقبل
         // $jobAds = JobAd::where('user_id', $user->id)->get(); // للمستقبل
 
@@ -61,11 +63,32 @@ class MyAdsController extends Controller
             ];
         });
         
+        $formattedRestaurantAds = $restaurantAds->map(function ($ad) {
+            return [
+                'id' => $ad->id,
+                'title' => $ad->title,
+                'description' => $ad->description,
+                'emirate' => $ad->emirate,
+                'district' => $ad->district,
+                'area' => $ad->area,
+                'price_range' => $ad->price_range,
+                'category' => $ad->category,
+                'plan_type' => $ad->plan_type,
+                'main_image_url' => asset('storage/' . $ad->main_image),
+                'price' => $ad->price_range,
+                'status' => $ad->add_status,
+                'category' => 'Restaurants', // نوع القسم
+                'created_at' => $ad->created_at->toDateTimeString(),
+                'created_at_timestamp' => $ad->created_at->timestamp,
+            ];
+        });
+        
         // --- الخطوة 3 و 4: دمج كل القوائم وترتيبها ---
         // تحويل Collections إلى arrays لتجنب مشاكل getKey()
         $allAdsArray = array_merge(
             $formattedCarAds->toArray(),
-            $formattedCarServicesAds->toArray()
+            $formattedCarServicesAds->toArray(),
+            $formattedRestaurantAds->toArray()
         );
         
         // ترتيب البيانات حسب created_at_timestamp
