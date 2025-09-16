@@ -147,6 +147,9 @@ public function store(Request $request)
     // عرض إعلان واحد محدد
     public function show(CarSalesAd $carSalesAd)
     {
+        // Increment views count
+        $carSalesAd->incrementViews();
+        
         return response()->json($carSalesAd);
     }
 
