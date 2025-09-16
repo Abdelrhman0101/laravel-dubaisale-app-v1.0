@@ -81,7 +81,7 @@ class RestaurantAdController extends Controller
             'phone_number' => $validated['phone_number'] ?? null,
             'address' => $validated['address'],
             'user_id' => $request->user()->id,
-            'add_category' => 'Restaurants',
+            'add_category' => 'restaurant',
         ];
 
         // Upload main image

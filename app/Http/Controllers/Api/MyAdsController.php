@@ -79,7 +79,7 @@ class MyAdsController extends Controller
                 'main_image_url' => asset('storage/' . $ad->main_image),
                 'price' => $ad->price_range,
                 'status' => $ad->add_status,
-                'category' => 'Restaurants', // نوع القسم
+                'category' => 'restaurant', // نوع القسم
                 'category_slug' => 'restaurant', // إضافة category_slug
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,

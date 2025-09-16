@@ -11,7 +11,7 @@ class BestAdvertiserController extends Controller
 {
     protected $allowedCategories = [
         'car_sales', 'real_estate', 'car_rent', 'car_services', 
-        'electronics', 'restaurants', 'jobs', 'other_services'
+        'electronics', 'restaurant', 'jobs', 'other_services'
     ];
 
     public function toggleStatus(Request $request, User $user)

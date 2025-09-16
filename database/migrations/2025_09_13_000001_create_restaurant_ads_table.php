@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('address', 500);
 
             // System-managed fields
-            $table->string('add_category', 100)->default('Restaurants');
+            $table->string('add_category', 100)->default('restaurant');
             $table->string('add_status', 50)->default('Pending');
             $table->boolean('admin_approved')->default(false);
             $table->unsignedBigInteger('views')->default(0);
