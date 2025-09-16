@@ -84,4 +84,13 @@ class CarSalesAd extends Model
     {
         return $query->where('year', $year);
     }
+
+    /**
+     * Increment the views count for this ad.
+     * @return bool
+     */
+    public function incrementViews(): bool
+    {
+        return $this->increment('views');
+    }
 }

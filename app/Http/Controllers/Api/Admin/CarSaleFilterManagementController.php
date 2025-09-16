@@ -28,7 +28,19 @@ class CarSaleFilterManagementController extends Controller
     }
 
     // ====== Car Models Management ======
-    public function getModels(CarMake $make) { return response()->json($make->carModels()->orderBy('name')->get()); }
+    public function getModels($makeId) { 
+        // التحقق من صحة الـ ID
+        if ($makeId == -1 || !is_numeric($makeId)) {
+            return response()->json([], 200); // إرجاع قائمة فارغة بدلاً من خطأ 404
+        }
+        
+        $make = CarMake::find($makeId);
+        if (!$make) {
+            return response()->json([], 200); // إرجاع قائمة فارغة بدلاً من خطأ 404
+        }
+        
+        return response()->json($make->carModels()->orderBy('name')->get()); 
+    }
     public function addModel(Request $request) {
         $data = $request->validate([
             'name' => 'required|string',
@@ -47,7 +59,19 @@ class CarSaleFilterManagementController extends Controller
     }
 
     // ====== Car Trims Management ======
-    public function getTrims(CarModel $model) { return response()->json($model->carTrims()->orderBy('name')->get()); }
+    public function getTrims($modelId) { 
+        // التحقق من صحة الـ ID
+        if ($modelId == -1 || !is_numeric($modelId)) {
+            return response()->json([], 200); // إرجاع قائمة فارغة بدلاً من خطأ 404
+        }
+        
+        $model = CarModel::find($modelId);
+        if (!$model) {
+            return response()->json([], 200); // إرجاع قائمة فارغة بدلاً من خطأ 404
+        }
+        
+        return response()->json($model->carTrims()->orderBy('name')->get()); 
+    }
     public function addTrim(Request $request) {
         $data = $request->validate([
             'name' => 'required|string',
