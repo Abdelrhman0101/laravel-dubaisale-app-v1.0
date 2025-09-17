@@ -71,6 +71,9 @@ class CarRentAdController extends Controller
         ]);
 
         $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
 
         $data = [
             'title' => $validated['title'],
