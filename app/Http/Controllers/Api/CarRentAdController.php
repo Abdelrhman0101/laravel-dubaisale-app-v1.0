@@ -124,17 +124,20 @@ class CarRentAdController extends Controller
         }
 
         // manual approval mode (car_rent specific or global fallback)
-        $manualApproval = optional(\App\Models\SystemSetting::where('key', 'manual_approval_mode_car_rent')->first())->value;
-        if (is_null($manualApproval)) {
-            $manualApproval = optional(\App\Models\SystemSetting::where('key', 'manual_approval_mode')->first())->value ?? 'true';
-        }
-        $isManual = filter_var($manualApproval, FILTER_VALIDATE_BOOLEAN);
-        if ($isManual) {
-            $data['add_status'] = 'Pending';
-            $data['admin_approved'] = false;
+        // اتّباع نفس منطق الأقسام الأخرى: استخدام الإعداد العام مع Cache
+        $manualApproval = cache()->rememberForever('setting_manual_approval_mode', function () {
+        return optional(\App\Models\SystemSetting::where('key', 'manual_approval_mode')->first())->value ?? 'true';
+        });
+        
+        $isManualApprovalActive = filter_var($manualApproval, FILTER_VALIDATE_BOOLEAN);
+        if ($isManualApprovalActive) {
+        // الموافقة اليدوية مفعلة => Pending
+        $data['add_status'] = 'Pending';
+        $data['admin_approved'] = false;
         } else {
-            $data['add_status'] = 'Valid';
-            $data['admin_approved'] = true;
+        // القبول التلقائي مفعّل => Valid
+        $data['add_status'] = 'Valid';
+        $data['admin_approved'] = true;
         }
 
         $ad = CarRentAd::create($data);
