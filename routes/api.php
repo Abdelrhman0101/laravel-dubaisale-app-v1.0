@@ -115,6 +115,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-ads', [MyAdsController::class, 'index']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class);
     Route::apiResource('car-services-ads', CarServicesAdController::class);
+    Route::apiResource('car-rent-ads', CarRentAdController::class);
     
     // --- Restaurants (CRUD Authenticated) ---
     Route::post('/restaurants', [RestaurantAdController::class, 'store']);
@@ -213,10 +214,11 @@ Route::get('/car-rent/search', [CarRentAdController::class, 'search']);
 Route::get('/car-rent', [CarRentAdController::class, 'index']);
 Route::get('/car-rent/{carRentAd}', [CarRentAdController::class, 'show']);
 Route::get('/car-rent/offers-box/ads', [CarRentAdController::class, 'getOffersBoxAds']);
-Route::apiResource('car-rent-ads', CarRentAdController::class);
 
 // --- Admin: Car Rent Ads Management ---
-Route::get('/car-rent-ads', [CarRentAdController::class, 'indexForAdmin']);
-Route::get('/car-rent/stats', [CarRentAdController::class, 'getStats']);
-Route::post('/car-rent-ads/{carRentAd}/approve', [CarRentAdController::class, 'approveAd']);
-Route::post('/car-rent-ads/{carRentAd}/reject', [CarRentAdController::class, 'rejectAd']);
+Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {
+    Route::get('/car-rent-ads', [CarRentAdController::class, 'indexForAdmin']);
+    Route::get('/car-rent/stats', [CarRentAdController::class, 'getStats']);
+    Route::post('/car-rent-ads/{carRentAd}/approve', [CarRentAdController::class, 'approveAd']);
+    Route::post('/car-rent-ads/{carRentAd}/reject', [CarRentAdController::class, 'rejectAd']);
+});
