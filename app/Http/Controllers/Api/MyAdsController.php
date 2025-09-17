@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\CarSalesAd;
 use App\Models\CarServicesAd;
 use App\Models\RestaurantAd;
+use App\Models\CarRentAd;
 // في المستقبل، ستضيف الـ Models الأخرى هنا
 // use App\Models\RealEstateAd;
 // use App\Models\JobAd;
@@ -24,6 +25,7 @@ class MyAdsController extends Controller
         $restaurantAds = RestaurantAd::where('user_id', $user->id)->get();
         // $realEstateAds = RealEstateAd::where('user_id', $user->id)->get(); // للمستقبل
         // $jobAds = JobAd::where('user_id', $user->id)->get(); // للمستقبل
+        $carRentAds = CarRentAd::where('user_id', $user->id)->get();
 
         // --- الخطوة 2: توحيد شكل البيانات لكل قسم ---
         $formattedCarAds = $carAds->map(function ($ad) {
@@ -81,6 +83,25 @@ class MyAdsController extends Controller
                 'status' => $ad->add_status,
                 'category' => 'restaurant', // نوع القسم
                 'category_slug' => 'restaurant', // إضافة category_slug
+                'created_at' => $ad->created_at->toDateTimeString(),
+                'created_at_timestamp' => $ad->created_at->timestamp,
+            ];
+        });
+        
+        $formattedCarRentAds = $carRentAds->map(function ($ad) {
+            return [
+                'id' => $ad->id,
+                'title' => $ad->title,
+                'make' => $ad->make,
+                'model' => $ad->model,
+                'trim' => $ad->trim,
+                'year' => $ad->year,
+                'plan_type' => $ad->plan_type,
+                'main_image_url' => asset('storage/' . $ad->main_image),
+                'price' => $ad->price ?? $ad->day_rent ?? $ad->month_rent,
+                'status' => $ad->add_status,
+                'category' => 'Car Rent',
+                'category_slug' => 'car_rent',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
             ];

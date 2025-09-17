@@ -8,6 +8,7 @@ use App\Models\OfferBoxSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Models\RestaurantAd;
+use App\Models\CarRentAd;
 
 class OfferBoxActivationController extends Controller
 {
@@ -15,7 +16,7 @@ class OfferBoxActivationController extends Controller
     {
         $data = $request->validate([
             'ad_id' => 'required|integer',
-            'category_slug' => 'required|string|in:car_sales,car_services,restaurant',
+            'category_slug' => 'required|string|in:car_sales,car_services,restaurant,car_rent',
             'days' => 'required|integer|min:1',
         ]);
 
@@ -75,6 +76,8 @@ class OfferBoxActivationController extends Controller
                 return CarServicesAd::find($adId);
             case 'restaurant':
                 return RestaurantAd::find($adId);
+            case 'car_rent':
+                return CarRentAd::find($adId);
             default:
                 return null;
         }
@@ -92,6 +95,8 @@ class OfferBoxActivationController extends Controller
                 return CarServicesAd::where('active_offers_box_status', true)->count();
             case 'restaurant':
                 return RestaurantAd::where('active_offers_box_status', true)->count();
+            case 'car_rent':
+                return CarRentAd::where('active_offers_box_status', true)->count();
             default:
                 return 0;
         }

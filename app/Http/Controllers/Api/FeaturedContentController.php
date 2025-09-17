@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\BestAdvertiser;
 use App\Models\CarSalesAd; // كمثال للقسم الأول
 use App\Models\CarServicesAd;
+use App\Models\CarRentAd;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request; // <<< أضف هذا السطر
 use App\Models\User; // <<< أضف هذا السطر
@@ -74,6 +75,12 @@ class FeaturedContentController extends Controller
                          ->latest()->take(8)
                          ->get(['id', 'title', 'price_range', 'main_image', 'emirate', 'district', 'area'])
                          ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+        } elseif ($categorySlug === 'car_rent') {
+            $ads = CarRentAd::where('user_id', $userId)
+                         ->where('add_status', 'Valid')
+                         ->latest()->take(8)
+                         ->get(['id','title','make','model','year','price','day_rent','month_rent','main_image','emirate'])
+                         ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
         }
         // else if ($categorySlug === 'real_estate') {
         //     // منطق جلب إعلانات العقارات
@@ -114,6 +121,9 @@ public function getOfferBoxAds($category)
                     ->inRandomOrder()
                     ->limit(10)
                     ->get();
+        return response()->json($ads);
+    } elseif ($category === 'car_rent') {
+        $ads = CarRentAd::getOffersBoxAds();
         return response()->json($ads);
     }
     
