@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         // إضافة متغيرات النظام الخاصة بقسم car_services
-        DB::table('system_settings')->insert([
+        $settings = [
             // -- الإعلانات المجانية لقسم خدمات السيارات --
             [
                 'key' => 'free_ads_limit_car_services', 
@@ -55,16 +55,27 @@ return new class extends Migration
                 'type' => 'boolean', 
                 'description' => 'تفعيل قسم خدمات السيارات في التطبيق.'
             ]
-        ]);
+        ];
+        
+        // إدراج الإعدادات باستخدام updateOrInsert لتجنب التكرار
+        foreach ($settings as $setting) {
+            DB::table('system_settings')->updateOrInsert(
+                ['key' => $setting['key']],
+                $setting
+            );
+        }
         
         // إضافة إعدادات offer box لقسم car_services
-        DB::table('offer_box_settings')->insert([
+        DB::table('offer_box_settings')->updateOrInsert(
+            ['category_slug' => 'car_services'],
+            [
             'category_slug' => 'car_services',
-            'max_ads' => 10,
-            'price_per_day' => 5.00,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
+                 'max_ads' => 10,
+                 'price_per_day' => 5.00,
+                 'created_at' => now(),
+                 'updated_at' => now()
+             ]
+         );
     }
 
     /**
