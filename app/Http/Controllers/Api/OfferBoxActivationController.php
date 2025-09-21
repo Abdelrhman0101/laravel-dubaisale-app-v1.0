@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CarSalesAd;
 use App\Models\CarServicesAd;
 use App\Models\OfferBoxSetting;
+use App\Models\RealEstateAd;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Models\RestaurantAd;
@@ -16,7 +17,7 @@ class OfferBoxActivationController extends Controller
     {
         $data = $request->validate([
             'ad_id' => 'required|integer',
-            'category_slug' => 'required|string|in:car_sales,car_services,restaurant,car_rent',
+            'category_slug' => 'required|string|in:car_sales,car_services,restaurant,car_rent,real-estate',
             'days' => 'required|integer|min:1',
         ]);
 
@@ -25,21 +26,21 @@ class OfferBoxActivationController extends Controller
         if (!$ad) {
             return response()->json(['error' => 'Ad not found'], 404);
         }
-        
+
         if ($request->user()->id !== $ad->user_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        
+
         if ($ad->active_offers_box_status) {
-             return response()->json(['error' => 'This ad is already in the Offers Box.'], 422);
+            return response()->json(['error' => 'This ad is already in the Offers Box.'], 422);
         }
-        
+
         // 2. جلب إعدادات القسم
         $settings = OfferBoxSetting::where('category_slug', $data['category_slug'])->first();
         if (!$settings) {
             return response()->json(['error' => 'Offers Box is not available for this category yet.'], 404);
         }
-        
+
         // 3. التحقق من العدد الأقصى (الخطوة الأهم)
         $currentActiveOffers = $this->getCurrentActiveOffersCount($data['category_slug']);
 
@@ -78,6 +79,9 @@ class OfferBoxActivationController extends Controller
                 return RestaurantAd::find($adId);
             case 'car_rent':
                 return CarRentAd::find($adId);
+            case 'real-estate':
+                return RealEstateAd::find($adId);
+
             default:
                 return null;
         }
@@ -97,6 +101,8 @@ class OfferBoxActivationController extends Controller
                 return RestaurantAd::where('active_offers_box_status', true)->count();
             case 'car_rent':
                 return CarRentAd::where('active_offers_box_status', true)->count();
+            case 'real-estate':
+                return RealEstateAd::where('active_offers_box_status', true)->count();
             default:
                 return 0;
         }

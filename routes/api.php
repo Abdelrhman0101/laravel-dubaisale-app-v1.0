@@ -1,5 +1,6 @@
 <?php
 
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,7 @@ use App\Http\Controllers\Api\OfferBoxActivationController;
 use App\Http\Controllers\Api\PublicSettingsController;
 use App\Http\Controllers\Api\RestaurantAdController;
 use App\Http\Controllers\Api\CarRentAdController;
+use App\Http\Controllers\Api\RealEstateAdController;
 
 
 // --- Filter Controllers ---
@@ -52,7 +54,7 @@ Route::post('/activate', [AuthController::class, 'activate']);
 
 
 // --- Featured & Public Content ---
-Route::get('/best-advertisers', [FeaturedContentController::class, 'getBestAdvertisers']);
+Route::get('/best-advertisers/{categorySlug}', [FeaturedContentController::class, 'getBestAdvertisers']);
 Route::get('/users/{user}/ads/{category}', [FeaturedContentController::class, 'getUserAdsByCategory']);
 Route::get('/offers-box/{category}', [FeaturedContentController::class, 'getOfferBoxAds']);
 Route::get('/settings', [PublicSettingsController::class, 'index']);
@@ -69,7 +71,7 @@ Route::get('/restaurant-categories', function (Request $request) {
     if ($onlyActive) {
         $query->where('active', true);
     }
-    $categories = $query->orderBy('sort_order')->orderBy('name')->get(['id','name','active','sort_order']);
+    $categories = $query->orderBy('sort_order')->orderBy('name')->get(['id', 'name', 'active', 'sort_order']);
     return response()->json($categories);
 });
 
@@ -103,7 +105,7 @@ Route::get('/car-services/offers-box/ads', [CarServicesAdController::class, 'get
 */
 // هذه المجموعة محمية بـ 'auth:sanctum' وهي لا تدعم الجلسات بشكل افتراضي
 Route::middleware('auth:sanctum')->group(function () {
-    
+
     // --- User & Profile Management ---
     Route::get('/user', fn(Request $request) => $request->user());
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -116,12 +118,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('car-sales-ads', CarSalesAdController::class);
     Route::apiResource('car-services-ads', CarServicesAdController::class);
     Route::apiResource('car-rent-ads', CarRentAdController::class);
-    
+
     // --- Restaurants (CRUD Authenticated) ---
     Route::post('/restaurants', [RestaurantAdController::class, 'store']);
     Route::put('/restaurants/{restaurantAd}', [RestaurantAdController::class, 'update']);
     Route::patch('/restaurants/{restaurantAd}', [RestaurantAdController::class, 'update']);
     Route::delete('/restaurants/{restaurantAd}', [RestaurantAdController::class, 'destroy']);
+
+    // --- real state (CRUD Authenticated) ---
+    Route::get('/real-estates', [RealEstateAdController::class, 'index']);
+    Route::get('/real-estate/{realEstateAd}',[RealEstateAdController::class,'show']);
+    Route::post('/real-estate', [RealEstateAdController::class, 'store']);
+    Route::put('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'update']);
+    Route::post('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'approveAd']);
+    Route::delete('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'destroy']);
+    Route::get('/real-estates/offers-box-ads', [RealEstateAdController::class, 'offersBoxAds']);
+
 
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
 
@@ -132,6 +144,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/remove-item', [UserContactInfoController::class, 'removeContactItem']);
         Route::put('/bulk-update', [UserContactInfoController::class, 'bulkUpdateContactInfo']);
         Route::post('/initialize', [UserContactInfoController::class, 'initializeFromUserData']);
+
     });
 
     /*
@@ -140,14 +153,17 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('admin')->middleware(IsAdmin::class)->group(function () {
-        
+
         // --- Admin: Car Sales Ads Management ---
         Route::get('/car-sales-ads', [CarSalesAdController::class, 'indexForAdmin']);
         Route::get('/car-sales-ads/pending', [CarSalesAdController::class, 'getPendingAds']);
         Route::get('/car-sales/stats', [CarSalesAdController::class, 'getStats']);
         Route::post('/car-sales-ads/{carSalesAd}/approve', [CarSalesAdController::class, 'approveAd']);
         Route::post('/car-sales-ads/{carSalesAd}/reject', [CarSalesAdController::class, 'rejectAd']);
-        
+
+        //Real State
+        Route::put('/real-estate/{realEstateAd}/approve', [RealEstateAdController::class, 'approveAd']);
+
         // --- Admin: Car Services Ads Management ---
         Route::get('/car-services-ads', [CarServicesAdController::class, 'indexForAdmin']);
         Route::get('/car-services/stats', [CarServicesAdController::class, 'getStats']);
@@ -155,16 +171,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/car-services-ads/{carServicesAd}/reject', [CarServicesAdController::class, 'rejectAd']);
 
         // --- Admin: Full Users Management ---
-        Route::apiResource('/users', UserController::class); 
+        Route::apiResource('/users', UserController::class);
         Route::post('/users/{user}/toggle-best', [BestAdvertiserController::class, 'toggleStatus']);
-        
+
         // --- Admin: Car Sale Filters (CRUD Operations) ---
         Route::prefix('filters/car-sale')->group(function () {
             // Makes Management
             Route::post('/makes', [CarSaleFilterManagementController::class, 'addMake']);
             Route::put('/makes/{make}', [CarSaleFilterManagementController::class, 'updateMake']);
             Route::delete('/makes/{make}', [CarSaleFilterManagementController::class, 'deleteMake']);
-            
+
             // Models Management
             Route::post('/models', [CarSaleFilterManagementController::class, 'addModel']);
             Route::put('/models/{model}', [CarSaleFilterManagementController::class, 'updateModel']);
@@ -183,7 +199,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{fieldName}', [CarSalesAdSpecController::class, 'updateSpec']);
             Route::post('/bulk-update', [CarSalesAdSpecController::class, 'bulkUpdateSpecs']);
         });
-        
+
         // --- Admin: Car Service Types Management ---
         Route::apiResource('car-service-types', CarServiceTypeController::class);
         Route::post('/car-service-types/bulk-update', [CarServiceTypeController::class, 'bulkUpdate']);

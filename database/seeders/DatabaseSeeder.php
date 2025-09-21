@@ -24,8 +24,9 @@ class DatabaseSeeder extends Seeder
 
         // Seed car sales ad specifications
         $this->call(CarSalesAdSpecSeeder::class);
-        
+
         // Seed car service types
         $this->call(CarServiceTypeSeeder::class);
+        $this->call(RealEstateAdsOptionsSeeder::class);
     }
 }
