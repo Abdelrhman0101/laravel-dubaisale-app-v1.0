@@ -19,9 +19,19 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-    'username', 'email', 'phone', 'whatsapp', 'password',
-    'referral_code', 'is_active', 'email_verified_at', 'role',
-    'advertiser_name', 'advertiser_type', 'advertiser_logo', 'advertiser_location',
+        'username',
+        'email',
+        'phone',
+        'whatsapp',
+        'password',
+        'referral_code',
+        'is_active',
+        'email_verified_at',
+        'role',
+        'advertiser_name',
+        'advertiser_type',
+        'advertiser_logo',
+        'advertiser_location',
 
     ];
 
@@ -52,7 +62,7 @@ class User extends Authenticatable
      * Get the car sale ads for the user.
      */
 
-       public function carSalesAds()
+    public function carSalesAds()
     {
         return $this->hasMany(CarSalesAd::class);
     }
@@ -68,5 +78,9 @@ class User extends Authenticatable
     public function contactInfo()
     {
         return $this->hasOne(UserContactInfo::class);
+    }
+    public function bestAdvertiser()
+    {
+        return $this->hasOne(BestAdvertiser::class);
     }
 }

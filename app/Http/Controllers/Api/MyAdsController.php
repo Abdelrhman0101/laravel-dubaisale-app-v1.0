@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\RealEstateAd;
 use Illuminate\Http\Request;
 use App\Models\CarSalesAd;
 use App\Models\CarServicesAd;
@@ -26,6 +27,8 @@ class MyAdsController extends Controller
         // $realEstateAds = RealEstateAd::where('user_id', $user->id)->get(); // للمستقبل
         // $jobAds = JobAd::where('user_id', $user->id)->get(); // للمستقبل
         $carRentAds = CarRentAd::where('user_id', $user->id)->get();
+        //real-estates
+        $realEstatesAds = RealEstateAd::where('user_id', $user->id)->get();
 
         // --- الخطوة 2: توحيد شكل البيانات لكل قسم ---
         $formattedCarAds = $carAds->map(function ($ad) {
@@ -46,7 +49,7 @@ class MyAdsController extends Controller
                 'created_at_timestamp' => $ad->created_at->timestamp,
             ];
         });
-        
+
         $formattedCarServicesAds = $carServicesAds->map(function ($ad) {
             return [
                 'id' => $ad->id,
@@ -66,7 +69,7 @@ class MyAdsController extends Controller
                 'created_at_timestamp' => $ad->created_at->timestamp,
             ];
         });
-        
+
         $formattedRestaurantAds = $restaurantAds->map(function ($ad) {
             return [
                 'id' => $ad->id,
@@ -87,7 +90,7 @@ class MyAdsController extends Controller
                 'created_at_timestamp' => $ad->created_at->timestamp,
             ];
         });
-        
+
         $formattedCarRentAds = $carRentAds->map(function ($ad) {
             return [
                 'id' => $ad->id,
@@ -106,18 +109,40 @@ class MyAdsController extends Controller
                 'created_at_timestamp' => $ad->created_at->timestamp,
             ];
         });
-        
+        //real Estate
+        $formattedRealEstateAds = $realEstatesAds->map(function ($ad) {
+            return [
+                'id' => $ad->id,
+                'title' => $ad->title,
+                'description' => $ad->description,
+                'emirate' => $ad->emirate,
+                'district' => $ad->district,
+                'area' => $ad->area,
+                'price' => $ad->price_range,
+                'plan_type' => $ad->plan_type,
+                'main_image_url' => $ad->main_image_url, // جاي من Accessor اللي في الموديل
+                'thumbnail_images_urls' => $ad->thumbnail_images_urls, // برضه من الموديل
+                'status' => $ad->add_status,
+                'category' => 'Real Estate',
+                'category_slug' => 'real-estate',
+                'created_at' => $ad->created_at->toDateTimeString(),
+                'created_at_timestamp' => $ad->created_at->timestamp,
+            ];
+        });
+
+
         // --- الخطوة 3 و 4: دمج كل القوائم وترتيبها ---
         // تحويل Collections إلى arrays لتجنب مشاكل getKey()
         $allAdsArray = array_merge(
             $formattedCarAds->toArray(),
             $formattedCarServicesAds->toArray(),
             $formattedRestaurantAds->toArray(),
-            $formattedCarRentAds->toArray()
+            $formattedCarRentAds->toArray(),
+            $formattedRealEstateAds->toArray()
         );
-        
+
         // ترتيب البيانات حسب created_at_timestamp
-        usort($allAdsArray, function($a, $b) {
+        usort($allAdsArray, function ($a, $b) {
             return $b['created_at_timestamp'] <=> $a['created_at_timestamp'];
         });
 
@@ -143,7 +168,7 @@ class MyAdsController extends Controller
             'next_page_url' => $currentPage < ceil($totalItems / $perPage) ? $request->url() . '?page=' . ($currentPage + 1) : null,
             'prev_page_url' => $currentPage > 1 ? $request->url() . '?page=' . ($currentPage - 1) : null,
         ];
-        
+
         return response()->json($paginationData);
     }
 }

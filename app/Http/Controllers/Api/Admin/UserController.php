@@ -16,7 +16,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::latest()->paginate(20);
+        return User::with('bestAdvertiser') // load 
+            ->latest()
+            ->paginate(20);
     }
 
     /**
@@ -35,7 +37,7 @@ class UserController extends Controller
         if (!isset($validatedData['email']) && !isset($validatedData['phone'])) {
             return response()->json(['message' => 'Email or phone field is required.'], 422);
         }
-        
+
         $validatedData['password'] = bcrypt($validatedData['password']);
         $validatedData['is_active'] = true;
 
@@ -49,6 +51,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        $user->load('bestAdvertiser');
         return response()->json($user);
     }
 

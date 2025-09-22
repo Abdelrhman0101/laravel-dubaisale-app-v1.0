@@ -27,6 +27,8 @@ class RestaurantAd extends Model
 
     protected $hidden = [
         'updated_at',
+        // 'add_status',
+        // 'add_category',
     ];
 
     protected $appends = [
@@ -83,10 +85,10 @@ class RestaurantAd extends Model
     public function scopeInOffersBox(Builder $query): void
     {
         $query->where('active_offers_box_status', true)
-              ->where(function ($q) {
-                  $q->whereNull('active_offers_box_expires_at')
+            ->where(function ($q) {
+                $q->whereNull('active_offers_box_expires_at')
                     ->orWhere('active_offers_box_expires_at', '>', now());
-              });
+            });
     }
 
     public function scopeByEmirate(Builder $query, string $emirate): void
