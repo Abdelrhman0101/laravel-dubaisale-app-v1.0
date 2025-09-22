@@ -12,12 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('car_rent_ads', function (Blueprint $table) {
-            $table->string('car_type')->nullable()->after('year');
-            $table->string('trans_type')->nullable()->after('car_type');
-            $table->string('fuel_type')->nullable()->after('trans_type');
-            $table->string('color')->nullable()->after('fuel_type');
-            $table->string('interior_color')->nullable()->after('color');
-            $table->integer('seats_no')->nullable()->after('interior_color');
+            if (!Schema::hasColumn('car_rent_ads', 'car_type')) {
+                $table->string('car_type')->nullable()->after('year');
+            }
+            if (!Schema::hasColumn('car_rent_ads', 'trans_type')) {
+                $table->string('trans_type')->nullable()->after('car_type');
+            }
+            if (!Schema::hasColumn('car_rent_ads', 'fuel_type')) {
+                $table->string('fuel_type')->nullable()->after('trans_type');
+            }
+            if (!Schema::hasColumn('car_rent_ads', 'color')) {
+                $table->string('color')->nullable()->after('fuel_type');
+            }
+            if (!Schema::hasColumn('car_rent_ads', 'interior_color')) {
+                $table->string('interior_color')->nullable()->after('color');
+            }
+            if (!Schema::hasColumn('car_rent_ads', 'seats_no')) {
+                $table->integer('seats_no')->nullable()->after('interior_color');
+            }
         });
     }
 
@@ -27,14 +39,18 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('car_rent_ads', function (Blueprint $table) {
-            $table->dropColumn([
-                'car_type',
-                'trans_type', 
-                'fuel_type',
-                'color',
-                'interior_color',
-                'seats_no'
-            ]);
+            $columnsToCheck = ['car_type', 'trans_type', 'fuel_type', 'color', 'interior_color', 'seats_no'];
+            $columnsToDelete = [];
+            
+            foreach ($columnsToCheck as $column) {
+                if (Schema::hasColumn('car_rent_ads', $column)) {
+                    $columnsToDelete[] = $column;
+                }
+            }
+            
+            if (!empty($columnsToDelete)) {
+                $table->dropColumn($columnsToDelete);
+            }
         });
     }
 };
