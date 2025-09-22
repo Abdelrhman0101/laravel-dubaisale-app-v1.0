@@ -137,7 +137,8 @@ class MyAdsController extends Controller
             $formattedCarAds->toArray(),
             $formattedCarServicesAds->toArray(),
             $formattedRestaurantAds->toArray(),
-            $formattedRealEstateAds->toArray()
+            $formattedRealEstateAds->toArray(),
+
         );
 
         // ترتيب البيانات حسب created_at_timestamp

@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\RealEstateAdOptionsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -86,6 +87,7 @@ Route::prefix('filters/car-sale')->group(function () {
 
 // --- Car Sales Ad Specifications (Public) ---
 Route::get('/car-sales-ad-specs', [CarSalesAdSpecController::class, 'getClientSpecs']);
+Route::get('/real_estate_options', [RealEstateAdOptionsController::class, 'getClientSpecs']);
 
 // --- Car Service Types (Public) ---
 Route::get('/car-service-types', [CarServiceTypeController::class, 'getClientOptions']);
@@ -127,7 +129,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- real state (CRUD Authenticated) ---
     Route::get('/real-estates', [RealEstateAdController::class, 'index']);
-    Route::get('/real-estate/{realEstateAd}',[RealEstateAdController::class,'show']);
+    Route::get('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'show']);
     Route::post('/real-estate', [RealEstateAdController::class, 'store']);
     Route::put('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'update']);
     Route::post('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'approveAd']);
