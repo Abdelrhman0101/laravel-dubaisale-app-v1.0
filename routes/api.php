@@ -79,14 +79,18 @@ Route::get('/restaurant-categories', function (Request $request) {
 
 // --- Public Filter Data ---
 Route::get('/car-sales-filters', [CarSalesFiltersController::class, 'index']);
+route::get('/makes-with-models', [CarSaleFilterManagementController::class, 'getMakesWithModels']);
 Route::prefix('filters/car-sale')->group(function () {
     Route::get('/makes', [CarSaleFilterManagementController::class, 'getMakes']);
     Route::get('/makes/{make}/models', [CarSaleFilterManagementController::class, 'getModels']);
     Route::get('/models/{model}/trims', [CarSaleFilterManagementController::class, 'getTrims']);
+    
+    Route::get('/models', [CarSaleFilterManagementController::class, 'getAllModels']);
 });
 
 // --- Car Sales Ad Specifications (Public) ---
 Route::get('/car-sales-ad-specs', [CarSalesAdSpecController::class, 'getClientSpecs']);
+//--- Real Estate Ad options
 Route::get('/real_estate_options', [RealEstateAdOptionsController::class, 'getClientSpecs']);
 
 // --- Car Service Types (Public) ---

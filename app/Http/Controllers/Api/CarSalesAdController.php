@@ -7,11 +7,12 @@ use App\Models\CarSalesAd;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
+use App\Models\CarMake;
 
 class CarSalesAdController extends Controller
 {
     // عرض جميع الإعلانات
-        /**
+    /**
      * Display a listing of the resource with smart filtering.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -21,8 +22,8 @@ class CarSalesAdController extends Controller
     {
         // 1. نبدأ بالاستعلام الأساسي الذي يعرض الإعلانات المعتمدة فقط
         $query = CarSalesAd::query()
-                       ->where('add_status', 'Valid')
-                       ->where('admin_approved', true);
+            ->where('add_status', 'Valid')
+            ->where('admin_approved', true);
 
         // 2. تطبيق الفلاتر بشكل ديناميكي بناءً على الطلب الوارد
         // الدالة `when` تقوم بتطبيق الفلتر فقط إذا كانت القيمة موجودة في الطلب
@@ -46,16 +47,16 @@ class CarSalesAdController extends Controller
         $query->when($request->query('year'), function ($q, $year) {
             return $q->filterByYear($year);
         });
-        
+
         // 3. الترتيب من الأحدث للأقدم وتقسيم النتائج على صفحات
         $ads = $query->latest()->paginate(15)->withQueryString();
 
         return response()->json($ads);
     }
 
-    
+
     // إنشاء إعلان جديد
-public function store(Request $request)
+    public function store(Request $request)
     {
         $validatedData = $request->validate([
             // ... (نفس قواعد التحقق السابقة)
@@ -80,7 +81,7 @@ public function store(Request $request)
         $data = $request->all();
 
         // (هذا الجزء الخاص بالصلاحيات مؤقت وغير مثالي، الأفضل معالجته على مستوى الخادم)
-        $fixPermissions = function ($path) { /* ... */ };
+        $fixPermissions = function ($path) { /* ... */};
 
         // رفع الصورة الأساسية
         $mainImagePath = $request->file('main_image')->store('cars/main', 'public');
@@ -138,7 +139,7 @@ public function store(Request $request)
         }
 
         // =========================================================
-        
+
         $ad = CarSalesAd::create($data);
 
         return response()->json($ad, 201);
@@ -149,12 +150,12 @@ public function store(Request $request)
     {
         // Increment views count
         $carSalesAd->incrementViews();
-        
+
         return response()->json($carSalesAd);
     }
 
     // تحديث إعلان
-/**
+    /**
      * تحديث بيانات إعلان موجود.
      */
     public function update(Request $request, CarSalesAd $carSalesAd)
@@ -163,7 +164,7 @@ public function store(Request $request)
         if ($request->user()->id !== $carSalesAd->user_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        
+
         // 2. التحقق من صحة البيانات المدخلة
         // 'sometimes' تعني أن الحقل ليس إجباريًا، ولكن إذا وُجد، يجب أن يتبع القواعد
         $validatedData = $request->validate([
@@ -197,17 +198,17 @@ public function store(Request $request)
         // =========================================================
         // ====        المنطق الذكي لتحديث الصور          ====
         // =========================================================
-        
+
         $updateData = [];
 
         // 4. تحديث الصورة الرئيسية (إذا تم رفع صورة جديدة)
         if ($request->hasFile('main_image')) {
             // أ. حذف الصورة القديمة من الـ storage
             Storage::disk('public')->delete($carSalesAd->main_image);
-            
+
             // ب. رفع الصورة الجديدة
             $path = $request->file('main_image')->store('cars/main', 'public');
-            
+
             // ج. تجهيز المسار الجديد للحفظ في قاعدة البيانات
             $updateData['main_image'] = $path;
         }
@@ -218,13 +219,13 @@ public function store(Request $request)
             if (is_array($carSalesAd->thumbnail_images)) {
                 Storage::disk('public')->delete($carSalesAd->thumbnail_images);
             }
-            
+
             // ب. رفع الصور الجديدة وتجميع مساراتها
             $thumbnailPaths = [];
             foreach ($request->file('thumbnail_images') as $file) {
                 $thumbnailPaths[] = $file->store('cars/thumbnails', 'public');
             }
-            
+
             // ج. تجهيز مصفوفة المسارات الجديدة للحفظ
             $updateData['thumbnail_images'] = $thumbnailPaths;
         }
@@ -233,7 +234,7 @@ public function store(Request $request)
         if (!empty($updateData)) {
             $carSalesAd->update($updateData);
         }
-        
+
         // 7. إرجاع بيانات الإعلان المحدثة بالكامل
         // ->fresh() لجلب أحدث نسخة من البيانات من قاعدة البيانات
         return response()->json($carSalesAd->fresh());
@@ -258,14 +259,14 @@ public function store(Request $request)
         return response()->json(null, 204); // 204 No Content
     }
 
-        /**
+    /**
      * [Admin] جلب كل الإعلانات المعلقة للمراجعة.
      */
     public function getPendingAds()
     {
         $pendingAds = CarSalesAd::where('add_status', 'Pending')
-                               ->latest()
-                               ->paginate(15);
+            ->latest()
+            ->paginate(15);
         return response()->json($pendingAds);
     }
 
@@ -291,7 +292,7 @@ public function store(Request $request)
     public function rejectAd(CarSalesAd $carSalesAd)
     {
         $carSalesAd->update(['add_status' => 'Rejected']);
-        
+
         // هنا يمكنك لاحقًا إرسال إشعار للمستخدم بسبب الرفض
 
         return response()->json([
@@ -301,74 +302,91 @@ public function store(Request $request)
     }
 
     /**
- * [Admin] جلب جميع الإعلانات بجميع حالاتها للمشرف.
- */
-public function indexForAdmin()
-{
-    // ببساطة، نقوم بجلب كل الإعلانات بدون أي شروط (where)
-    // with('user') يقوم بجلب بيانات صاحب الإعلان مع كل إعلان لتقليل استعلامات قاعدة البيانات (Eager Loading)
-    // latest() لترتيبها من الأحدث للأقدم
-    // paginate() لتقسيم النتائج على صفحات
-    $allAds = CarSalesAd::with('user')->latest()->paginate(15);
+     * [Admin] جلب جميع الإعلانات بجميع حالاتها للمشرف.
+     */
+    public function indexForAdmin()
+    {
+        // ببساطة، نقوم بجلب كل الإعلانات بدون أي شروط (where)
+        // with('user') يقوم بجلب بيانات صاحب الإعلان مع كل إعلان لتقليل استعلامات قاعدة البيانات (Eager Loading)
+        // latest() لترتيبها من الأحدث للأقدم
+        // paginate() لتقسيم النتائج على صفحات
+        $allAds = CarSalesAd::with('user')->latest()->paginate(15);
 
-    return response()->json($allAds);
-}
-
-/**
- * [Admin] Get comprehensive statistics for car sales ads.
- *
- * @return \Illuminate\Http\JsonResponse
- */
-public function getStats()
-{
-    try {
-        // إجمالي الإعلانات
-        $totalAds = CarSalesAd::count();
-        
-        // الإعلانات المعلقة
-        $pendingAds = CarSalesAd::where('add_status', 'Pending')->count();
-        
-        // الإعلانات المعتمدة
-        $approvedAds = CarSalesAd::where('admin_approved', true)
-                                 ->where('add_status', 'Valid')
-                                 ->count();
-        
-        // الإعلانات المرفوضة
-        $rejectedAds = CarSalesAd::where('add_status', 'Rejected')->count();
-        
-        // الإعلانات في صندوق العروض النشط
-        $activeOffersBox = CarSalesAd::where('active_offers_box_days', '>', 0)
-                                     ->where('admin_approved', true)
-                                     ->count();
-        
-        // إجمالي المشاهدات
-        $totalViews = CarSalesAd::sum('views');
-        
-        // إعلانات هذا الشهر
-        $thisMonthAds = CarSalesAd::whereMonth('created_at', now()->month)
-                                  ->whereYear('created_at', now()->year)
-                                  ->count();
-        
-        // عدد الماركات المختلفة
-        $brandsCount = CarSalesAd::distinct('make')->count('make');
-        
-        return response()->json([
-            'total_ads' => $totalAds,
-            'pending_ads' => $pendingAds,
-            'approved_ads' => $approvedAds,
-            'rejected_ads' => $rejectedAds,
-            'active_offers_box' => $activeOffersBox,
-            'total_views' => $totalViews,
-            'this_month_ads' => $thisMonthAds,
-            'brands_count' => $brandsCount
-        ]);
-        
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to retrieve statistics',
-            'error' => $e->getMessage()
-        ], 500);
+        return response()->json($allAds);
     }
-}
+
+    /**
+     * [Admin] Get comprehensive statistics for car sales ads.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getStats()
+    {
+        try {
+            // إجمالي الإعلانات
+            $totalAds = CarSalesAd::count();
+
+            // الإعلانات المعلقة
+            $pendingAds = CarSalesAd::where('add_status', 'Pending')->count();
+
+            // الإعلانات المعتمدة
+            $approvedAds = CarSalesAd::where('admin_approved', true)
+                ->where('add_status', 'Valid')
+                ->count();
+
+            // الإعلانات المرفوضة
+            $rejectedAds = CarSalesAd::where('add_status', 'Rejected')->count();
+
+            // الإعلانات في صندوق العروض النشط
+            $activeOffersBox = CarSalesAd::where('active_offers_box_days', '>', 0)
+                ->where('admin_approved', true)
+                ->count();
+
+            // إجمالي المشاهدات
+            $totalViews = CarSalesAd::sum('views');
+
+            // إعلانات هذا الشهر
+            $thisMonthAds = CarSalesAd::whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count();
+
+            // عدد الماركات المختلفة
+            $brandsCount = CarSalesAd::distinct('make')->count('make');
+
+            return response()->json([
+                'total_ads' => $totalAds,
+                'pending_ads' => $pendingAds,
+                'approved_ads' => $approvedAds,
+                'rejected_ads' => $rejectedAds,
+                'active_offers_box' => $activeOffersBox,
+                'total_views' => $totalViews,
+                'this_month_ads' => $thisMonthAds,
+                'brands_count' => $brandsCount
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve statistics',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getMakesWithModels()
+    {
+        $makes = CarMake::with('models:id,car_make_id,name')->get();
+
+        $data = $makes->map(function ($make) {
+            return [
+                'make' => $make->name,
+                'models' => $make->models->pluck('name')
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+    }
 }

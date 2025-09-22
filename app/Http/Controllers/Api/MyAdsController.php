@@ -136,14 +136,11 @@ class MyAdsController extends Controller
         $allAdsArray = array_merge(
             $formattedCarAds->toArray(),
             $formattedCarServicesAds->toArray(),
-            $formattedRestaurantAds->toArray(),
-<<<<<<< HEAD
-            $formattedRealEstateAds->toArray(),
+            $formattedRestaurantAds->toArray(), $formattedRealEstateAds->toArray(),
 
-=======
             $formattedCarRentAds->toArray(),
             $formattedRealEstateAds->toArray()
->>>>>>> af8ac7a4b6583da60d2bd03d15aef75320078b52
+// >>>>>>> af8ac7a4b6583da60d2bd03d15aef75320078b52
         );
 
         // ترتيب البيانات حسب created_at_timestamp
