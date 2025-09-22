@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('best_advertisers', function (Blueprint $table) {
             //
-            $table->json('categories')->default(json_encode([]));
+            $table->json('categories')->nullable();
         });
     }
 
