@@ -136,7 +136,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- User's Ads & Offers Management ---
     Route::get('/my-ads', [MyAdsController::class, 'index']);
-    Route::apiResource('car-sales-ads', CarSalesAdController::class);
+    Route::apiResource('car-sales-ads', CarSalesAdController::class)->except(['index', 'show']);
     Route::apiResource('car-services-ads', CarServicesAdController::class);
     Route::apiResource('car-rent-ads', CarRentAdController::class);
 
