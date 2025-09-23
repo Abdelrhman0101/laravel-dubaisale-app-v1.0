@@ -37,13 +37,13 @@ class RealEstateAd extends Model
 
     public function getMainImageUrlAttribute()
     {
-        return $this->main_image ? \Storage::url($this->main_image) : null;
+        return $this->main_image ? Storage::url($this->main_image) : null;
     }
 
     public function getThumbnailImagesUrlsAttribute()
     {
         $images = $this->thumbnail_images ?? [];
-        return array_map(fn($path) => \Storage::url($path), $images);
+        return array_map(fn($path) => Storage::url($path), $images);
     }
 
     public function getStatusAttribute()

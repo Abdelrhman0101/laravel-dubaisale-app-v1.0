@@ -120,8 +120,8 @@ class MyAdsController extends Controller
                 'area' => $ad->area,
                 'price' => $ad->price_range,
                 'plan_type' => $ad->plan_type,
-                'main_image_url' => $ad->main_image_url, // جاي من Accessor اللي في الموديل
-                'thumbnail_images_urls' => $ad->thumbnail_images_urls, // برضه من الموديل
+                'main_image_url' => $ad->main_image_url, 
+                'thumbnail_images_urls' => $ad->thumbnail_images_urls, 
                 'status' => $ad->add_status,
                 'category' => 'Real Estate',
                 'category_slug' => 'real-estate',
@@ -136,8 +136,7 @@ class MyAdsController extends Controller
         $allAdsArray = array_merge(
             $formattedCarAds->toArray(),
             $formattedCarServicesAds->toArray(),
-            $formattedRestaurantAds->toArray(), $formattedRealEstateAds->toArray(),
-
+            $formattedRestaurantAds->toArray(),
             $formattedCarRentAds->toArray(),
             $formattedRealEstateAds->toArray()
 // >>>>>>> af8ac7a4b6583da60d2bd03d15aef75320078b52

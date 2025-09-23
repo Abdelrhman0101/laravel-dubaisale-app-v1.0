@@ -58,32 +58,32 @@ class FeaturedContentController extends Controller
             $ads = CarSalesAd::where('user_id', $userId)
                 ->where('add_status', 'Valid')
                 ->latest()->take(8)
-                ->get(['id', 'price', 'year', 'km', 'main_image', 'make', 'model', 'trim'])
-                ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+                ->get(['id', 'price', 'year', 'km', 'main_image', 'make', 'model', 'trim']);
+                // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
         } elseif ($categorySlug === 'car_services') {
             $ads = CarServicesAd::where('user_id', $userId)
                 ->where('add_status', 'Valid')
                 ->latest()->take(8)
-                ->get(['id', 'title', 'service_name', 'price', 'main_image', 'emirate', 'district', 'area'])
-                ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+                ->get(['id', 'title', 'service_name', 'price', 'main_image', 'emirate', 'district', 'area']);
+                // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
         } elseif ($categorySlug === 'restaurant') {
             $ads = RestaurantAd::where('user_id', $userId)
                 ->where('add_status', 'Valid')
                 ->latest()->take(8)
-                ->get(['id', 'title', 'price_range', 'main_image', 'emirate', 'district', 'area'])
-                ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+                ->get(['id', 'title', 'price_range', 'main_image', 'emirate', 'district', 'area']);
+                // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
         } elseif ($categorySlug === 'car_rent') {
             $ads = CarRentAd::where('user_id', $userId)
                 ->where('add_status', 'Valid')
                 ->latest()->take(8)
-                ->get(['id', 'title', 'make', 'model', 'year', 'price', 'day_rent', 'month_rent', 'main_image', 'emirate'])
-                ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+                ->get(['id', 'title', 'make', 'model', 'year', 'price', 'day_rent', 'month_rent', 'main_image', 'emirate']);
+                // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
         } elseif ($categorySlug === 'real-estate') {
             $ads = RealEstateAd::where('user_id', $userId)
                 ->where('add_status', 'Valid')
                 ->latest()->take(8)
-                ->get(['id', 'title', 'price', 'emirate', 'district', 'area', 'contract_type', 'property_type', 'main_image'])
-                ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+                ->get(['id', 'title', 'price', 'emirate', 'district', 'area', 'contract_type', 'property_type', 'main_image']);
+                // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
         }
 
 

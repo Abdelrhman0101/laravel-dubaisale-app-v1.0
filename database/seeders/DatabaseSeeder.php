@@ -28,5 +28,6 @@ class DatabaseSeeder extends Seeder
         // Seed car service types
         $this->call(CarServiceTypeSeeder::class);
         $this->call(RealEstateAdsOptionsSeeder::class);
+        $this->call(JopAdValuesSeeder::class);
     }
 }

@@ -76,6 +76,11 @@ Route::get('/restaurant-categories', function (Request $request) {
     return response()->json($categories);
 });
 
+//real-estate public 
+Route::get('/real-estates', [RealEstateAdController::class, 'index']);
+Route::get('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'show']);
+Route::get('/real-estates/offers-box-ads', [RealEstateAdController::class, 'offersBoxAds']);
+
 
 // --- Public Filter Data ---
 Route::get('/car-sales-filters', [CarSalesFiltersController::class, 'index']);
@@ -84,7 +89,7 @@ Route::prefix('filters/car-sale')->group(function () {
     Route::get('/makes', [CarSaleFilterManagementController::class, 'getMakes']);
     Route::get('/makes/{make}/models', [CarSaleFilterManagementController::class, 'getModels']);
     Route::get('/models/{model}/trims', [CarSaleFilterManagementController::class, 'getTrims']);
-    
+
     Route::get('/models', [CarSaleFilterManagementController::class, 'getAllModels']);
 });
 
@@ -96,12 +101,22 @@ Route::get('/real_estate_options', [RealEstateAdOptionsController::class, 'getCl
 // --- Car Service Types (Public) ---
 Route::get('/car-service-types', [CarServiceTypeController::class, 'getClientOptions']);
 
+// --- Car Sales Ads (Public) ---
+Route::get('/car-sales-ads', [CarSalesAdController::class, 'index']);
+Route::get('/car-sales-ads/{carSalesAd}', [CarSalesAdController::class, 'show']);
+
 // --- Car Services Search & Filters (Public) ---
 Route::get('/car-services/search', [CarServicesAdController::class, 'search']);
 Route::get('/car-services/filters', [CarServicesAdController::class, 'getSearchFilters']);
 Route::get('/car-services', [CarServicesAdController::class, 'index']);
 Route::get('/car-services/{carServicesAd}', [CarServicesAdController::class, 'show']);
 Route::get('/car-services/offers-box/ads', [CarServicesAdController::class, 'getOffersBoxAds']);
+
+// --- Car Rent Search & Filters (Public) ---
+Route::get('/car-rent/search', [CarRentAdController::class, 'search']);
+Route::get('/car-rent', [CarRentAdController::class, 'index']);
+Route::get('/car-rent/{carRentAd}', [CarRentAdController::class, 'show']);
+Route::get('/car-rent/offers-box/ads', [CarRentAdController::class, 'getOffersBoxAds']);
 
 
 /*
@@ -132,13 +147,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/restaurants/{restaurantAd}', [RestaurantAdController::class, 'destroy']);
 
     // --- real state (CRUD Authenticated) ---
-    Route::get('/real-estates', [RealEstateAdController::class, 'index']);
-    Route::get('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'show']);
+
     Route::post('/real-estate', [RealEstateAdController::class, 'store']);
     Route::put('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'update']);
     Route::post('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'approveAd']);
     Route::delete('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'destroy']);
-    Route::get('/real-estates/offers-box-ads', [RealEstateAdController::class, 'offersBoxAds']);
+
 
 
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
@@ -150,7 +164,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/remove-item', [UserContactInfoController::class, 'removeContactItem']);
         Route::put('/bulk-update', [UserContactInfoController::class, 'bulkUpdateContactInfo']);
         Route::post('/initialize', [UserContactInfoController::class, 'initializeFromUserData']);
-
     });
 
     /*
@@ -228,14 +241,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/locations/emirates/{emirate}/district', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'deleteDistrict']);
         Route::put('/locations/emirates/{emirate}', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'renameEmirate']);
     });
-
 });
-
-// --- Car Rent Search & Filters (Public) ---
-Route::get('/car-rent/search', [CarRentAdController::class, 'search']);
-Route::get('/car-rent', [CarRentAdController::class, 'index']);
-Route::get('/car-rent/{carRentAd}', [CarRentAdController::class, 'show']);
-Route::get('/car-rent/offers-box/ads', [CarRentAdController::class, 'getOffersBoxAds']);
 
 // --- Admin: Car Rent Ads Management ---
 Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {

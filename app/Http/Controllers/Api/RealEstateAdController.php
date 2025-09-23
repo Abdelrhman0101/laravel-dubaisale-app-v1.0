@@ -212,13 +212,31 @@ class RealEstateAdController extends Controller
 
     public function offersBoxAds(Request $request)
     {
+        $query = RealEstateAd::active()->inOffersBox();
+
+        $query->when($request->query('emirate'), fn($q, $v) => $q->byEmirate($v));
+        $query->when($request->query('district'), fn($q, $v) => $q->byDistrict($v));
+        $query->when($request->query('area'), fn($q, $v) => $q->byArea($v));
+        $query->when($request->query('contract_type'), fn($q, $v) => $q->byContractType($v));
+        $query->when($request->query('property_type'), fn($q, $v) => $q->byPropertyType($v));
+
+        $query->when($request->filled('price_min') || $request->filled('price_max'), function ($q) use ($request) {
+            $q->byPriceRange($request->price_min, $request->price_max);
+        });
+
+        $sort = $request->query('sort', 'latest');
+        if ($sort === 'most_viewed') {
+            $query->mostViewed();
+        } elseif ($sort === 'rank') {
+            $query->byRank();
+        } else {
+            $query->latest();
+        }
+
         $limit = (int) $request->query('limit', 10);
 
-        $ads = RealEstateAd::getOffersBoxAds($limit);
+        $ads = $query->limit($limit)->get();
 
         return response()->json($ads);
     }
-
 }
-
-
