@@ -155,7 +155,7 @@ class JobsAdController extends Controller
             'plan_days' => 'nullable|integer|min:0',
             'plan_expires_at' => 'nullable|date',
 
-            
+
         ]);
 
         $data = $validated;
@@ -195,42 +195,53 @@ class JobsAdController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
+        // 2. Validation
         $validated = $request->validate([
-            'emirate' => 'sometimes|required|string|max:100',
-            'district' => 'sometimes|nullable|string|max:100',
-            'category_type' => 'sometimes|required|string|max:100',
-            'section_type' => 'sometimes|required|string|max:100',
-            'job_name' => 'sometimes|required|string|max:255',
-            'salary' => 'sometimes|nullable|string|max:100',
-            'title' => 'sometimes|required|string|max:255',
-            'description' => 'sometimes|nullable|string',
-            'main_image' => 'sometimes|image|max:5120',
+            'emirate'         => 'sometimes|required|string|max:100',
+            'district'        => 'sometimes|nullable|string|max:100',
+            'category_type'   => 'sometimes|required|string|max:100',
+            'section_type'    => 'sometimes|required|string|max:100',
+            'job_name'        => 'sometimes|required|string|max:255',
+            'salary'          => 'sometimes|nullable|string|max:100',
+            'title'           => 'sometimes|required|string|max:255',
+            'description'     => 'sometimes|nullable|string',
             'advertiser_name' => 'sometimes|nullable|string|max:255',
-            'phone_number' => 'sometimes|required|string|max:20',
-            'whatsapp' => 'sometimes|nullable|string|max:20',
-            'address' => 'sometimes|nullable|string|max:500',
+            'phone_number'    => 'sometimes|required|string|max:20',
+            'whatsapp'        => 'sometimes|nullable|string|max:20',
+            'address'         => 'sometimes|nullable|string|max:500',
+            'main_image'      => 'sometimes|image|max:5120',
             // Plan
-            'plan_type' => 'sometimes|nullable|string|max:50',
-            'plan_days' => 'sometimes|nullable|integer|min:0',
+            'plan_type'       => 'sometimes|nullable|string|max:50',
+            'plan_days'       => 'sometimes|nullable|integer|min:0',
             'plan_expires_at' => 'sometimes|nullable|date',
         ]);
 
+
         $updateFields = $request->except(['main_image']);
+        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+            $updateFields['plan_expires_at'] = now()->addDays((int) $request->plan_days);
+        }
 
         $jobAd->update($updateFields);
-
+        $updateData = [];
         if ($request->hasFile('main_image')) {
-            Storage::disk('public')->delete($jobAd->main_image);
-            $jobAd->update([
-                'main_image' => $request->file('main_image')->store('jobs/main', 'public'),
-            ]);
+
+
+            if ($jobAd->main_image) {
+                Storage::disk('public')->delete($jobAd->main_image);
+            }
+
+            $updateData['main_image'] = $request->file('main_image')->store('jobs/main', 'public');
+            // return response()->json([  'message'=>'secss' ]);
         }
-        if (!empty($updateFields)) {
-            $jobAd->update($updateFields);
+
+        if (!empty($updateData)) {
+            $jobAd->update($updateData);
         }
 
         return response()->json($jobAd->fresh());
     }
+
 
     /**
      * DELETE /jobs/{id} - Destroy (Auth required)
@@ -256,7 +267,7 @@ class JobsAdController extends Controller
 
         return response()->json([
             'message' => 'Ad approved successfully.',
-            'ad' => $jobAd      
+            'ad' => $jobAd
         ]);
     }
 }

@@ -34,6 +34,7 @@ use App\Http\Controllers\Api\Admin\OfferBoxSettingsController;
 use App\Http\Controllers\Api\Admin\SystemSettingsController;
 use App\Http\Controllers\Api\Admin\RestaurantCategoryController;
 use App\Http\Controllers\CarSalesAdSpecController;
+use App\Http\Controllers\JobAdValuesController;
 use App\Http\Controllers\UserContactInfoController;
 
 
@@ -102,6 +103,8 @@ Route::prefix('filters/car-sale')->group(function () {
 Route::get('/car-sales-ad-specs', [CarSalesAdSpecController::class, 'getClientSpecs']);
 //--- Real Estate Ad options
 Route::get('/real_estate_options', [RealEstateAdOptionsController::class, 'getClientSpecs']);
+// values of table jobs Ads
+Route::get('/jobs_ad_values', [JobAdValuesController::class, 'getClientSpecs']);
 
 // --- Car Service Types (Public) ---
 Route::get('/car-service-types', [CarServiceTypeController::class, 'getClientOptions']);
@@ -148,6 +151,7 @@ Route::get('/jobs/offers-box/ads', [JobsAdController::class, 'getOffersBoxAds'])
 Route::get('/jobs/{jobAd}', [JobsAdController::class, 'show']);
 
 
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated User Routes (Requires Bearer Token from Sanctum)
@@ -183,8 +187,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'destroy']);
 
     // --- Jobs (CRUD Authenticated) ---
-    Route::apiResource('jobs', JobsAdController::class)->except(['index', 'show','getOffersBoxAds']);
-
+    Route::post('/jobs', [JobsAdController::class, 'store']);
+    Route::put('/jobs/{jobAd}', [JobsAdController::class, 'update']);
+    Route::post('/jobs/{jobAd}', [JobsAdController::class, 'approveAd']);
+    Route::delete('/jobs/{jobAd}', [JobsAdController::class, 'destroy']);
 
 
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);

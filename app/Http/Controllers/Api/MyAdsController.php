@@ -9,6 +9,7 @@ use App\Models\CarSalesAd;
 use App\Models\CarServicesAd;
 use App\Models\RestaurantAd;
 use App\Models\CarRentAd;
+use App\Models\JobAd;
 // في المستقبل، ستضيف الـ Models الأخرى هنا
 // use App\Models\RealEstateAd;
 // use App\Models\JobAd;
@@ -29,6 +30,8 @@ class MyAdsController extends Controller
         $carRentAds = CarRentAd::where('user_id', $user->id)->get();
         //real-estates
         $realEstatesAds = RealEstateAd::where('user_id', $user->id)->get();
+        //Jobs Ads
+        $jobAds=JobAd::where('user_id', $user->id)->get();
 
         // --- الخطوة 2: توحيد شكل البيانات لكل قسم ---
         $formattedCarAds = $carAds->map(function ($ad) {
@@ -129,7 +132,25 @@ class MyAdsController extends Controller
                 'created_at_timestamp' => $ad->created_at->timestamp,
             ];
         });
-
+        //Jobs 
+        $formattedJobAds = $jobAds->map(function ($ad) {
+            return [
+                'id' => $ad->id,
+                'title' => $ad->title,
+                'price' => $ad->salary,
+                'emirate' => $ad->emirate,
+                'district' => $ad->district,
+                'category_type' => $ad->category_type,
+                'section_type' => $ad->section_type,
+                'main_image_url' => asset('storage/' . $ad->main_image),
+                'job_name' => $ad->job_name,
+                'status' => $ad->add_status,
+                'category' => 'Jobs',
+                'category_slug' => 'jobs',
+                'created_at' => $ad->created_at->toDateTimeString(),
+                'created_at_timestamp' => $ad->created_at->timestamp,
+            ];
+        });
 
         // --- الخطوة 3 و 4: دمج كل القوائم وترتيبها ---
         // تحويل Collections إلى arrays لتجنب مشاكل getKey()
@@ -138,8 +159,8 @@ class MyAdsController extends Controller
             $formattedCarServicesAds->toArray(),
             $formattedRestaurantAds->toArray(),
             $formattedCarRentAds->toArray(),
-            $formattedRealEstateAds->toArray()
-// >>>>>>> af8ac7a4b6583da60d2bd03d15aef75320078b52
+            $formattedRealEstateAds->toArray(),
+            $formattedJobAds->toArray()
         );
 
         // ترتيب البيانات حسب created_at_timestamp

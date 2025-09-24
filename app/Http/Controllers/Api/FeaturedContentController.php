@@ -9,6 +9,7 @@ use App\Models\CarSalesAd; // كمثال للقسم الأول
 use App\Models\CarServicesAd;
 use App\Models\CarRentAd;
 use App\Http\Controllers\Controller;
+use App\Models\JobAd;
 use Illuminate\Http\Request; // <<< أضف هذا السطر
 use App\Models\User; // <<< أضف هذا السطر
 use App\Models\RestaurantAd; // أضف الموديل الخاص بالمطاعم
@@ -84,8 +85,12 @@ class FeaturedContentController extends Controller
                 ->latest()->take(8)
                 ->get(['id', 'title', 'price', 'emirate', 'district', 'area', 'contract_type', 'property_type', 'main_image']);
                 // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+        }elseif( $categorySlug === 'jobs') {
+            $ads = JobAd::where('user_id', $userId)
+                ->where('add_status', 'Valid')
+                ->latest()->take(8)
+                ->get(['id', 'title', 'salary', 'emirate', 'district', 'category_type', 'section_type', 'main_image','job_name']);
         }
-
 
         return $ads;
     }
@@ -131,7 +136,12 @@ class FeaturedContentController extends Controller
             $ads = RealEstateAd::where('add_category', 'Real State')
                 ->where('active_offers_box_status', true)
                 ->get();
+        }elseif($category=='Jobs'){
+            $ads = JobAd::where('add_category', 'Jop')
+                ->where('active_offers_box_status', true)
+                ->get();
         }
+        
 
         return response()->json($ads);
     }
