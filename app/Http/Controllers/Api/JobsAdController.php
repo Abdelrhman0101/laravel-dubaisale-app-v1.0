@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\JobAd;
-use App\Models\JopAD;
+// use App\Models\JopAD;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class JobsAdController extends Controller
 {
@@ -22,19 +24,34 @@ class JobsAdController extends Controller
         $query->when($request->query('category_type'), fn($q, $v) => $q->filterByCategoryType($v));
         $query->when($request->query('section_type'), fn($q, $v) => $q->filterBySectionType($v));
         $query->when($request->query('keyword'), fn($q, $v) => $q->keywordSearch($v));
-        $query->when($request->query('offers_box_only'), fn($q, $v) => $v ? $q->scopeInOffersBox() : null);
+        $query->when($request->query('offers_box_only'), fn($q, $v) => $v ? $q->inOffersBox() : null);
 
-        // Legacy Filters (Backward compatibility)
-        $query->when($request->query('emirate_legacy'), fn($q, $v) => $q->byEmirate($v));
-        $query->when($request->query('district_legacy'), fn($q, $v) => $q->byDistrict($v));
-        $query->when($request->query('category_type_legacy'), fn($q, $v) => $q->byCategoryType($v));
-        $query->when($request->query('section_type_legacy'), fn($q, $v) => $q->bySectionType($v));
+        // // Legacy Filters (Backward compatibility)
+        // $query->when($request->query('emirate_legacy'), fn($q, $v) => $q->byEmirate($v));
+        // $query->when($request->query('district_legacy'), fn($q, $v) => $q->byDistrict($v));
+        // $query->when($request->query('category_type_legacy'), fn($q, $v) => $q->byCategoryType($v));
+        // $query->when($request->query('section_type_legacy'), fn($q, $v) => $q->bySectionType($v));
 
         // Sorting options (latest, most_viewed, rank)
-        $sort = $request->query('sort', 'latest');
-        if ($sort === 'most_viewed') $query->mostViewed();
-        elseif ($sort === 'rank') $query->byRank();
-        else $query->latest();
+        $sortBy = $request->query('sort_by', 'latest');
+        switch ($sortBy) {
+            case 'most_viewed':
+                $query->mostViewed();
+                break;
+            case 'rank':
+                $query->byRank();
+                break;
+            case 'price_low':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_high':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+                break;
+        }
 
         $perPage = (int) ($request->query('per_page', 15));
         return response()->json($query->paginate($perPage));
@@ -43,37 +60,59 @@ class JobsAdController extends Controller
     /**
      * GET /jobs/search - Smart search with multiple filters
      */
-    public function search(Request $request)
-    {
-        $query = JobAd::query()
-            ->where('add_status', 'Valid')
-            ->where('admin_approved', true);
+    // public function search(Request $request)
+    // {
+    //     $query = JobAd::query()
+    //         ->where('add_status', 'Valid')
+    //         ->where('admin_approved', true);
 
-        // Smart Filters (Support multiple values)
-        $query->when($request->query('emirate'), fn($q, $v) => $q->filterByEmirate($v));
-        $query->when($request->query('district'), fn($q, $v) => $q->filterByDistrict($v));
-        $query->when($request->query('category_type'), fn($q, $v) => $q->filterByCategoryType($v));
-        $query->when($request->query('section_type'), fn($q, $v) => $q->filterBySectionType($v));
-        $query->when($request->query('keyword'), fn($q, $v) => $q->keywordSearch($v));
-        $query->when($request->query('offers_box_only'), fn($q, $v) => $v ? $q->offerBoxOnly() : null);
+    //     // Smart Filters (Support multiple values)
+    //     $query->when($request->query('emirate'), fn($q, $v) => $q->filterByEmirate($v));
+    //     $query->when($request->query('district'), fn($q, $v) => $q->filterByDistrict($v));
+    //     $query->when($request->query('category_type'), fn($q, $v) => $q->filterByCategoryType($v));
+    //     $query->when($request->query('section_type'), fn($q, $v) => $q->filterBySectionType($v));
+    //     $query->when($request->query('keyword'), fn($q, $v) => $q->keywordSearch($v));
+    //     $query->when($request->query('offers_box_only'), fn($q, $v) => $v ? $q->offerBoxOnly() : null);
 
-        // Sorting options (latest, most_viewed, rank)
-        $sort = $request->query('sort', 'latest');
-        if ($sort === 'most_viewed') $query->mostViewed();
-        elseif ($sort === 'rank') $query->byRank();
-        else $query->latest();
+    //     // Sorting options (latest, most_viewed, rank)
+    //     $sort = $request->query('sort', 'latest');
+    //     if ($sort === 'most_viewed') $query->mostViewed();
+    //     elseif ($sort === 'rank') $query->byRank();
+    //     else $query->latest();
 
-        $perPage = (int) ($request->query('per_page', 15));
-        return response()->json($query->paginate($perPage));
-    }
+    //     $perPage = (int) ($request->query('per_page', 15));
+    //     return response()->json($query->paginate($perPage));
+    // }
 
     /**
      * GET /jobs/offers-box/ads - Get active offers box ads
      */
     public function getOffersBoxAds(Request $request)
     {
-        $limit = (int) ($request->query('limit', 10));
-        $ads = JobAd::getOffersBoxAds($limit);
+        $query = JobAd::query()
+            ->where('add_status', 'Valid')
+            ->where('admin_approved', true)
+            ->inOffersBox();
+
+        $query->when($request->query('emirate'), fn($q, $v) => $q->filterByEmirate($v));
+        $query->when($request->query('district'), fn($q, $v) => $q->filterByDistrict($v));
+        $query->when($request->query('category_type'), fn($q, $v) => $q->filterByCategoryType($v));
+        $query->when($request->query('section_type'), fn($q, $v) => $q->filterBySectionType($v));
+        $query->when($request->query('keyword'), fn($q, $v) => $q->keywordSearch($v));
+
+        // Sorting options
+        $sort = $request->query('sort', 'latest');
+        if ($sort === 'most_viewed') {
+            $query->mostViewed();
+        } elseif ($sort === 'rank') {
+            $query->byRank();
+        } else {
+            $query->latest();
+        }
+
+        $limit = (int) $request->query('limit', 10);
+        $ads = $query->limit($limit)->get();
+
         return response()->json($ads);
     }
 
@@ -82,8 +121,14 @@ class JobsAdController extends Controller
      */
     public function show(JobAd $jobAd)
     {
-        $jobAd->incrementViews();
-        return response()->json($jobAd);
+        try {
+            $jobAd->incrementViews();
+            return response()->json($jobAd);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => ' this Ad not found'
+            ], 404);
+        }
     }
 
     /**
@@ -96,7 +141,7 @@ class JobsAdController extends Controller
             'district' => 'nullable|string|max:100',
             'category_type' => 'required|string|max:100',
             'section_type' => 'required|string|max:100',
-            'job_name' => 'required|string|max:255',
+            'job_name' => 'required|string|max:100',
             'salary' => 'nullable|string|max:100',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -105,14 +150,24 @@ class JobsAdController extends Controller
             'phone_number' => 'required|string|max:20',
             'whatsapp' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
+            // Plan
+            'plan_type' => 'nullable|string|max:50',
+            'plan_days' => 'nullable|integer|min:0',
+            'plan_expires_at' => 'nullable|date',
+
+            
         ]);
 
         $data = $validated;
         $data['user_id'] = $request->user()->id;
-        $data['add_category'] = 'Job';
+        $data['add_category'] = 'Jop';
 
         // Upload main image
         $data['main_image'] = $request->file('main_image')->store('jobs/main', 'public');
+        // Plan
+        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+            $data['plan_expires_at'] = now()->addDays((int) $request->plan_days);
+        }
 
         // Manual approval setting (reuse SystemSetting key manual_approval_mode)
         $manualApproval = cache()->rememberForever('setting_manual_approval_mode', function () {
@@ -154,6 +209,10 @@ class JobsAdController extends Controller
             'phone_number' => 'sometimes|required|string|max:20',
             'whatsapp' => 'sometimes|nullable|string|max:20',
             'address' => 'sometimes|nullable|string|max:500',
+            // Plan
+            'plan_type' => 'sometimes|nullable|string|max:50',
+            'plan_days' => 'sometimes|nullable|integer|min:0',
+            'plan_expires_at' => 'sometimes|nullable|date',
         ]);
 
         $updateFields = $request->except(['main_image']);
@@ -165,6 +224,9 @@ class JobsAdController extends Controller
             $jobAd->update([
                 'main_image' => $request->file('main_image')->store('jobs/main', 'public'),
             ]);
+        }
+        if (!empty($updateFields)) {
+            $jobAd->update($updateFields);
         }
 
         return response()->json($jobAd->fresh());
@@ -182,6 +244,19 @@ class JobsAdController extends Controller
         Storage::disk('public')->delete($jobAd->main_image);
         $jobAd->delete();
 
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Ad deleted successfully.'], 204);
+    }
+
+    public function approveAd(JobAd $jobAd)
+    {
+        $jobAd->update([
+            'add_status' => 'Valid',
+            'admin_approved' => true,
+        ]);
+
+        return response()->json([
+            'message' => 'Ad approved successfully.',
+            'ad' => $jobAd      
+        ]);
     }
 }

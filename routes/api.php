@@ -18,6 +18,8 @@ use App\Http\Controllers\Api\PublicSettingsController;
 use App\Http\Controllers\Api\RestaurantAdController;
 use App\Http\Controllers\Api\CarRentAdController;
 use App\Http\Controllers\Api\RealEstateAdController;
+use App\Http\Controllers\Api\JobsAdController;
+
 
 
 // --- Filter Controllers ---
@@ -140,10 +142,10 @@ Route::prefix('car-rent-ads')->group(function () {
 });
 
 // --- Job Ads (Public) ---
-Route::get('/jobs', [\App\Http\Controllers\JobsAdController::class, 'index']);
-Route::get('/jobs/search', [\App\Http\Controllers\JobsAdController::class, 'search']);
-Route::get('/jobs/offers-box/ads', [\App\Http\Controllers\JobsAdController::class, 'getOffersBoxAds']);
-Route::get('/jobs/{jobAd}', [\App\Http\Controllers\JobsAdController::class, 'show']);
+Route::get('/jobs', [JobsAdController::class, 'index']);
+// Route::get('/jobs/search', [\App\Http\Controllers\JobsAdController::class, 'search']);
+Route::get('/jobs/offers-box/ads', [JobsAdController::class, 'getOffersBoxAds']);
+Route::get('/jobs/{jobAd}', [JobsAdController::class, 'show']);
 
 
 /*
@@ -179,6 +181,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'update']);
     Route::post('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'approveAd']);
     Route::delete('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'destroy']);
+
+    // --- Jobs (CRUD Authenticated) ---
+    Route::apiResource('jobs', JobsAdController::class)->except(['index', 'show','getOffersBoxAds']);
 
 
 
@@ -267,13 +272,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/locations/emirates/{emirate}/districts', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'upsertDistricts']);
         Route::delete('/locations/emirates/{emirate}/district', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'deleteDistrict']);
         Route::put('/locations/emirates/{emirate}', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'renameEmirate']);
-    });
-});
 
-// --- Admin: Car Rent Ads Management ---
-Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {
-    Route::get('/car-rent-ads', [CarRentAdController::class, 'indexForAdmin']);
-    Route::get('/car-rent/stats', [CarRentAdController::class, 'getStats']);
-    Route::post('/car-rent-ads/{carRentAd}/approve', [CarRentAdController::class, 'approveAd']);
-    Route::post('/car-rent-ads/{carRentAd}/reject', [CarRentAdController::class, 'rejectAd']);
+        // --- Admin: Car Rent Ads Management ---
+        Route::get('/car-rent-ads', [CarRentAdController::class, 'indexForAdmin']);
+        Route::get('/car-rent-ads/pending', [CarRentAdController::class, 'getPendingAds']);
+        Route::post('/car-rent-ads/{carRentAd}/approve', [CarRentAdController::class, 'approveAd']);
+        Route::post('/car-rent-ads/{carRentAd}/reject', [CarRentAdController::class, 'rejectAd']);
+
+        // --- Admin: Job Ads Management ---
+        Route::get('/job-ads', [JobsAdController::class, 'indexForAdmin']);
+        Route::get('/job-ads/pending', [JobsAdController::class, 'getPendingAds']);
+        Route::post('/job-ads/{jobAd}/approve', [JobsAdController::class, 'approveAd']);
+        Route::post('/job-ads/{jobAd}/reject', [JobsAdController::class, 'rejectAd']);
+    });
 });

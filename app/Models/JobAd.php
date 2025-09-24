@@ -29,6 +29,8 @@ class JobAd extends Model
     }
 
     // Accessors
+    protected $appends = ['main_image_url', 'status', 'category'];
+
     public function getMainImageUrlAttribute()
     {
         return $this->main_image ? Storage::url($this->main_image) : null;
