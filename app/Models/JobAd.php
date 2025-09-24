@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\Storage;
 
 class JobAd extends Model
 {
-    //
     use HasFactory;
+
     protected $table = 'job_ads';
     protected $guarded = [];
+
     protected $casts = [
         'warranty' => 'boolean',
         'admin_approved' => 'boolean',
@@ -21,11 +22,13 @@ class JobAd extends Model
         'active_offers_box_expires_at' => 'datetime',
     ];
 
+    // Relationships
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    // Accessors
     public function getMainImageUrlAttribute()
     {
         return $this->main_image ? Storage::url($this->main_image) : null;
@@ -36,14 +39,14 @@ class JobAd extends Model
         return $this->add_status;
     }
 
-    public function getSectionAttribute()
+    public function getCategoryAttribute()
     {
         return $this->add_category;
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Scopes
+    | Basic scopes
     |--------------------------------------------------------------------------
     */
     public function scopeValid(Builder $query): void
@@ -68,26 +71,6 @@ class JobAd extends Model
                 $q->whereNull('active_offers_box_expires_at')
                     ->orWhere('active_offers_box_expires_at', '>', now());
             });
-    }
-
-    public function scopeByEmirate(Builder $query, string $emirate): void
-    {
-        $query->where('emirate', $emirate);
-    }
-
-    public function scopeByDistrict(Builder $query, string $district): void
-    {
-        $query->where('district', $district);
-    }
-
-    public function scopeByCategoryType(Builder $query, string $type): void
-    {
-        $query->where('category_type', $type);
-    }
-
-    public function scopeBySectionType(Builder $query, string $type): void
-    {
-        $query->where('section_type', $type);
     }
 
     public function scopeLatest(Builder $query): void
@@ -128,5 +111,76 @@ class JobAd extends Model
             ->inRandomOrder()
             ->limit($limit)
             ->get();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Smart Filtering Scopes (support multiple values)
+    |--------------------------------------------------------------------------
+    | These accept a string with commas ("A,B") or an array.
+    */
+
+    public function scopeFilterByEmirate(Builder $query, $emirates): void
+    {
+        if (empty($emirates)) return;
+
+        $emiratesArray = is_array($emirates) ? $emirates : explode(',', $emirates);
+        $emiratesArray = array_filter(array_map('trim', $emiratesArray));
+
+        if (!empty($emiratesArray)) {
+            $query->whereIn('emirate', $emiratesArray);
+        }
+    }
+
+    public function scopeFilterByDistrict(Builder $query, $districts): void
+    {
+        if (empty($districts)) return;
+
+        $districtsArray = is_array($districts) ? $districts : explode(',', $districts);
+        $districtsArray = array_filter(array_map('trim', $districtsArray));
+
+        if (!empty($districtsArray)) {
+            $query->whereIn('district', $districtsArray);
+        }
+    }
+
+    public function scopeFilterByCategoryType(Builder $query, $categoryTypes): void
+    {
+        if (empty($categoryTypes)) return;
+
+        $categoryTypesArray = is_array($categoryTypes) ? $categoryTypes : explode(',', $categoryTypes);
+        $categoryTypesArray = array_filter(array_map('trim', $categoryTypesArray));
+
+        if (!empty($categoryTypesArray)) {
+            $query->whereIn('category_type', $categoryTypesArray);
+        }
+    }
+
+    public function scopeFilterBySectionType(Builder $query, $sectionTypes): void
+    {
+        if (empty($sectionTypes)) return;
+
+        $sectionTypesArray = is_array($sectionTypes) ? $sectionTypes : explode(',', $sectionTypes);
+        $sectionTypesArray = array_filter(array_map('trim', $sectionTypesArray));
+
+        if (!empty($sectionTypesArray)) {
+            $query->whereIn('section_type', $sectionTypesArray);
+        }
+    }
+
+    public function scopeKeywordSearch(Builder $query, $keyword): void
+    {
+        if (empty($keyword)) return;
+
+        $keyword = trim($keyword);
+        if (!empty($keyword)) {
+            $query->where(function ($q) use ($keyword) {
+                $q->where('title', 'LIKE', "%{$keyword}%")
+                    ->orWhere('description', 'LIKE', "%{$keyword}%")
+                    ->orWhere('company_name', 'LIKE', "%{$keyword}%")
+                    ->orWhere('emirate', 'LIKE', "%{$keyword}%")
+                    ->orWhere('district', 'LIKE', "%{$keyword}%");
+            });
+        }
     }
 }

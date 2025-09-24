@@ -11,37 +11,177 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class RealEstateAdController extends Controller
 {
     /**
-     * GET /real-estates - Public index with filters
+     * GET /real-estates - Public index with smart filters
      */
     public function index(Request $request)
     {
         $query = RealEstateAd::active();
 
-        $query->when($request->query('emirate'), fn($q, $v) => $q->byEmirate($v));
-        $query->when($request->query('district'), fn($q, $v) => $q->byDistrict($v));
-        $query->when($request->query('area'), fn($q, $v) => $q->byArea($v));
-        $query->when($request->query('contract_type'), fn($q, $v) => $q->byContractType($v));
-        $query->when($request->query('property_type'), fn($q, $v) => $q->byPropertyType($v));
-        // $query->when($request->filled('price_min') || $request->filled('price_max'), function ($q) use ($request) {
-        //     $q->byPriceRange($request->price_min, $request->price_max);
-        // });
+        // Smart filters - support multiple values
+        $query->when($request->query('emirate'), function ($q, $emirate) {
+            return $q->filterByEmirate($emirate);
+        });
+
+        $query->when($request->query('district'), function ($q, $district) {
+            return $q->filterByDistrict($district);
+        });
+
+        $query->when($request->query('area'), function ($q, $area) {
+            return $q->filterByArea($area);
+        });
+
+        $query->when($request->query('contract_type'), function ($q, $contractType) {
+            return $q->filterByContractType($contractType);
+        });
+
+        $query->when($request->query('property_type'), function ($q, $propertyType) {
+            return $q->filterByPropertyType($propertyType);
+        });
+
+        // Price range filter
+        $query->when($request->query('min_price') || $request->query('max_price'), function ($q) use ($request) {
+            return $q->filterByPriceRange($request->query('min_price'), $request->query('max_price'));
+        });
+
+        // Keyword search in title, description, property_type, contract_type
+        $query->when($request->query('keyword'), function ($q, $keyword) {
+            return $q->where(function($subQuery) use ($keyword) {
+                $subQuery->where('title', 'like', "%{$keyword}%")
+                        ->orWhere('description', 'like', "%{$keyword}%")
+                        ->orWhere('property_type', 'like', "%{$keyword}%")
+                        ->orWhere('contract_type', 'like', "%{$keyword}%");
+            });
+        });
 
         // Sorting options
-        $sort = $request->query('sort', 'latest');
-        if ($sort === 'most_viewed')
-            $query->mostViewed();
-        elseif ($sort === 'rank')
-            $query->byRank();
-        else
-            $query->latest();
+        $sortBy = $request->query('sort_by', 'latest');
+        switch ($sortBy) {
+            case 'most_viewed':
+                $query->mostViewed();
+                break;
+            case 'rank':
+                $query->byRank();
+                break;
+            case 'price_low':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_high':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+                break;
+        }
 
         // In offers box filter
         if ($request->boolean('in_offers_box')) {
             $query->inOffersBox();
         }
 
-        $perPage = (int) ($request->query('per_page', 15));
-        return response()->json($query->paginate($perPage));
+        $perPage = $request->query('per_page', 15);
+        $perPage = min(max($perPage, 1), 50); // Between 1 and 50
+        
+        return response()->json($query->paginate($perPage)->withQueryString());
+    }
+
+    /**
+     * Smart search endpoint for real estates.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search(Request $request)
+    {
+        // Validation for search parameters
+        $request->validate([
+            'emirate' => 'nullable|string|max:500',
+            'district' => 'nullable|string|max:500',
+            'area' => 'nullable|string|max:500',
+            'contract_type' => 'nullable|string|max:500',
+            'property_type' => 'nullable|string|max:500',
+            'min_price' => 'nullable|numeric|min:0',
+            'max_price' => 'nullable|numeric|min:0',
+            'keyword' => 'nullable|string|max:255',
+            'sort_by' => 'nullable|in:latest,most_viewed,rank,price_low,price_high',
+            'per_page' => 'nullable|integer|min:1|max:50',
+            'in_offers_box' => 'nullable|boolean',
+        ]);
+
+        // Use the same logic as index method
+        return $this->index($request);
+    }
+
+    /**
+     * Get offer box ads with smart filtering.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getOffersBoxAds(Request $request)
+    {
+        // Start with offer box query
+        $query = RealEstateAd::active()->offerBoxOnly();
+
+        // Apply the same smart filters as index method
+        $query->when($request->query('emirate'), function ($q, $emirate) {
+            return $q->filterByEmirate($emirate);
+        });
+
+        $query->when($request->query('district'), function ($q, $district) {
+            return $q->filterByDistrict($district);
+        });
+
+        $query->when($request->query('area'), function ($q, $area) {
+            return $q->filterByArea($area);
+        });
+
+        $query->when($request->query('contract_type'), function ($q, $contractType) {
+            return $q->filterByContractType($contractType);
+        });
+
+        $query->when($request->query('property_type'), function ($q, $propertyType) {
+            return $q->filterByPropertyType($propertyType);
+        });
+
+        $query->when($request->query('min_price') || $request->query('max_price'), function ($q) use ($request) {
+            return $q->filterByPriceRange($request->query('min_price'), $request->query('max_price'));
+        });
+
+        $query->when($request->query('keyword'), function ($q, $keyword) {
+            return $q->where(function($subQuery) use ($keyword) {
+                $subQuery->where('title', 'like', "%{$keyword}%")
+                        ->orWhere('description', 'like', "%{$keyword}%")
+                        ->orWhere('property_type', 'like', "%{$keyword}%")
+                        ->orWhere('contract_type', 'like', "%{$keyword}%");
+            });
+        });
+
+        // Sorting
+        $sortBy = $request->query('sort_by', 'latest');
+        switch ($sortBy) {
+            case 'most_viewed':
+                $query->mostViewed();
+                break;
+            case 'rank':
+                $query->byRank();
+                break;
+            case 'price_low':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_high':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        $perPage = $request->query('per_page', 15);
+        $perPage = min(max($perPage, 1), 50);
+        
+        return response()->json($query->paginate($perPage)->withQueryString());
     }
 
     /**
@@ -210,33 +350,33 @@ class RealEstateAdController extends Controller
         ]);
     }
 
-    public function offersBoxAds(Request $request)
-    {
-        $query = RealEstateAd::active()->inOffersBox();
+    // public function offersBoxAds(Request $request)
+    // {
+    //     $query = RealEstateAd::active()->inOffersBox();
 
-        $query->when($request->query('emirate'), fn($q, $v) => $q->byEmirate($v));
-        $query->when($request->query('district'), fn($q, $v) => $q->byDistrict($v));
-        $query->when($request->query('area'), fn($q, $v) => $q->byArea($v));
-        $query->when($request->query('contract_type'), fn($q, $v) => $q->byContractType($v));
-        $query->when($request->query('property_type'), fn($q, $v) => $q->byPropertyType($v));
+    //     $query->when($request->query('emirate'), fn($q, $v) => $q->byEmirate($v));
+    //     $query->when($request->query('district'), fn($q, $v) => $q->byDistrict($v));
+    //     $query->when($request->query('area'), fn($q, $v) => $q->byArea($v));
+    //     $query->when($request->query('contract_type'), fn($q, $v) => $q->byContractType($v));
+    //     $query->when($request->query('property_type'), fn($q, $v) => $q->byPropertyType($v));
 
-        $query->when($request->filled('price_min') || $request->filled('price_max'), function ($q) use ($request) {
-            $q->byPriceRange($request->price_min, $request->price_max);
-        });
+    //     $query->when($request->filled('price_min') || $request->filled('price_max'), function ($q) use ($request) {
+    //         $q->byPriceRange($request->price_min, $request->price_max);
+    //     });
 
-        $sort = $request->query('sort', 'latest');
-        if ($sort === 'most_viewed') {
-            $query->mostViewed();
-        } elseif ($sort === 'rank') {
-            $query->byRank();
-        } else {
-            $query->latest();
-        }
+    //     $sort = $request->query('sort', 'latest');
+    //     if ($sort === 'most_viewed') {
+    //         $query->mostViewed();
+    //     } elseif ($sort === 'rank') {
+    //         $query->byRank();
+    //     } else {
+    //         $query->latest();
+    //     }
 
-        $limit = (int) $request->query('limit', 10);
+    //     $limit = (int) $request->query('limit', 10);
 
-        $ads = $query->limit($limit)->get();
+    //     $ads = $query->limit($limit)->get();
 
-        return response()->json($ads);
-    }
+    //     return response()->json($ads);
+    // }
 }

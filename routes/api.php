@@ -63,6 +63,8 @@ Route::get('/locations/emirates', [\App\Http\Controllers\Api\LocationsController
 
 // --- Restaurants (Public) ---
 Route::get('/restaurants', [\App\Http\Controllers\Api\RestaurantAdController::class, 'index']);
+Route::get('/restaurants/search', [\App\Http\Controllers\Api\RestaurantAdController::class, 'search']);
+Route::get('/restaurants/offers-box/ads', [\App\Http\Controllers\Api\RestaurantAdController::class, 'getOffersBoxAds']);
 Route::get('/restaurants/{restaurantAd}', [\App\Http\Controllers\Api\RestaurantAdController::class, 'show']);
 
 // --- Restaurant Categories (Public) ---
@@ -78,8 +80,9 @@ Route::get('/restaurant-categories', function (Request $request) {
 
 //real-estate public 
 Route::get('/real-estates', [RealEstateAdController::class, 'index']);
-Route::get('/real-estate/{realEstateAd}', [RealEstateAdController::class, 'show']);
-Route::get('/real-estates/offers-box-ads', [RealEstateAdController::class, 'offersBoxAds']);
+Route::get('/real-estates/search', [RealEstateAdController::class, 'search']);
+Route::get('/real-estates/offers-box/ads', [RealEstateAdController::class, 'getOffersBoxAds']);
+Route::get('/real-estates/{realEstateAd}', [RealEstateAdController::class, 'show']);
 
 
 // --- Public Filter Data ---
@@ -103,6 +106,8 @@ Route::get('/car-service-types', [CarServiceTypeController::class, 'getClientOpt
 
 // --- Car Sales Ads (Public) ---
 Route::get('/car-sales-ads', [CarSalesAdController::class, 'index']);
+Route::get('/car-sales-ads/search', [CarSalesAdController::class, 'search']);
+Route::get('/car-sales-ads/offers-box/ads', [CarSalesAdController::class, 'getOffersBoxAds']);
 Route::get('/car-sales-ads/{carSalesAd}', [CarSalesAdController::class, 'show']);
 
 // --- Car Services Search & Filters (Public) ---
@@ -112,11 +117,33 @@ Route::get('/car-services', [CarServicesAdController::class, 'index']);
 Route::get('/car-services/{carServicesAd}', [CarServicesAdController::class, 'show']);
 Route::get('/car-services/offers-box/ads', [CarServicesAdController::class, 'getOffersBoxAds']);
 
+// Car Services Ads - Public Routes
+Route::prefix('car-services-ads')->group(function () {
+    Route::get('/', [CarServicesAdController::class, 'index']);
+    Route::get('/search', [CarServicesAdController::class, 'search']);
+    Route::get('/offers-box/ads', [CarServicesAdController::class, 'getOffersBoxAds']);
+    Route::get('/{id}', [CarServicesAdController::class, 'show']);
+});
+
 // --- Car Rent Search & Filters (Public) ---
 Route::get('/car-rent/search', [CarRentAdController::class, 'search']);
 Route::get('/car-rent', [CarRentAdController::class, 'index']);
 Route::get('/car-rent/{carRentAd}', [CarRentAdController::class, 'show']);
 Route::get('/car-rent/offers-box/ads', [CarRentAdController::class, 'getOffersBoxAds']);
+
+// Car Rent Ads - Public Routes
+Route::prefix('car-rent-ads')->group(function () {
+    Route::get('/', [CarRentAdController::class, 'index']);
+    Route::get('/search', [CarRentAdController::class, 'search']);
+    Route::get('/offers-box/ads', [CarRentAdController::class, 'getOffersBoxAds']);
+    Route::get('/{id}', [CarRentAdController::class, 'show']);
+});
+
+// --- Job Ads (Public) ---
+Route::get('/jobs', [\App\Http\Controllers\JobsAdController::class, 'index']);
+Route::get('/jobs/search', [\App\Http\Controllers\JobsAdController::class, 'search']);
+Route::get('/jobs/offers-box/ads', [\App\Http\Controllers\JobsAdController::class, 'getOffersBoxAds']);
+Route::get('/jobs/{jobAd}', [\App\Http\Controllers\JobsAdController::class, 'show']);
 
 
 /*

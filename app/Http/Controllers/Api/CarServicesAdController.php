@@ -25,40 +25,159 @@ class CarServicesAdController extends Controller
                        ->where('add_status', 'Valid')
                        ->where('admin_approved', true);
 
-        // 2. تطبيق الفلاتر بشكل ديناميكي بناءً على الطلب الوارد
+        // 2. تطبيق الفلاتر الذكية بشكل ديناميكي بناءً على الطلب الوارد
         // الدالة `when` تقوم بتطبيق الفلتر فقط إذا كانت القيمة موجودة في الطلب
 
-        // Filter by 'service_type' if provided in the URL query string
+        // Smart Filter by 'service_type' - supports multiple values
         $query->when($request->query('service_type'), function ($q, $serviceType) {
-            return $q->byServiceType($serviceType);
+            return $q->filterByServiceType($serviceType);
         });
 
-        // Filter by 'emirate' if provided in the URL query string
+        // Smart Filter by 'emirate' - supports multiple values
         $query->when($request->query('emirate'), function ($q, $emirate) {
-            return $q->byEmirate($emirate);
+            return $q->filterByEmirate($emirate);
         });
 
-        // Filter by 'district' if provided in the URL query string
+        // Smart Filter by 'district' - supports multiple values
         $query->when($request->query('district'), function ($q, $district) {
-            return $q->byDistrict($district);
+            return $q->filterByDistrict($district);
         });
 
-        // Filter by 'area' if provided in the URL query string
+        // Smart Filter by 'area' - supports multiple values
         $query->when($request->query('area'), function ($q, $area) {
-            return $q->byArea($area);
+            return $q->filterByArea($area);
         });
 
         // Filter by price range if provided
-        $query->when($request->query('min_price'), function ($q, $minPrice) {
-            return $q->byPriceRange($minPrice, null);
+        $query->when($request->query('min_price') || $request->query('max_price'), function ($q) use ($request) {
+            return $q->filterByPriceRange($request->query('min_price'), $request->query('max_price'));
         });
 
-        $query->when($request->query('max_price'), function ($q, $maxPrice) {
-            return $q->byPriceRange(null, $maxPrice);
+        // Keyword search across title and description
+        $query->when($request->query('keyword'), function ($q, $keyword) {
+            return $q->where(function ($subQuery) use ($keyword) {
+                $subQuery->where('title', 'like', '%' . $keyword . '%')
+                         ->orWhere('description', 'like', '%' . $keyword . '%');
+            });
         });
+
+        // Sorting options
+        $sortBy = $request->query('sort_by', 'latest');
+        switch ($sortBy) {
+            case 'most_viewed':
+                $query->mostViewed();
+                break;
+            case 'rank':
+                $query->byRank();
+                break;
+            default:
+                $query->latest();
+                break;
+        }
         
-        // 3. الترتيب من الأحدث للأقدم وتقسيم النتائج على صفحات
-        $ads = $query->latest()->paginate(15)->withQueryString();
+        // 3. تقسيم النتائج على صفحات
+        $ads = $query->paginate(15)->withQueryString();
+
+        return response()->json($ads);
+    }
+
+    /**
+     * Smart search for car services ads with advanced filtering.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search(Request $request)
+    {
+        $query = CarServicesAd::active();
+
+        // Apply all smart filters
+        $query->when($request->query('service_type'), function ($q, $serviceType) {
+            return $q->filterByServiceType($serviceType);
+        });
+
+        $query->when($request->query('emirate'), function ($q, $emirate) {
+            return $q->filterByEmirate($emirate);
+        });
+
+        $query->when($request->query('district'), function ($q, $district) {
+            return $q->filterByDistrict($district);
+        });
+
+        $query->when($request->query('area'), function ($q, $area) {
+            return $q->filterByArea($area);
+        });
+
+        $query->when($request->query('min_price') || $request->query('max_price'), function ($q) use ($request) {
+            return $q->filterByPriceRange($request->query('min_price'), $request->query('max_price'));
+        });
+
+        $query->when($request->query('keyword'), function ($q, $keyword) {
+            return $q->where(function ($subQuery) use ($keyword) {
+                $subQuery->where('title', 'like', '%' . $keyword . '%')
+                         ->orWhere('description', 'like', '%' . $keyword . '%');
+            });
+        });
+
+        // Sorting
+        $sortBy = $request->query('sort_by', 'latest');
+        switch ($sortBy) {
+            case 'most_viewed':
+                $query->mostViewed();
+                break;
+            case 'rank':
+                $query->byRank();
+                break;
+            default:
+                $query->latest();
+                break;
+        }
+
+        $ads = $query->paginate(15)->withQueryString();
+
+        return response()->json($ads);
+    }
+
+    /**
+     * Get car services ads for offers box with smart filtering.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getOffersBoxAds(Request $request)
+    {
+        $query = CarServicesAd::active()->offerBoxOnly();
+
+        // Apply smart filters for offers box
+        $query->when($request->query('service_type'), function ($q, $serviceType) {
+            return $q->filterByServiceType($serviceType);
+        });
+
+        $query->when($request->query('emirate'), function ($q, $emirate) {
+            return $q->filterByEmirate($emirate);
+        });
+
+        $query->when($request->query('district'), function ($q, $district) {
+            return $q->filterByDistrict($district);
+        });
+
+        $query->when($request->query('area'), function ($q, $area) {
+            return $q->filterByArea($area);
+        });
+
+        $query->when($request->query('min_price') || $request->query('max_price'), function ($q) use ($request) {
+            return $q->filterByPriceRange($request->query('min_price'), $request->query('max_price'));
+        });
+
+        $query->when($request->query('keyword'), function ($q, $keyword) {
+            return $q->where(function ($subQuery) use ($keyword) {
+                $subQuery->where('title', 'like', '%' . $keyword . '%')
+                         ->orWhere('description', 'like', '%' . $keyword . '%');
+            });
+        });
+
+        $limit = $request->query('limit', 10);
+        $ads = $query->inRandomOrder()->limit($limit)->get();
 
         return response()->json($ads);
     }
@@ -383,13 +502,13 @@ class CarServicesAdController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getOffersBoxAds(Request $request)
-    {
-        $limit = $request->query('limit', 10);
-        $ads = CarServicesAd::getOffersBoxAds($limit);
+    // public function getOffersBoxAds(Request $request)
+    // {
+    //     $limit = $request->query('limit', 10);
+    //     $ads = CarServicesAd::getOffersBoxAds($limit);
         
-        return response()->json($ads);
-    }
+    //     return response()->json($ads);
+    // }
 
     /**
      * Get search filters data for car services.
@@ -415,78 +534,78 @@ class CarServicesAdController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function search(Request $request)
-    {
-        $request->validate([
-            'emirate' => 'nullable|string|max:100',
-            'service_type' => 'nullable|string|exists:car_service_types,name',
-            'district' => 'nullable|string|max:100',
-            'area' => 'nullable|string|max:100',
-            'min_price' => 'nullable|numeric|min:0',
-            'max_price' => 'nullable|numeric|min:0',
-            'keyword' => 'nullable|string|max:255',
-            'sort_by' => 'nullable|in:latest,price_low,price_high,most_viewed',
-            'per_page' => 'nullable|integer|min:1|max:50',
-        ]);
+    // public function search(Request $request)
+    // {
+    //     $request->validate([
+    //         'emirate' => 'nullable|string|max:100',
+    //         'service_type' => 'nullable|string|exists:car_service_types,name',
+    //         'district' => 'nullable|string|max:100',
+    //         'area' => 'nullable|string|max:100',
+    //         'min_price' => 'nullable|numeric|min:0',
+    //         'max_price' => 'nullable|numeric|min:0',
+    //         'keyword' => 'nullable|string|max:255',
+    //         'sort_by' => 'nullable|in:latest,price_low,price_high,most_viewed',
+    //         'per_page' => 'nullable|integer|min:1|max:50',
+    //     ]);
 
-        // Start with active ads query
-        $query = CarServicesAd::query()
-                              ->where('add_status', 'Valid')
-                              ->where('admin_approved', true);
+    //     // Start with active ads query
+    //     $query = CarServicesAd::query()
+    //                           ->where('add_status', 'Valid')
+    //                           ->where('admin_approved', true);
 
-        // Apply filters
-        if ($request->filled('emirate')) {
-            $query->byEmirate($request->emirate);
-        }
+    //     // Apply filters
+    //     if ($request->filled('emirate')) {
+    //         $query->byEmirate($request->emirate);
+    //     }
 
-        if ($request->filled('service_type')) {
-            $query->byServiceType($request->service_type);
-        }
+    //     if ($request->filled('service_type')) {
+    //         $query->byServiceType($request->service_type);
+    //     }
 
-        if ($request->filled('district')) {
-            $query->byDistrict($request->district);
-        }
+    //     if ($request->filled('district')) {
+    //         $query->byDistrict($request->district);
+    //     }
 
-        if ($request->filled('area')) {
-            $query->byArea($request->area);
-        }
+    //     if ($request->filled('area')) {
+    //         $query->byArea($request->area);
+    //     }
 
-        if ($request->filled('min_price') || $request->filled('max_price')) {
-            $query->byPriceRange($request->min_price, $request->max_price);
-        }
+    //     if ($request->filled('min_price') || $request->filled('max_price')) {
+    //         $query->byPriceRange($request->min_price, $request->max_price);
+    //     }
 
-        // Keyword search in title, description, and service_name
-        if ($request->filled('keyword')) {
-            $keyword = $request->keyword;
-            $query->where(function ($q) use ($keyword) {
-                $q->where('title', 'LIKE', "%{$keyword}%")
-                  ->orWhere('description', 'LIKE', "%{$keyword}%")
-                  ->orWhere('service_name', 'LIKE', "%{$keyword}%");
-            });
-        }
+    //     // Keyword search in title, description, and service_name
+    //     if ($request->filled('keyword')) {
+    //         $keyword = $request->keyword;
+    //         $query->where(function ($q) use ($keyword) {
+    //             $q->where('title', 'LIKE', "%{$keyword}%")
+    //               ->orWhere('description', 'LIKE', "%{$keyword}%")
+    //               ->orWhere('service_name', 'LIKE', "%{$keyword}%");
+    //         });
+    //     }
 
-        // Apply sorting
-        switch ($request->sort_by) {
-            case 'price_low':
-                $query->orderBy('price', 'asc');
-                break;
-            case 'price_high':
-                $query->orderBy('price', 'desc');
-                break;
-            case 'most_viewed':
-                $query->mostViewed();
-                break;
-            case 'latest':
-            default:
-                $query->latest();
-                break;
-        }
+    //     // Apply sorting
+    //     switch ($request->sort_by) {
+    //         case 'price_low':
+    //             $query->orderBy('price', 'asc');
+    //             break;
+    //         case 'price_high':
+    //             $query->orderBy('price', 'desc');
+    //             break;
+    //         case 'most_viewed':
+    //             $query->mostViewed();
+    //             break;
+    //         case 'latest':
+    //         default:
+    //             $query->latest();
+    //             break;
+    //     }
 
-        $perPage = $request->per_page ?? 15;
-        $ads = $query->paginate($perPage)->withQueryString();
+    //     $perPage = $request->per_page ?? 15;
+    //     $ads = $query->paginate($perPage)->withQueryString();
 
-        return response()->json($ads);
-    }
+    //     return response()->json($ads);
+    // }
 
     /**
      * [Admin] Get comprehensive statistics for car services ads.

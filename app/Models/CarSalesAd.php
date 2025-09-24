@@ -41,48 +41,144 @@ class CarSalesAd extends Model
     // =========================================================
 
     /**
-     * Filter by Make.
+     * Smart Filter by Make - supports multiple values.
      * @param Builder $query
-     * @param string $make
+     * @param string|array $make
      * @return Builder
      */
-    public function scopeFilterByMake(Builder $query, string $make): Builder
+    public function scopeFilterByMake(Builder $query, $make): Builder
     {
-        // استخدام where للمطابقة التامة، أو like للمطابقة الجزئية
-        return $query->where('make', $make);
+        if (is_string($make)) {
+            $make = explode(',', $make);
+        }
+        return $query->whereIn('make', array_map('trim', $make));
     }
 
     /**
-     * Filter by Model.
+     * Smart Filter by Model - supports multiple values.
      * @param Builder $query
-     * @param string $model
+     * @param string|array $model
      * @return Builder
      */
-    public function scopeFilterByModel(Builder $query, string $model): Builder
+    public function scopeFilterByModel(Builder $query, $model): Builder
     {
-        return $query->where('model', $model);
+        if (is_string($model)) {
+            $model = explode(',', $model);
+        }
+        return $query->whereIn('model', array_map('trim', $model));
     }
 
     /**
-     * Filter by Trim.
+     * Smart Filter by Trim - supports multiple values.
      * @param Builder $query
-     * @param string $trim
+     * @param string|array $trim
      * @return Builder
      */
-    public function scopeFilterByTrim(Builder $query, string $trim): Builder
+    public function scopeFilterByTrim(Builder $query, $trim): Builder
     {
-        return $query->where('trim', $trim);
+        if (is_string($trim)) {
+            $trim = explode(',', $trim);
+        }
+        return $query->whereIn('trim', array_map('trim', $trim));
     }
     
     /**
-     * Filter by Year.
+     * Smart Filter by Year - supports multiple values.
      * @param Builder $query
-     * @param int $year
+     * @param string|array $year
      * @return Builder
      */
-    public function scopeFilterByYear(Builder $query, int $year): Builder
+    public function scopeFilterByYear(Builder $query, $year): Builder
     {
-        return $query->where('year', $year);
+        if (is_string($year)) {
+            $year = explode(',', $year);
+        }
+        return $query->whereIn('year', array_map('trim', $year));
+    }
+
+    /**
+     * Smart Filter by Emirate - supports multiple values.
+     * @param Builder $query
+     * @param string|array $emirate
+     * @return Builder
+     */
+    public function scopeFilterByEmirate(Builder $query, $emirate): Builder
+    {
+        if (is_string($emirate)) {
+            $emirate = explode(',', $emirate);
+        }
+        return $query->whereIn('emirate', array_map('trim', $emirate));
+    }
+
+    /**
+     * Smart Filter by District - supports multiple values.
+     * @param Builder $query
+     * @param string|array $district
+     * @return Builder
+     */
+    public function scopeFilterByDistrict(Builder $query, $district): Builder
+    {
+        if (is_string($district)) {
+            $district = explode(',', $district);
+        }
+        return $query->whereIn('district', array_map('trim', $district));
+    }
+
+    /**
+     * Smart Filter by Area - supports multiple values.
+     * @param Builder $query
+     * @param string|array $area
+     * @return Builder
+     */
+    public function scopeFilterByArea(Builder $query, $area): Builder
+    {
+        if (is_string($area)) {
+            $area = explode(',', $area);
+        }
+        return $query->whereIn('area', array_map('trim', $area));
+    }
+
+    /**
+     * Filter by Price Range.
+     * @param Builder $query
+     * @param float|null $min
+     * @param float|null $max
+     * @return Builder
+     */
+    public function scopeFilterByPriceRange(Builder $query, $min = null, $max = null): Builder
+    {
+        if (!is_null($min)) {
+            $query->where('price', '>=', $min);
+        }
+        if (!is_null($max)) {
+            $query->where('price', '<=', $max);
+        }
+        return $query;
+    }
+
+    /**
+     * Filter by Transmission Type - supports multiple values.
+     * @param Builder $query
+     * @param string|array $transType
+     * @return Builder
+     */
+    public function scopeFilterByTransType(Builder $query, $transType): Builder
+    {
+        if (is_string($transType)) {
+            $transType = explode(',', $transType);
+        }
+        return $query->whereIn('trans_type', array_map('trim', $transType));
+    }
+
+    /**
+     * Filter by Offer Box Status.
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeOfferBoxOnly(Builder $query): Builder
+    {
+        return $query->where('active_offers_box_status', true)
+                    ->where('active_offers_box_expires_at', '>', now());
     }
 
     /**

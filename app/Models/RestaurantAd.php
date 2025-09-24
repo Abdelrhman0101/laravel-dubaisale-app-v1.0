@@ -91,6 +91,73 @@ class RestaurantAd extends Model
             });
     }
 
+    // Smart Filtering Scopes - Support multiple values
+    public function scopeFilterByEmirate(Builder $query, $emirate): void
+    {
+        if (is_string($emirate) && str_contains($emirate, ',')) {
+            $emirates = array_map('trim', explode(',', $emirate));
+            $query->whereIn('emirate', $emirates);
+        } elseif (is_array($emirate)) {
+            $query->whereIn('emirate', $emirate);
+        } else {
+            $query->where('emirate', $emirate);
+        }
+    }
+
+    public function scopeFilterByDistrict(Builder $query, $district): void
+    {
+        if (is_string($district) && str_contains($district, ',')) {
+            $districts = array_map('trim', explode(',', $district));
+            $query->whereIn('district', $districts);
+        } elseif (is_array($district)) {
+            $query->whereIn('district', $district);
+        } else {
+            $query->where('district', $district);
+        }
+    }
+
+    public function scopeFilterByArea(Builder $query, $area): void
+    {
+        if (is_string($area) && str_contains($area, ',')) {
+            $areas = array_map('trim', explode(',', $area));
+            $query->whereIn('area', $areas);
+        } elseif (is_array($area)) {
+            $query->whereIn('area', $area);
+        } else {
+            $query->where('area', $area);
+        }
+    }
+
+    public function scopeFilterByCategory(Builder $query, $category): void
+    {
+        if (is_string($category) && str_contains($category, ',')) {
+            $categories = array_map('trim', explode(',', $category));
+            $query->whereIn('category', $categories);
+        } elseif (is_array($category)) {
+            $query->whereIn('category', $category);
+        } else {
+            $query->where('category', $category);
+        }
+    }
+
+    public function scopeFilterByPriceRange(Builder $query, $priceRange): void
+    {
+        if (is_string($priceRange) && str_contains($priceRange, ',')) {
+            $priceRanges = array_map('trim', explode(',', $priceRange));
+            $query->whereIn('price_range', $priceRanges);
+        } elseif (is_array($priceRange)) {
+            $query->whereIn('price_range', $priceRange);
+        } else {
+            $query->where('price_range', $priceRange);
+        }
+    }
+
+    public function scopeOfferBoxOnly(Builder $query): void
+    {
+        $query->inOffersBox();
+    }
+
+    // Legacy Scopes (kept for backward compatibility)
     public function scopeByEmirate(Builder $query, string $emirate): void
     {
         $query->where('emirate', $emirate);

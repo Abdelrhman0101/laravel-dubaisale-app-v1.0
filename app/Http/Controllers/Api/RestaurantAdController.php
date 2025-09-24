@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 class RestaurantAdController extends Controller
 {
     /**
-     * GET /restaurants - Public index with filters
+     * GET /restaurants - Public index with smart filters
      */
     public function index(Request $request)
     {
@@ -18,20 +18,143 @@ class RestaurantAdController extends Controller
             ->where('add_status', 'Valid')
             ->where('admin_approved', true);
 
-        $query->when($request->query('emirate'), fn($q, $v) => $q->byEmirate($v));
-        $query->when($request->query('district'), fn($q, $v) => $q->byDistrict($v));
-        $query->when($request->query('area'), fn($q, $v) => $q->byArea($v));
-        $query->when($request->query('price_range'), fn($q, $v) => $q->byPriceRange($v));
-        $query->when($request->query('category'), fn($q, $v) => $q->byCategory($v));
+        // Smart filters - support multiple values
+        $query->when($request->query('emirate'), function ($q, $emirate) {
+            return $q->filterByEmirate($emirate);
+        });
 
-        // Sorting options (optional): latest, most_viewed, rank
-        $sort = $request->query('sort', 'latest');
-        if ($sort === 'most_viewed') $query->mostViewed();
-        elseif ($sort === 'rank') $query->byRank();
-        else $query->latest();
+        $query->when($request->query('district'), function ($q, $district) {
+            return $q->filterByDistrict($district);
+        });
 
-        $perPage = (int) ($request->query('per_page', 15));
-        return response()->json($query->paginate($perPage));
+        $query->when($request->query('area'), function ($q, $area) {
+            return $q->filterByArea($area);
+        });
+
+        $query->when($request->query('price_range'), function ($q, $priceRange) {
+            return $q->filterByPriceRange($priceRange);
+        });
+
+        $query->when($request->query('category'), function ($q, $category) {
+            return $q->filterByCategory($category);
+        });
+
+        // Keyword search in title, description, category
+        $query->when($request->query('keyword'), function ($q, $keyword) {
+            return $q->where(function($subQuery) use ($keyword) {
+                $subQuery->where('title', 'like', "%{$keyword}%")
+                        ->orWhere('description', 'like', "%{$keyword}%")
+                        ->orWhere('category', 'like', "%{$keyword}%");
+            });
+        });
+
+        // Sorting options
+        $sortBy = $request->query('sort_by', 'latest');
+        switch ($sortBy) {
+            case 'most_viewed':
+                $query->mostViewed();
+                break;
+            case 'rank':
+                $query->byRank();
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        $perPage = $request->query('per_page', 15);
+        $perPage = min(max($perPage, 1), 50); // Between 1 and 50
+        
+        return response()->json($query->paginate($perPage)->withQueryString());
+    }
+
+    /**
+     * Smart search endpoint for restaurants.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search(Request $request)
+    {
+        // Validation for search parameters
+        $request->validate([
+            'emirate' => 'nullable|string|max:500',
+            'district' => 'nullable|string|max:500',
+            'area' => 'nullable|string|max:500',
+            'price_range' => 'nullable|string|max:500',
+            'category' => 'nullable|string|max:500',
+            'keyword' => 'nullable|string|max:255',
+            'sort_by' => 'nullable|in:latest,most_viewed,rank',
+            'per_page' => 'nullable|integer|min:1|max:50',
+        ]);
+
+        // Use the same logic as index method
+        return $this->index($request);
+    }
+
+    /**
+     * Get offer box ads with smart filtering.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getOffersBoxAds(Request $request)
+    {
+        // Start with offer box query
+        $query = RestaurantAd::query()
+            ->where('add_status', 'Valid')
+            ->where('admin_approved', true)
+            ->offerBoxOnly();
+
+        // Apply the same smart filters as index method
+        $query->when($request->query('emirate'), function ($q, $emirate) {
+            return $q->filterByEmirate($emirate);
+        });
+
+        $query->when($request->query('district'), function ($q, $district) {
+            return $q->filterByDistrict($district);
+        });
+
+        $query->when($request->query('area'), function ($q, $area) {
+            return $q->filterByArea($area);
+        });
+
+        $query->when($request->query('price_range'), function ($q, $priceRange) {
+            return $q->filterByPriceRange($priceRange);
+        });
+
+        $query->when($request->query('category'), function ($q, $category) {
+            return $q->filterByCategory($category);
+        });
+
+        $query->when($request->query('keyword'), function ($q, $keyword) {
+            return $q->where(function($subQuery) use ($keyword) {
+                $subQuery->where('title', 'like', "%{$keyword}%")
+                        ->orWhere('description', 'like', "%{$keyword}%")
+                        ->orWhere('category', 'like', "%{$keyword}%");
+            });
+        });
+
+        // Sorting
+        $sortBy = $request->query('sort_by', 'latest');
+        switch ($sortBy) {
+            case 'most_viewed':
+                $query->mostViewed();
+                break;
+            case 'rank':
+                $query->byRank();
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        $perPage = $request->query('per_page', 15);
+        $perPage = min(max($perPage, 1), 50);
+        
+        return response()->json($query->paginate($perPage)->withQueryString());
     }
 
     /**

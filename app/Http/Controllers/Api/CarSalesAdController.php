@@ -11,7 +11,6 @@ use App\Models\CarMake;
 
 class CarSalesAdController extends Controller
 {
-    // عرض جميع الإعلانات
     /**
      * Display a listing of the resource with smart filtering.
      *
@@ -25,31 +24,188 @@ class CarSalesAdController extends Controller
             ->where('add_status', 'Valid')
             ->where('admin_approved', true);
 
-        // 2. تطبيق الفلاتر بشكل ديناميكي بناءً على الطلب الوارد
+        // 2. تطبيق الفلاتر الذكية بشكل ديناميكي بناءً على الطلب الوارد
         // الدالة `when` تقوم بتطبيق الفلتر فقط إذا كانت القيمة موجودة في الطلب
 
-        // Filter by 'make' if provided in the URL query string
+        // Smart Filter by 'make' - supports multiple values (comma-separated)
         $query->when($request->query('make'), function ($q, $make) {
             return $q->filterByMake($make);
         });
 
-        // Filter by 'model' if provided in the URL query string
+        // Smart Filter by 'model' - supports multiple values (comma-separated)
         $query->when($request->query('model'), function ($q, $model) {
             return $q->filterByModel($model);
         });
 
-        // Filter by 'trim' if provided in the URL query string
+        // Smart Filter by 'trim' - supports multiple values (comma-separated)
         $query->when($request->query('trim'), function ($q, $trim) {
             return $q->filterByTrim($trim);
         });
 
-        // Filter by 'year' if provided in the URL query string
+        // Smart Filter by 'year' - supports multiple values (comma-separated)
         $query->when($request->query('year'), function ($q, $year) {
             return $q->filterByYear($year);
         });
 
-        // 3. الترتيب من الأحدث للأقدم وتقسيم النتائج على صفحات
-        $ads = $query->latest()->paginate(15)->withQueryString();
+        // Smart Filter by 'emirate' - supports multiple values (comma-separated)
+        $query->when($request->query('emirate'), function ($q, $emirate) {
+            return $q->filterByEmirate($emirate);
+        });
+
+        // Smart Filter by 'district' - supports multiple values (comma-separated)
+        $query->when($request->query('district'), function ($q, $district) {
+            return $q->filterByDistrict($district);
+        });
+
+        // Smart Filter by 'area' - supports multiple values (comma-separated)
+        $query->when($request->query('area'), function ($q, $area) {
+            return $q->filterByArea($area);
+        });
+
+        // Smart Filter by 'trans_type' - supports multiple values (comma-separated)
+        $query->when($request->query('trans_type'), function ($q, $transType) {
+            return $q->filterByTransType($transType);
+        });
+
+        // Filter by price range
+        $query->when($request->query('min_price') || $request->query('max_price'), function ($q) use ($request) {
+            return $q->filterByPriceRange($request->query('min_price'), $request->query('max_price'));
+        });
+
+        // Filter by keyword search
+        $query->when($request->query('keyword'), function ($q, $keyword) {
+            return $q->where(function($subQuery) use ($keyword) {
+                $subQuery->where('title', 'like', "%{$keyword}%")
+                         ->orWhere('description', 'like', "%{$keyword}%")
+                         ->orWhere('make', 'like', "%{$keyword}%")
+                         ->orWhere('model', 'like', "%{$keyword}%");
+            });
+        });
+
+        // Apply sorting
+        $sortBy = $request->query('sort_by', 'latest');
+        switch ($sortBy) {
+            case 'price_low':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_high':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'most_viewed':
+                $query->orderBy('views', 'desc');
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        // 3. تقسيم النتائج على صفحات
+        $perPage = $request->query('per_page', 15);
+        $ads = $query->paginate($perPage)->withQueryString();
+
+        return response()->json($ads);
+    }
+
+    /**
+     * Advanced search endpoint with smart filtering capabilities.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search(Request $request)
+    {
+        $request->validate([
+            'make' => 'nullable|string|max:500',
+            'model' => 'nullable|string|max:500',
+            'trim' => 'nullable|string|max:500',
+            'year' => 'nullable|string|max:100',
+            'emirate' => 'nullable|string|max:500',
+            'district' => 'nullable|string|max:500',
+            'area' => 'nullable|string|max:500',
+            'trans_type' => 'nullable|string|max:200',
+            'min_price' => 'nullable|numeric|min:0',
+            'max_price' => 'nullable|numeric|min:0',
+            'keyword' => 'nullable|string|max:255',
+            'sort_by' => 'nullable|in:latest,price_low,price_high,most_viewed',
+            'per_page' => 'nullable|integer|min:1|max:50',
+        ]);
+
+        $query = CarSalesAd::query()
+            ->where('add_status', 'Valid')
+            ->where('admin_approved', true);
+
+        // Apply smart filters
+        if ($request->filled('make')) $query->filterByMake($request->make);
+        if ($request->filled('model')) $query->filterByModel($request->model);
+        if ($request->filled('trim')) $query->filterByTrim($request->trim);
+        if ($request->filled('year')) $query->filterByYear($request->year);
+        if ($request->filled('emirate')) $query->filterByEmirate($request->emirate);
+        if ($request->filled('district')) $query->filterByDistrict($request->district);
+        if ($request->filled('area')) $query->filterByArea($request->area);
+        if ($request->filled('trans_type')) $query->filterByTransType($request->trans_type);
+
+        // Price range filter
+        if ($request->filled('min_price') || $request->filled('max_price')) {
+            $query->filterByPriceRange($request->min_price, $request->max_price);
+        }
+
+        // Keyword search
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function($q) use ($keyword) {
+                $q->where('title', 'like', "%{$keyword}%")
+                  ->orWhere('description', 'like', "%{$keyword}%")
+                  ->orWhere('make', 'like', "%{$keyword}%")
+                  ->orWhere('model', 'like', "%{$keyword}%");
+            });
+        }
+
+        // Apply sorting
+        switch ($request->sort_by) {
+            case 'price_low':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_high':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'most_viewed':
+                $query->orderBy('views', 'desc');
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        $perPage = $request->per_page ?? 15;
+        $ads = $query->paginate($perPage)->withQueryString();
+
+        return response()->json($ads);
+    }
+
+    /**
+     * Get offer box ads with smart filtering.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getOffersBoxAds(Request $request)
+    {
+        $query = CarSalesAd::query()
+            ->where('add_status', 'Valid')
+            ->where('admin_approved', true)
+            ->offerBoxOnly();
+
+        // Apply smart filters for offer box
+        if ($request->filled('make')) $query->filterByMake($request->make);
+        if ($request->filled('model')) $query->filterByModel($request->model);
+        if ($request->filled('emirate')) $query->filterByEmirate($request->emirate);
+        if ($request->filled('district')) $query->filterByDistrict($request->district);
+        if ($request->filled('area')) $query->filterByArea($request->area);
+
+        $perPage = $request->query('per_page', 10);
+        $ads = $query->latest()->paginate($perPage)->withQueryString();
 
         return response()->json($ads);
     }

@@ -67,7 +67,117 @@ class CarRentAd extends Model
     {
         return $query->valid()->approved();
     }
+    public function scopeFilterByMake($query, $make)
+    {
+        if (is_string($make) && str_contains($make, ',')) {
+            $makes = array_map('trim', explode(',', $make));
+            return $query->whereIn('make', $makes);
+        } elseif (is_array($make)) {
+            return $query->whereIn('make', $make);
+        } else {
+            return $query->where('make', $make);
+        }
+    }
 
+    public function scopeFilterByModel($query, $model)
+    {
+        if (is_string($model) && str_contains($model, ',')) {
+            $models = array_map('trim', explode(',', $model));
+            return $query->whereIn('model', $models);
+        } elseif (is_array($model)) {
+            return $query->whereIn('model', $model);
+        } else {
+            return $query->where('model', $model);
+        }
+    }
+
+    public function scopeFilterByTrim($query, $trim)
+    {
+        if (is_string($trim) && str_contains($trim, ',')) {
+            $trims = array_map('trim', explode(',', $trim));
+            return $query->whereIn('trim', $trims);
+        } elseif (is_array($trim)) {
+            return $query->whereIn('trim', $trim);
+        } else {
+            return $query->where('trim', $trim);
+        }
+    }
+
+    public function scopeFilterByYear($query, $year)
+    {
+        if (is_string($year) && str_contains($year, ',')) {
+            $years = array_map('trim', explode(',', $year));
+            return $query->whereIn('year', $years);
+        } elseif (is_array($year)) {
+            return $query->whereIn('year', $year);
+        } else {
+            return $query->where('year', $year);
+        }
+    }
+
+    public function scopeFilterByEmirate($query, $emirate)
+    {
+        if (is_string($emirate) && str_contains($emirate, ',')) {
+            $emirates = array_map('trim', explode(',', $emirate));
+            return $query->whereIn('emirate', $emirates);
+        } elseif (is_array($emirate)) {
+            return $query->whereIn('emirate', $emirate);
+        } else {
+            return $query->where('emirate', $emirate);
+        }
+    }
+
+    public function scopeFilterByDistrict($query, $district)
+    {
+        if (is_string($district) && str_contains($district, ',')) {
+            $districts = array_map('trim', explode(',', $district));
+            return $query->whereIn('district', $districts);
+        } elseif (is_array($district)) {
+            return $query->whereIn('district', $district);
+        } else {
+            return $query->where('district', $district);
+        }
+    }
+
+    public function scopeFilterByArea($query, $area)
+    {
+        if (is_string($area) && str_contains($area, ',')) {
+            $areas = array_map('trim', explode(',', $area));
+            return $query->whereIn('area', $areas);
+        } elseif (is_array($area)) {
+            return $query->whereIn('area', $area);
+        } else {
+            return $query->where('area', $area);
+        }
+    }
+
+    public function scopeFilterByPriceRange($query, $min = null, $max = null)
+    {
+        if (!is_null($min)) $query->where('price', '>=', $min);
+        if (!is_null($max)) $query->where('price', '<=', $max);
+        return $query;
+    }
+
+    public function scopeFilterByDayRentRange($query, $min = null, $max = null)
+    {
+        if (!is_null($min)) $query->where('day_rent', '>=', $min);
+        if (!is_null($max)) $query->where('day_rent', '<=', $max);
+        return $query;
+    }
+
+    public function scopeFilterByMonthRentRange($query, $min = null, $max = null)
+    {
+        if (!is_null($min)) $query->where('month_rent', '>=', $min);
+        if (!is_null($max)) $query->where('month_rent', '<=', $max);
+        return $query;
+    }
+
+    public function scopeOfferBoxOnly($query)
+    {
+        return $query->inOffersBox();
+    }
+
+    // Legacy Scopes (kept for backward compatibility)
     public function scopeByMake($query, $make)
     {
         return $query->where('make', $make);

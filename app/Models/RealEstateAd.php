@@ -62,6 +62,82 @@ class RealEstateAd extends Model
         return $query->where('add_status', 'Valid')->where('admin_approved', true);
     }
 
+    // Smart Filtering Scopes - Support multiple values
+    public function scopeFilterByEmirate(Builder $query, $emirate)
+    {
+        if (is_string($emirate) && str_contains($emirate, ',')) {
+            $emirates = array_map('trim', explode(',', $emirate));
+            return $query->whereIn('emirate', $emirates);
+        } elseif (is_array($emirate)) {
+            return $query->whereIn('emirate', $emirate);
+        } else {
+            return $query->where('emirate', $emirate);
+        }
+    }
+
+    public function scopeFilterByDistrict(Builder $query, $district)
+    {
+        if (is_string($district) && str_contains($district, ',')) {
+            $districts = array_map('trim', explode(',', $district));
+            return $query->whereIn('district', $districts);
+        } elseif (is_array($district)) {
+            return $query->whereIn('district', $district);
+        } else {
+            return $query->where('district', $district);
+        }
+    }
+
+    public function scopeFilterByArea(Builder $query, $area)
+    {
+        if (is_string($area) && str_contains($area, ',')) {
+            $areas = array_map('trim', explode(',', $area));
+            return $query->whereIn('area', $areas);
+        } elseif (is_array($area)) {
+            return $query->whereIn('area', $area);
+        } else {
+            return $query->where('area', $area);
+        }
+    }
+
+    public function scopeFilterByContractType(Builder $query, $contract)
+    {
+        if (is_string($contract) && str_contains($contract, ',')) {
+            $contracts = array_map('trim', explode(',', $contract));
+            return $query->whereIn('contract_type', $contracts);
+        } elseif (is_array($contract)) {
+            return $query->whereIn('contract_type', $contract);
+        } else {
+            return $query->where('contract_type', $contract);
+        }
+    }
+
+    public function scopeFilterByPropertyType(Builder $query, $type)
+    {
+        if (is_string($type) && str_contains($type, ',')) {
+            $types = array_map('trim', explode(',', $type));
+            return $query->whereIn('property_type', $types);
+        } elseif (is_array($type)) {
+            return $query->whereIn('property_type', $type);
+        } else {
+            return $query->where('property_type', $type);
+        }
+    }
+
+    public function scopeFilterByPriceRange(Builder $query, $min = null, $max = null)
+    {
+        if (!is_null($min))
+            $query->where('price', '>=', $min);
+        if (!is_null($max))
+            $query->where('price', '<=', $max);
+        return $query;
+    }
+
+    public function scopeOfferBoxOnly(Builder $query)
+    {
+        return $query->inOffersBox();
+    }
+
+    // Legacy Scopes (kept for backward compatibility)
     public function scopeByEmirate(Builder $query, $emirate)
     {
         return $query->where('emirate', $emirate);

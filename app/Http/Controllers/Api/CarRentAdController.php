@@ -9,30 +9,158 @@ use Illuminate\Support\Facades\Storage;
 
 class CarRentAdController extends Controller
 {
-    // Public: list with filters
+    // Public: list with smart filters
     public function index(Request $request)
     {
         $query = CarRentAd::query()->where('add_status', 'Valid')->where('admin_approved', true);
 
-        $query->when($request->query('make'), fn($q, $v) => $q->byMake($v));
-        $query->when($request->query('model'), fn($q, $v) => $q->byModel($v));
-        $query->when($request->query('trim'), fn($q, $v) => $q->byTrim($v));
-        $query->when($request->query('year'), fn($q, $v) => $q->byYear($v));
-        $query->when($request->query('emirate'), fn($q, $v) => $q->byEmirate($v));
-        $query->when($request->query('district'), fn($q, $v) => $q->byDistrict($v));
-        $query->when($request->query('area'), fn($q, $v) => $q->byArea($v));
+        // Smart filters - support multiple values
+        $query->when($request->query('make'), fn($q, $v) => $q->filterByMake($v));
+        $query->when($request->query('model'), fn($q, $v) => $q->filterByModel($v));
+        $query->when($request->query('trim'), fn($q, $v) => $q->filterByTrim($v));
+        $query->when($request->query('year'), fn($q, $v) => $q->filterByYear($v));
+        $query->when($request->query('emirate'), fn($q, $v) => $q->filterByEmirate($v));
+        $query->when($request->query('district'), fn($q, $v) => $q->filterByDistrict($v));
+        $query->when($request->query('area'), fn($q, $v) => $q->filterByArea($v));
 
-        // price filters (generic)
-        $query->when($request->query('min_price'), fn($q, $v) => $q->byPriceRange($v, null));
-        $query->when($request->query('max_price'), fn($q, $v) => $q->byPriceRange(null, $v));
-        // day rent filters
-        $query->when($request->query('min_day_rent'), fn($q, $v) => $q->byDayRentRange($v, null));
-        $query->when($request->query('max_day_rent'), fn($q, $v) => $q->byDayRentRange(null, $v));
-        // month rent filters
-        $query->when($request->query('min_month_rent'), fn($q, $v) => $q->byMonthRentRange($v, null));
-        $query->when($request->query('max_month_rent'), fn($q, $v) => $q->byMonthRentRange(null, $v));
+        // Price range filters
+        $query->when($request->query('min_price') || $request->query('max_price'), function ($q) use ($request) {
+            return $q->filterByPriceRange($request->query('min_price'), $request->query('max_price'));
+        });
 
-        $ads = $query->latest()->paginate(15)->withQueryString();
+        // Day rent range filters
+        $query->when($request->query('min_day_rent') || $request->query('max_day_rent'), function ($q) use ($request) {
+            return $q->filterByDayRentRange($request->query('min_day_rent'), $request->query('max_day_rent'));
+        });
+
+        // Month rent range filters
+        $query->when($request->query('min_month_rent') || $request->query('max_month_rent'), function ($q) use ($request) {
+            return $q->filterByMonthRentRange($request->query('min_month_rent'), $request->query('max_month_rent'));
+        });
+
+        // Keyword search
+        $query->when($request->query('keyword'), function ($q, $keyword) {
+            return $q->where(function ($subQuery) use ($keyword) {
+                $subQuery->where('title', 'like', '%' . $keyword . '%')
+                         ->orWhere('description', 'like', '%' . $keyword . '%');
+            });
+        });
+
+        // Sorting options
+        $sortBy = $request->query('sort_by', 'latest');
+        switch ($sortBy) {
+            case 'most_viewed':
+                $query->mostViewed();
+                break;
+            case 'rank':
+                $query->byRank();
+                break;
+            default:
+                $query->latest();
+                break;
+        }
+
+        $ads = $query->paginate(15)->withQueryString();
+        return response()->json($ads);
+    }
+
+    /**
+     * Smart search for car rent ads with advanced filtering.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search(Request $request)
+    {
+        $query = CarRentAd::active();
+
+        // Apply all smart filters
+        $query->when($request->query('make'), fn($q, $v) => $q->filterByMake($v));
+        $query->when($request->query('model'), fn($q, $v) => $q->filterByModel($v));
+        $query->when($request->query('trim'), fn($q, $v) => $q->filterByTrim($v));
+        $query->when($request->query('year'), fn($q, $v) => $q->filterByYear($v));
+        $query->when($request->query('emirate'), fn($q, $v) => $q->filterByEmirate($v));
+        $query->when($request->query('district'), fn($q, $v) => $q->filterByDistrict($v));
+        $query->when($request->query('area'), fn($q, $v) => $q->filterByArea($v));
+
+        $query->when($request->query('min_price') || $request->query('max_price'), function ($q) use ($request) {
+            return $q->filterByPriceRange($request->query('min_price'), $request->query('max_price'));
+        });
+
+        $query->when($request->query('min_day_rent') || $request->query('max_day_rent'), function ($q) use ($request) {
+            return $q->filterByDayRentRange($request->query('min_day_rent'), $request->query('max_day_rent'));
+        });
+
+        $query->when($request->query('min_month_rent') || $request->query('max_month_rent'), function ($q) use ($request) {
+            return $q->filterByMonthRentRange($request->query('min_month_rent'), $request->query('max_month_rent'));
+        });
+
+        $query->when($request->query('keyword'), function ($q, $keyword) {
+            return $q->where(function ($subQuery) use ($keyword) {
+                $subQuery->where('title', 'like', '%' . $keyword . '%')
+                         ->orWhere('description', 'like', '%' . $keyword . '%');
+            });
+        });
+
+        // Sorting
+        $sortBy = $request->query('sort_by', 'latest');
+        switch ($sortBy) {
+            case 'most_viewed':
+                $query->mostViewed();
+                break;
+            case 'rank':
+                $query->byRank();
+                break;
+            default:
+                $query->latest();
+                break;
+        }
+
+        $ads = $query->paginate(15)->withQueryString();
+        return response()->json($ads);
+    }
+
+    /**
+     * Get car rent ads for offers box with smart filtering.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getOffersBoxAds(Request $request)
+    {
+        $query = CarRentAd::active()->offerBoxOnly();
+
+        // Apply smart filters for offers box
+        $query->when($request->query('make'), fn($q, $v) => $q->filterByMake($v));
+        $query->when($request->query('model'), fn($q, $v) => $q->filterByModel($v));
+        $query->when($request->query('trim'), fn($q, $v) => $q->filterByTrim($v));
+        $query->when($request->query('year'), fn($q, $v) => $q->filterByYear($v));
+        $query->when($request->query('emirate'), fn($q, $v) => $q->filterByEmirate($v));
+        $query->when($request->query('district'), fn($q, $v) => $q->filterByDistrict($v));
+        $query->when($request->query('area'), fn($q, $v) => $q->filterByArea($v));
+
+        $query->when($request->query('min_price') || $request->query('max_price'), function ($q) use ($request) {
+            return $q->filterByPriceRange($request->query('min_price'), $request->query('max_price'));
+        });
+
+        $query->when($request->query('min_day_rent') || $request->query('max_day_rent'), function ($q) use ($request) {
+            return $q->filterByDayRentRange($request->query('min_day_rent'), $request->query('max_day_rent'));
+        });
+
+        $query->when($request->query('min_month_rent') || $request->query('max_month_rent'), function ($q) use ($request) {
+            return $q->filterByMonthRentRange($request->query('min_month_rent'), $request->query('max_month_rent'));
+        });
+
+        $query->when($request->query('keyword'), function ($q, $keyword) {
+            return $q->where(function ($subQuery) use ($keyword) {
+                $subQuery->where('title', 'like', '%' . $keyword . '%')
+                         ->orWhere('description', 'like', '%' . $keyword . '%');
+            });
+        });
+
+        $limit = $request->query('limit', 10);
+        $ads = $query->inRandomOrder()->limit($limit)->get();
+
         return response()->json($ads);
     }
 
@@ -283,78 +411,78 @@ class CarRentAdController extends Controller
     }
 
     // Offers box public
-    public function getOffersBoxAds(Request $request)
-    {
-        $limit = $request->query('limit', 10);
-        $ads = CarRentAd::getOffersBoxAds($limit);
-        return response()->json($ads);
-    }
+    // public function getOffersBoxAds(Request $request)
+    // {
+    //     $limit = $request->query('limit', 10);
+    //     $ads = CarRentAd::getOffersBoxAds($limit);
+    //     return response()->json($ads);
+    // }
 
     // Search (advanced)
-    public function search(Request $request)
-    {
-        $request->validate([
-            'emirate' => 'nullable|string|max:100',
-            'make' => 'nullable|string|max:100',
-            'model' => 'nullable|string|max:100',
-            'trim' => 'nullable|string|max:100',
-            'year' => 'nullable|integer|min:1900|max:' . (int)date('Y') + 1,
-            'district' => 'nullable|string|max:100',
-            'area' => 'nullable|string|max:100',
-            'min_price' => 'nullable|numeric|min:0',
-            'max_price' => 'nullable|numeric|min:0',
-            'min_day_rent' => 'nullable|numeric|min:0',
-            'max_day_rent' => 'nullable|numeric|min:0',
-            'min_month_rent' => 'nullable|numeric|min:0',
-            'max_month_rent' => 'nullable|numeric|min:0',
-            'keyword' => 'nullable|string|max:255',
-            'sort_by' => 'nullable|in:latest,price_low,price_high,most_viewed',
-            'per_page' => 'nullable|integer|min:1|max:50',
-        ]);
+    // public function search(Request $request)
+    // {
+    //     $request->validate([
+    //         'emirate' => 'nullable|string|max:100',
+    //         'make' => 'nullable|string|max:100',
+    //         'model' => 'nullable|string|max:100',
+    //         'trim' => 'nullable|string|max:100',
+    //         'year' => 'nullable|integer|min:1900|max:' . (int)date('Y') + 1,
+    //         'district' => 'nullable|string|max:100',
+    //         'area' => 'nullable|string|max:100',
+    //         'min_price' => 'nullable|numeric|min:0',
+    //         'max_price' => 'nullable|numeric|min:0',
+    //         'min_day_rent' => 'nullable|numeric|min:0',
+    //         'max_day_rent' => 'nullable|numeric|min:0',
+    //         'min_month_rent' => 'nullable|numeric|min:0',
+    //         'max_month_rent' => 'nullable|numeric|min:0',
+    //         'keyword' => 'nullable|string|max:255',
+    //         'sort_by' => 'nullable|in:latest,price_low,price_high,most_viewed',
+    //         'per_page' => 'nullable|integer|min:1|max:50',
+    //     ]);
 
-        $query = CarRentAd::query()->where('add_status', 'Valid')->where('admin_approved', true);
+    //     $query = CarRentAd::query()->where('add_status', 'Valid')->where('admin_approved', true);
 
-        if ($request->filled('emirate')) $query->byEmirate($request->emirate);
-        if ($request->filled('make')) $query->byMake($request->make);
-        if ($request->filled('model')) $query->byModel($request->model);
-        if ($request->filled('trim')) $query->byTrim($request->trim);
-        if ($request->filled('year')) $query->byYear($request->year);
-        if ($request->filled('district')) $query->byDistrict($request->district);
-        if ($request->filled('area')) $query->byArea($request->area);
+    //     if ($request->filled('emirate')) $query->byEmirate($request->emirate);
+    //     if ($request->filled('make')) $query->byMake($request->make);
+    //     if ($request->filled('model')) $query->byModel($request->model);
+    //     if ($request->filled('trim')) $query->byTrim($request->trim);
+    //     if ($request->filled('year')) $query->byYear($request->year);
+    //     if ($request->filled('district')) $query->byDistrict($request->district);
+    //     if ($request->filled('area')) $query->byArea($request->area);
 
-        if ($request->filled('min_price') || $request->filled('max_price'))
-            $query->byPriceRange($request->min_price, $request->max_price);
-        if ($request->filled('min_day_rent') || $request->filled('max_day_rent'))
-            $query->byDayRentRange($request->min_day_rent, $request->max_day_rent);
-        if ($request->filled('min_month_rent') || $request->filled('max_month_rent'))
-            $query->byMonthRentRange($request->min_month_rent, $request->max_month_rent);
+    //     if ($request->filled('min_price') || $request->filled('max_price'))
+    //         $query->byPriceRange($request->min_price, $request->max_price);
+    //     if ($request->filled('min_day_rent') || $request->filled('max_day_rent'))
+    //         $query->byDayRentRange($request->min_day_rent, $request->max_day_rent);
+    //     if ($request->filled('min_month_rent') || $request->filled('max_month_rent'))
+    //         $query->byMonthRentRange($request->min_month_rent, $request->max_month_rent);
 
-        if ($request->filled('keyword')) {
-            $kw = '%' . $request->keyword . '%';
-            $query->where(function($q) use ($kw) {
-                $q->where('title', 'like', $kw)
-                  ->orWhere('description', 'like', $kw)
-                  ->orWhere('make', 'like', $kw)
-                  ->orWhere('model', 'like', $kw)
-                  ->orWhere('trim', 'like', $kw);
-            });
-        }
+    //     if ($request->filled('keyword')) {
+    //         $kw = '%' . $request->keyword . '%';
+    //         $query->where(function($q) use ($kw) {
+    //             $q->where('title', 'like', $kw)
+    //               ->orWhere('description', 'like', $kw)
+    //               ->orWhere('make', 'like', $kw)
+    //               ->orWhere('model', 'like', $kw)
+    //               ->orWhere('trim', 'like', $kw);
+    //         });
+    //     }
 
-        if ($request->filled('sort_by')) {
-            switch ($request->sort_by) {
-                case 'latest': default: $query->orderBy('created_at', 'desc'); break;
-                case 'price_low': $query->orderByRaw('COALESCE(price, day_rent, month_rent) asc'); break;
-                case 'price_high': $query->orderByRaw('COALESCE(price, day_rent, month_rent) desc'); break;
-                case 'most_viewed': $query->orderBy('views', 'desc'); break;
-            }
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
+    //     if ($request->filled('sort_by')) {
+    //         switch ($request->sort_by) {
+    //             case 'latest': default: $query->orderBy('created_at', 'desc'); break;
+    //             case 'price_low': $query->orderByRaw('COALESCE(price, day_rent, month_rent) asc'); break;
+    //             case 'price_high': $query->orderByRaw('COALESCE(price, day_rent, month_rent) desc'); break;
+    //             case 'most_viewed': $query->orderBy('views', 'desc'); break;
+    //         }
+    //     } else {
+    //         $query->orderBy('created_at', 'desc');
+    //     }
 
-        $perPage = $request->query('per_page', 15);
-        $ads = $query->paginate($perPage)->withQueryString();
-        return response()->json($ads);
-    }
+    //     $perPage = $request->query('per_page', 15);
+    //     $ads = $query->paginate($perPage)->withQueryString();
+    //     return response()->json($ads);
+    // }
 
     // Admin stats
     public function getStats()

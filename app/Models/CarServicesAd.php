@@ -132,41 +132,91 @@ class CarServicesAd extends Model
         $query->valid()->approved();
     }
 
-    /**
-     * Scope a query to filter by service type.
-     */
+    // Smart Filtering Scopes - Support multiple values
+    public function scopeFilterByServiceType(Builder $query, $serviceType): void
+    {
+        if (is_string($serviceType) && str_contains($serviceType, ',')) {
+            $serviceTypes = array_map('trim', explode(',', $serviceType));
+            $query->whereIn('service_type', $serviceTypes);
+        } elseif (is_array($serviceType)) {
+            $query->whereIn('service_type', $serviceType);
+        } else {
+            $query->where('service_type', $serviceType);
+        }
+    }
+
+    public function scopeFilterByEmirate(Builder $query, $emirate): void
+    {
+        if (is_string($emirate) && str_contains($emirate, ',')) {
+            $emirates = array_map('trim', explode(',', $emirate));
+            $query->whereIn('emirate', $emirates);
+        } elseif (is_array($emirate)) {
+            $query->whereIn('emirate', $emirate);
+        } else {
+            $query->where('emirate', $emirate);
+        }
+    }
+
+    public function scopeFilterByDistrict(Builder $query, $district): void
+    {
+        if (is_string($district) && str_contains($district, ',')) {
+            $districts = array_map('trim', explode(',', $district));
+            $query->whereIn('district', $districts);
+        } elseif (is_array($district)) {
+            $query->whereIn('district', $district);
+        } else {
+            $query->where('district', $district);
+        }
+    }
+
+    public function scopeFilterByArea(Builder $query, $area): void
+    {
+        if (is_string($area) && str_contains($area, ',')) {
+            $areas = array_map('trim', explode(',', $area));
+            $query->whereIn('area', $areas);
+        } elseif (is_array($area)) {
+            $query->whereIn('area', $area);
+        } else {
+            $query->where('area', $area);
+        }
+    }
+
+    public function scopeFilterByPriceRange(Builder $query, $minPrice = null, $maxPrice = null): void
+    {
+        if ($minPrice !== null) {
+            $query->where('price', '>=', $minPrice);
+        }
+        if ($maxPrice !== null) {
+            $query->where('price', '<=', $maxPrice);
+        }
+    }
+
+    public function scopeOfferBoxOnly(Builder $query): void
+    {
+        $query->inOffersBox();
+    }
+
+    // Legacy Scopes (kept for backward compatibility)
     public function scopeByServiceType(Builder $query, string $serviceType): void
     {
         $query->where('service_type', $serviceType);
     }
 
-    /**
-     * Scope a query to filter by emirate.
-     */
     public function scopeByEmirate(Builder $query, string $emirate): void
     {
         $query->where('emirate', $emirate);
     }
 
-    /**
-     * Scope a query to filter by district.
-     */
     public function scopeByDistrict(Builder $query, string $district): void
     {
         $query->where('district', $district);
     }
 
-    /**
-     * Scope a query to filter by area.
-     */
     public function scopeByArea(Builder $query, string $area): void
     {
         $query->where('area', $area);
     }
 
-    /**
-     * Scope a query to filter by price range.
-     */
     public function scopeByPriceRange(Builder $query, $minPrice = null, $maxPrice = null): void
     {
         if ($minPrice !== null) {
