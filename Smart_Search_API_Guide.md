@@ -189,6 +189,48 @@ GET /api/jobs/search?section_type=Full Time,Part Time&district=Downtown,Marina
 GET /api/jobs/search?keyword=developer&category_type=IT&emirate=Dubai
 ```
 
+## 6. Electronics Ads
+
+### Endpoints
+- **GET** `/api/electronics/search` - Smart search with multiple filters
+- **GET** `/api/electronics/offers-box/ads` - Get active offers box ads
+
+### Search Parameters
+- `section_type` - Electronics sections (multiple values supported)
+- `brand` - Product brands (multiple values supported)
+- `product_name` - Product name search
+- `emirate` - Emirates (multiple values supported)
+- `district` - Districts (multiple values supported)
+- `warranty` - Warranty availability (true/false)
+- `min_price` - Minimum price filter
+- `max_price` - Maximum price filter
+- `keyword` - Search in title, description, product_name, brand, section_type
+- `in_offers_box` - Filter offers box ads only (true/false)
+- `sort_by` - Sorting: `latest`, `most_viewed`, `rank`, `price_low`, `price_high` (default: latest)
+- `per_page` - Results per page (default: 15)
+
+### Examples
+
+#### Brand and Section Search
+```
+GET /api/electronics/search?brand=Samsung,Apple&section_type=Smartphones,Tablets
+```
+
+#### Price Range with Warranty
+```
+GET /api/electronics/search?min_price=500&max_price=2000&warranty=true&emirate=Dubai
+```
+
+#### Comprehensive Electronics Search
+```
+GET /api/electronics/search?section_type=Laptops,Computers&brand=Dell,HP&keyword=gaming&sort_by=price_low
+```
+
+#### Offers Box Electronics
+```
+GET /api/electronics/offers-box/ads?limit=8
+```
+
 ## Response Format
 
 All search endpoints return paginated results in the following format:
@@ -275,6 +317,9 @@ curl "http://your-domain.com/api/car-services-ads/search?keyword=oil change&emir
 
 # Job search with multiple filters
 curl "http://your-domain.com/api/jobs/search?category_type=IT&section_type=Full Time&keyword=developer"
+
+# Electronics search with brand and warranty
+curl "http://your-domain.com/api/electronics/search?brand=Samsung,Apple&warranty=true&emirate=Dubai"
 ```
 
 ### Using JavaScript/Axios
@@ -291,6 +336,16 @@ const response = await axios.get('/api/restaurants/search', {
 
 // Multiple values as comma-separated string
 const response2 = await axios.get('/api/real-estates/search?emirate=Dubai,Sharjah&property_type=Apartment,Villa');
+
+// Electronics search with multiple brands and sections
+const response3 = await axios.get('/api/electronics/search', {
+  params: {
+    brand: ['Samsung', 'Apple', 'Sony'],
+    section_type: ['Smartphones', 'Tablets'],
+    warranty: true,
+    sort_by: 'price_low'
+  }
+});
 ```
 
 This smart search system provides powerful and flexible filtering capabilities while maintaining backward compatibility with existing implementations.

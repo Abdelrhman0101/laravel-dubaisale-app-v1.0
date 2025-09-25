@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\electronicAd;
 use App\Models\RealEstateAd;
 use Illuminate\Http\Request;
 use App\Models\CarSalesAd;
@@ -31,7 +32,8 @@ class MyAdsController extends Controller
         //real-estates
         $realEstatesAds = RealEstateAd::where('user_id', $user->id)->get();
         //Jobs Ads
-        $jobAds=JobAd::where('user_id', $user->id)->get();
+        $jobAds = JobAd::where('user_id', $user->id)->get();
+        $electronic = electronicAd::where('user_id', $user->id)->get();
 
         // --- الخطوة 2: توحيد شكل البيانات لكل قسم ---
         $formattedCarAds = $carAds->map(function ($ad) {
@@ -123,8 +125,8 @@ class MyAdsController extends Controller
                 'area' => $ad->area,
                 'price' => $ad->price,
                 'plan_type' => $ad->plan_type,
-                'main_image_url' => $ad->main_image_url, 
-                'thumbnail_images_urls' => $ad->thumbnail_images_urls, 
+                'main_image_url' => $ad->main_image_url,
+                'thumbnail_images_urls' => $ad->thumbnail_images_urls,
                 'status' => $ad->add_status,
                 'category' => 'Real Estate',
                 'category_slug' => 'real-estate',
@@ -142,11 +144,30 @@ class MyAdsController extends Controller
                 'district' => $ad->district,
                 'category_type' => $ad->category_type,
                 'section_type' => $ad->section_type,
-                'main_image_url' => asset('storage/' . $ad->main_image),
+                // 'main_image_url' => asset('storage/' . $ad->main_image),
                 'job_name' => $ad->job_name,
                 'status' => $ad->add_status,
                 'category' => 'Jobs',
                 'category_slug' => 'jobs',
+                'created_at' => $ad->created_at->toDateTimeString(),
+                'created_at_timestamp' => $ad->created_at->timestamp,
+            ];
+        });
+        //electronic
+        $formattedElectronicAds = $electronic->map(function ($ad) {
+            return [
+                'id' => $ad->id,
+                'title' => $ad->title,
+                'price' => $ad->price,
+                'emirate' => $ad->emirate,
+                'district' => $ad->district,
+                'area' => $ad->area,
+                'product_name' => $ad->product_name,
+                'main_image_url' => asset('storage/' . $ad->main_image),
+                'thumbnail_images_urls' => $ad->thumbnail_images_urls,
+                'category' => $ad->add_category,
+                'status' => $ad->add_status,
+                'category_slug' => 'electronics',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
             ];
@@ -160,7 +181,8 @@ class MyAdsController extends Controller
             $formattedRestaurantAds->toArray(),
             $formattedCarRentAds->toArray(),
             $formattedRealEstateAds->toArray(),
-            $formattedJobAds->toArray()
+            $formattedJobAds->toArray(),
+            $formattedElectronicAds->toArray()
         );
 
         // ترتيب البيانات حسب created_at_timestamp

@@ -9,6 +9,7 @@ use App\Models\CarSalesAd; // كمثال للقسم الأول
 use App\Models\CarServicesAd;
 use App\Models\CarRentAd;
 use App\Http\Controllers\Controller;
+use App\Models\electronicAd;
 use App\Models\JobAd;
 use Illuminate\Http\Request; // <<< أضف هذا السطر
 use App\Models\User; // <<< أضف هذا السطر
@@ -60,36 +61,41 @@ class FeaturedContentController extends Controller
                 ->where('add_status', 'Valid')
                 ->latest()->take(8)
                 ->get(['id', 'price', 'year', 'km', 'main_image', 'make', 'model', 'trim']);
-                // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+            // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
         } elseif ($categorySlug === 'car_services') {
             $ads = CarServicesAd::where('user_id', $userId)
                 ->where('add_status', 'Valid')
                 ->latest()->take(8)
                 ->get(['id', 'title', 'service_name', 'price', 'main_image', 'emirate', 'district', 'area']);
-                // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+            // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
         } elseif ($categorySlug === 'restaurant') {
             $ads = RestaurantAd::where('user_id', $userId)
                 ->where('add_status', 'Valid')
                 ->latest()->take(8)
                 ->get(['id', 'title', 'price_range', 'main_image', 'emirate', 'district', 'area']);
-                // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+            // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
         } elseif ($categorySlug === 'car_rent') {
             $ads = CarRentAd::where('user_id', $userId)
                 ->where('add_status', 'Valid')
                 ->latest()->take(8)
                 ->get(['id', 'title', 'make', 'model', 'year', 'price', 'day_rent', 'month_rent', 'main_image', 'emirate']);
-                // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+            // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
         } elseif ($categorySlug === 'real-estate') {
             $ads = RealEstateAd::where('user_id', $userId)
                 ->where('add_status', 'Valid')
                 ->latest()->take(8)
                 ->get(['id', 'title', 'price', 'emirate', 'district', 'area', 'contract_type', 'property_type', 'main_image']);
-                // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
-        }elseif( $categorySlug === 'jobs') {
+            // ->each(fn($ad) => $ad->main_image = asset('storage/' . $ad->main_image));
+        } elseif ($categorySlug === 'jobs') {
             $ads = JobAd::where('user_id', $userId)
                 ->where('add_status', 'Valid')
                 ->latest()->take(8)
-                ->get(['id', 'title', 'salary', 'emirate', 'district', 'category_type', 'section_type', 'main_image','job_name']);
+                ->get(['id', 'title', 'salary', 'emirate', 'district', 'category_type', 'section_type', 'job_name']);
+        } elseif ($categorySlug === 'electronics') {
+            $ads = electronicAd::where('user_id', $userId)
+                ->where('add_status', 'Valid')
+                ->latest()->take(8)
+                ->get(['id', 'title', 'price', 'emirate', 'district', 'area', 'product_name', 'main_image','add_category','add_status']);
         }
 
         return $ads;
@@ -131,17 +137,20 @@ class FeaturedContentController extends Controller
         } elseif ($category === 'car_rent') {
             $ads = CarRentAd::getOffersBoxAds();
             return response()->json($ads);
-
         } elseif ($category === 'real-estate') {
             $ads = RealEstateAd::where('add_category', 'Real State')
                 ->where('active_offers_box_status', true)
                 ->get();
-        }elseif($category=='Jobs'){
+        } elseif ($category == 'Jobs') {
             $ads = JobAd::where('add_category', 'Jop')
                 ->where('active_offers_box_status', true)
                 ->get();
+        } elseif ($category == 'electronics') {
+            $ads = electronicAd::where('add_category', 'electronics')
+                ->where('active_offers_box_status', true)
+                ->get();
         }
-        
+
 
         return response()->json($ads);
     }

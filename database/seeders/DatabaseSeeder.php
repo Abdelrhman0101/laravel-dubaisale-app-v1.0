@@ -30,5 +30,6 @@ class DatabaseSeeder extends Seeder
         $this->call(RealEstateAdsOptionsSeeder::class);
         $this->call(JopAdValuesSeeder::class);
         $this->call(SystemSettingsSeeder::class);
+        $this->call(ElectronicAdsOptionsSeeder::class);
     }
 }

@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CarSalesAd;
 use App\Models\CarServicesAd;
+use App\Models\electronicAd;
 use App\Models\OfferBoxSetting;
 use App\Models\RealEstateAd;
 use Illuminate\Http\Request;
@@ -18,7 +20,7 @@ class OfferBoxActivationController extends Controller
     {
         $data = $request->validate([
             'ad_id' => 'required|integer',
-            'category_slug' => 'required|string|in:car_sales,car_services,restaurant,car_rent,real-estate,Jobs',
+            'category_slug' => 'required|string|in:car_sales,car_services,restaurant,car_rent,real-estate,Jobs,electronics',
             'days' => 'required|integer|min:1',
         ]);
 
@@ -82,8 +84,10 @@ class OfferBoxActivationController extends Controller
                 return CarRentAd::find($adId);
             case 'real-estate':
                 return RealEstateAd::find($adId);
-                case 'Jobs':
-                    return JobAd::find($adId);
+            case 'Jobs':
+                return JobAd::find($adId);
+            case 'electronics':
+                return electronicAd::find($adId);
 
             default:
                 return null;
@@ -106,8 +110,10 @@ class OfferBoxActivationController extends Controller
                 return CarRentAd::where('active_offers_box_status', true)->count();
             case 'real-estate':
                 return RealEstateAd::where('active_offers_box_status', true)->count();
-                case 'Jobs':
-                    return JobAd::where('active_offers_box_status', true)->count() ;
+            case 'Jobs':
+                return JobAd::where('active_offers_box_status', true)->count();
+            case 'electronics':
+                return electronicAd::where('active_offers_box_status', true)->count();
             default:
                 return 0;
         }

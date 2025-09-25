@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\RestaurantAdController;
 use App\Http\Controllers\Api\CarRentAdController;
 use App\Http\Controllers\Api\RealEstateAdController;
 use App\Http\Controllers\Api\JobsAdController;
+use App\Http\Controllers\Api\ElectronicAdController;
 
 
 
@@ -34,6 +35,7 @@ use App\Http\Controllers\Api\Admin\OfferBoxSettingsController;
 use App\Http\Controllers\Api\Admin\SystemSettingsController;
 use App\Http\Controllers\Api\Admin\RestaurantCategoryController;
 use App\Http\Controllers\CarSalesAdSpecController;
+use App\Http\Controllers\ElectronicAdOptionController;
 use App\Http\Controllers\JobAdValuesController;
 use App\Http\Controllers\UserContactInfoController;
 
@@ -105,6 +107,8 @@ Route::get('/car-sales-ad-specs', [CarSalesAdSpecController::class, 'getClientSp
 Route::get('/real_estate_options', [RealEstateAdOptionsController::class, 'getClientSpecs']);
 // values of table jobs Ads
 Route::get('/jobs_ad_values', [JobAdValuesController::class, 'getClientSpecs']);
+//----Electronic Ad options
+Route::get('/electronic_ad_options', [ElectronicAdOptionController::class, 'getClientSpecs']);
 
 // --- Car Service Types (Public) ---
 Route::get('/car-service-types', [CarServiceTypeController::class, 'getClientOptions']);
@@ -152,6 +156,12 @@ Route::get('/jobs/{jobAd}', [JobsAdController::class, 'show']);
 
 Route::get('/job-category-images', [JobsAdController::class, 'getCategoryImages']);
 
+// --- Electronics Ads (Public) ---
+Route::get('/electronics', [ElectronicAdController::class, 'index']);
+Route::get('/electronics/search', [ElectronicAdController::class, 'search']);
+Route::get('/electronics/offers-box/ads', [ElectronicAdController::class, 'getOffersBoxAds']);
+Route::get('/electronics/{id}', [ElectronicAdController::class, 'show']);
+
 
 
 
@@ -194,6 +204,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/jobs/{jobAd}', [JobsAdController::class, 'update']);
     Route::post('/jobs/{jobAd}', [JobsAdController::class, 'approveAd']);
     Route::delete('/jobs/{jobAd}', [JobsAdController::class, 'destroy']);
+
+    // --- Electronics (CRUD Authenticated) ---
+    Route::post('/electronics', [ElectronicAdController::class, 'store']);
+    Route::put('/electronics/{electronicAd}', [ElectronicAdController::class, 'update']);
+    Route::delete('/electronics/{electronicAd}', [ElectronicAdController::class, 'destroy']);
 
 
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
@@ -293,5 +308,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/job-ads/pending', [JobsAdController::class, 'getPendingAds']);
         Route::post('/job-ads/{jobAd}/approve', [JobsAdController::class, 'approveAd']);
         Route::post('/job-ads/{jobAd}/reject', [JobsAdController::class, 'rejectAd']);
+
+        // --- Admin: Electronics Ads Management ---
+        Route::get('/electronics-ads', [ElectronicAdController::class, 'indexForAdmin']);
+        Route::get('/electronics-ads/pending', [ElectronicAdController::class, 'getPendingAds']);
+        Route::post('/electronics-ads/{id}/approve', [ElectronicAdController::class, 'approveAd']);
+        Route::post('/electronics-ads/{id}/reject', [ElectronicAdController::class, 'rejectAd']);
     });
 });
