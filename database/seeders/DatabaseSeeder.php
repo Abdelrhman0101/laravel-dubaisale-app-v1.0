@@ -29,5 +29,6 @@ class DatabaseSeeder extends Seeder
         $this->call(CarServiceTypeSeeder::class);
         $this->call(RealEstateAdsOptionsSeeder::class);
         $this->call(JopAdValuesSeeder::class);
+        $this->call(SystemSettingsSeeder::class);
     }
 }

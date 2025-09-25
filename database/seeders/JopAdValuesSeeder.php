@@ -13,18 +13,22 @@ class JopAdValuesSeeder extends Seeder
     public function run(): void
     {
         //
-        JopAdValuesModel::create([
-            'field_name'   => 'category_type',
-            'display_name' => 'Category Type',
-            'options'      => ['Job Offer', 'Job Wanted'],
-            'sort_order'   => 1,
-        ]);
+        JopAdValuesModel::updateOrCreate(
+            ['field_name' => 'category_type'],
+            [
+                'display_name' => 'Category Type',
+                'options'      => ['Job Offer', 'Job Seeker'],
+                'sort_order'   => 1,
+            ]
+        );
 
-        JopAdValuesModel::create([
-            'field_name'   => 'section_type',
-            'display_name' => 'Section Type',
-            'options'      => ['Cleaning Services', 'Construction', 'Driver', 'IT', 'Marketing'],
-            'sort_order'   => 2,
-        ]);
+        JopAdValuesModel::updateOrCreate(
+            ['field_name' => 'section_type'],
+            [
+                'display_name' => 'Section Type',
+                'options'      => ['Education', 'Engineering', 'Accounting', 'IT', 'Marketing'],
+                'sort_order'   => 2,
+            ]
+        );
     }
 }

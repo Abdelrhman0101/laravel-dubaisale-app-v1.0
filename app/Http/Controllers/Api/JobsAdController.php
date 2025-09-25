@@ -8,6 +8,7 @@ use App\Models\JobAd;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 class JobsAdController extends Controller
 {
@@ -145,10 +146,11 @@ class JobsAdController extends Controller
             'salary' => 'nullable|string|max:100',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'main_image' => 'required|image|max:5120',
+            'contact_info' => 'nullable|string',
+            // 'main_image' => 'nullable|image|max:5120',
             'advertiser_name' => 'nullable|string|max:255',
-            'phone_number' => 'required|string|max:20',
-            'whatsapp' => 'nullable|string|max:20',
+            // 'phone_number' => 'nullable|string|max:20',
+            // 'whatsapp' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             // Plan
             'plan_type' => 'nullable|string|max:50',
@@ -163,7 +165,7 @@ class JobsAdController extends Controller
         $data['add_category'] = 'Jop';
 
         // Upload main image
-        $data['main_image'] = $request->file('main_image')->store('jobs/main', 'public');
+        // $data['main_image'] = $request->file('main_image')->store('jobs/main', 'public');
         // Plan
         if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
             $data['plan_expires_at'] = now()->addDays((int) $request->plan_days);
@@ -268,6 +270,32 @@ class JobsAdController extends Controller
         return response()->json([
             'message' => 'Ad approved successfully.',
             'ad' => $jobAd
+        ]);
+    }
+
+
+    //get two image for jop offer and jop seeker
+    public function getCategoryImages()
+    {
+        $settings = DB::table('system_settings')
+            ->whereIn('key', ['job_offer_main_image', 'job_seeker_main_image'])
+            ->get()
+            ->keyBy('key');
+
+        $data = [
+            'job_offer' => [
+                'category' => 'Job Offer',
+                'image'    => $settings['job_offer_main_image']->value ?? null,
+            ],
+            'job_seeker' => [
+                'category' => 'Job Seeker',
+                'image'    => $settings['job_seeker_main_image']->value ?? null,
+            ],
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data'    => $data,
         ]);
     }
 }

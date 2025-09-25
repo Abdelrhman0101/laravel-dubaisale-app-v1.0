@@ -150,6 +150,9 @@ Route::get('/jobs', [JobsAdController::class, 'index']);
 Route::get('/jobs/offers-box/ads', [JobsAdController::class, 'getOffersBoxAds']);
 Route::get('/jobs/{jobAd}', [JobsAdController::class, 'show']);
 
+Route::get('/job-category-images', [JobsAdController::class, 'getCategoryImages']);
+
+
 
 
 /*
