@@ -17,7 +17,7 @@ class SystemSettingsSeeder extends Seeder
         DB::table('system_settings')->updateOrInsert(
             ['key' => 'job_offer_main_image'],
             [
-                'value' => 'electronics/main/mBcY8sq6r6nJDAIaXy6f3JxvT8lBFRHG6hSymmve.png',
+                'value' => 'real_estates/thumbnails/jyWyAf4NxG6GtcmWo5eco7D5PyZgK89vtnOXnYqT.jpg',
                 'type' => 'string',
                 'description' => 'الصورة الافتراضية لإعلانات Job Offer.'
             ]
@@ -26,7 +26,7 @@ class SystemSettingsSeeder extends Seeder
         DB::table('system_settings')->updateOrInsert(
             ['key' => 'job_seeker_main_image'],
             [
-                'value' => 'electronics/main/uyTE1Cm86bJnTMjFzV6T3BCfdGw7PYyPIKIrrdRv.png',
+                'value' => 'real_estates/main/AvewzsQUEuWJU9mOfNU2k7JENkqPgTgNyVXoXs84.jpg',
                 'type' => 'string',
                 'description' => 'الصورة الافتراضية لإعلانات Job Seeker.'
             ]
