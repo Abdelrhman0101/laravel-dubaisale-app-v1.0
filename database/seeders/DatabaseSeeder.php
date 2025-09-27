@@ -31,5 +31,6 @@ class DatabaseSeeder extends Seeder
         $this->call(JopAdValuesSeeder::class);
         $this->call(SystemSettingsSeeder::class);
         $this->call(ElectronicAdsOptionsSeeder::class);
+        $this->call(OtherServiceOptionSeeder::class);
     }
 }
