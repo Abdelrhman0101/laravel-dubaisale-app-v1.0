@@ -11,6 +11,7 @@ use App\Models\CarRentAd;
 use App\Http\Controllers\Controller;
 use App\Models\electronicAd;
 use App\Models\JobAd;
+use App\Models\OtherServiceAds;
 use Illuminate\Http\Request; // <<< أضف هذا السطر
 use App\Models\User; // <<< أضف هذا السطر
 use App\Models\RestaurantAd; // أضف الموديل الخاص بالمطاعم
@@ -95,7 +96,12 @@ class FeaturedContentController extends Controller
             $ads = electronicAd::where('user_id', $userId)
                 ->where('add_status', 'Valid')
                 ->latest()->take(8)
-                ->get(['id', 'title', 'price', 'emirate', 'district', 'area', 'product_name', 'main_image','add_category','add_status']);
+                ->get(['id', 'title', 'price', 'emirate', 'district', 'area', 'product_name', 'main_image', 'add_category', 'add_status']);
+        } elseif ($categorySlug === 'other_services') {
+            $ads = OtherServiceAds::where('user_id', $userId)
+                ->where('add_status', 'Valid')
+                ->latest()->take(8)
+                ->get(['id', 'title', 'price', 'emirate', 'district', 'area', 'service_name', 'main_image', 'add_category', 'add_status']);
         }
 
         return $ads;
@@ -147,6 +153,10 @@ class FeaturedContentController extends Controller
                 ->get();
         } elseif ($category == 'electronics') {
             $ads = electronicAd::where('add_category', 'electronics')
+                ->where('active_offers_box_status', true)
+                ->get();
+        } elseif ($category == 'other_services') {
+            $ads = OtherServiceAds::where('add_category', 'Other Services')
                 ->where('active_offers_box_status', true)
                 ->get();
         }

@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\OtherServiceAdsController;
 use App\Http\Controllers\RealEstateAdOptionsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -34,9 +35,11 @@ use App\Http\Controllers\Api\Admin\CarSaleFilterManagementController;
 use App\Http\Controllers\Api\Admin\OfferBoxSettingsController;
 use App\Http\Controllers\Api\Admin\SystemSettingsController;
 use App\Http\Controllers\Api\Admin\RestaurantCategoryController;
+use App\Http\Controllers\Api\OtherServiceAdsController as ApiOtherServiceAdsController;
 use App\Http\Controllers\CarSalesAdSpecController;
 use App\Http\Controllers\ElectronicAdOptionController;
 use App\Http\Controllers\JobAdValuesController;
+use App\Http\Controllers\OtherServiceOptionsController;
 use App\Http\Controllers\UserContactInfoController;
 
 
@@ -109,7 +112,8 @@ Route::get('/real_estate_options', [RealEstateAdOptionsController::class, 'getCl
 Route::get('/jobs_ad_values', [JobAdValuesController::class, 'getClientSpecs']);
 //----Electronic Ad options
 Route::get('/electronic_ad_options', [ElectronicAdOptionController::class, 'getClientSpecs']);
-
+//----Other Service Options
+Route::get('/other_service_options', [OtherServiceOptionsController::class, 'getClientSpecs']);
 // --- Car Service Types (Public) ---
 Route::get('/car-service-types', [CarServiceTypeController::class, 'getClientOptions']);
 
@@ -162,7 +166,11 @@ Route::get('/electronics/search', [ElectronicAdController::class, 'search']);
 Route::get('/electronics/offers-box/ads', [ElectronicAdController::class, 'getOffersBoxAds']);
 Route::get('/electronics/{id}', [ElectronicAdController::class, 'show']);
 
-
+//---- Other Service Ads (Public) ---
+Route::get('/other-services', [ApiOtherServiceAdsController::class, 'index']);
+Route::get('/other-services/search', [ApiOtherServiceAdsController::class, 'search']);
+Route::get('/other-services/offers-box/ads', [ApiOtherServiceAdsController::class, 'getOffersBoxAds']);
+Route::get('/other-services/{id}', [ApiOtherServiceAdsController::class, 'show']);
 
 
 /*
@@ -209,6 +217,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/electronics', [ElectronicAdController::class, 'store']);
     Route::put('/electronics/{electronicAd}', [ElectronicAdController::class, 'update']);
     Route::delete('/electronics/{electronicAd}', [ElectronicAdController::class, 'destroy']);
+
+    // --- Other Service Ads (CRUD Authenticated) ---
+    Route::post('/other-services', [ApiOtherServiceAdsController::class, 'store']);
+    Route::put('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'update']);
+    Route::post('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'approveAd']);
+    Route::delete('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'destroy']);    
 
 
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
