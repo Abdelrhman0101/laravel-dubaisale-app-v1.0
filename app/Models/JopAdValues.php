@@ -31,18 +31,18 @@ class JopAdValues extends Model
         return $query->orderBy('sort_order', 'asc');
     }
 
-    public function ensureOtherOption()
-    {
-        $options = $this->options ?? [];
-        $hasOther = collect($options)->contains(fn($opt) => strtolower($opt) === 'other');
+    // public function ensureOtherOption()
+    // {
+    //     $options = $this->options ?? [];
+    //     $hasOther = collect($options)->contains(fn($opt) => strtolower($opt) === 'other');
 
-        if (!$hasOther) {
-            $options[] = 'Other';
-            $this->options = $options;
-        }
+    //     if (!$hasOther) {
+    //         $options[] = 'Other';
+    //         $this->options = $options;
+    //     }
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     public static function getClientSpecs()
     {
@@ -50,7 +50,7 @@ class JopAdValues extends Model
             ->ordered()
             ->get()
             ->map(function ($spec) {
-                $spec->ensureOtherOption();
+                // $spec->ensureOtherOption();
                 return [
                     'field_name'   => $spec->field_name,
                     'display_name' => $spec->display_name,

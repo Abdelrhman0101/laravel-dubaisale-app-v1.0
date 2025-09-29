@@ -32,5 +32,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SystemSettingsSeeder::class);
         $this->call(ElectronicAdsOptionsSeeder::class);
         $this->call(OtherServiceOptionSeeder::class);
+        $this->call(LocationsSeeder::class);
     }
 }

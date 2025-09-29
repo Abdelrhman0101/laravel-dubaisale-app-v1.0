@@ -172,7 +172,7 @@ Route::get('/other-services/search', [ApiOtherServiceAdsController::class, 'sear
 Route::get('/other-services/offers-box/ads', [ApiOtherServiceAdsController::class, 'getOffersBoxAds']);
 Route::get('/other-services/{id}', [ApiOtherServiceAdsController::class, 'show']);
 
-
+Route::get('/locations/districts', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'getAllDistricts']);
 /*
 |--------------------------------------------------------------------------
 | Authenticated User Routes (Requires Bearer Token from Sanctum)
@@ -222,7 +222,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/other-services', [ApiOtherServiceAdsController::class, 'store']);
     Route::put('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'update']);
     Route::post('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'approveAd']);
-    Route::delete('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'destroy']);    
+    Route::delete('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'destroy']);
 
 
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
