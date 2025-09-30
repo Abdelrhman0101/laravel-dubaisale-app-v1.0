@@ -32,9 +32,12 @@ class DatabaseSeeder extends Seeder
         $this->call(SystemSettingsSeeder::class);
         $this->call(ElectronicAdsOptionsSeeder::class);
         $this->call(OtherServiceOptionSeeder::class);
+<<<<<<< HEAD
         $this->call(UserSeeder::class);
         
         // Seed locations (Emirates and Districts)
+=======
+>>>>>>> a2b62cc25650b96fc76374fe00eac6bdf7099a9e
         $this->call(LocationsSeeder::class);
     }
 }
