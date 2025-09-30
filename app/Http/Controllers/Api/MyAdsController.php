@@ -12,11 +12,6 @@ use App\Models\CarServicesAd;
 use App\Models\RestaurantAd;
 use App\Models\CarRentAd;
 use App\Models\JobAd;
-<<<<<<< HEAD
-use App\Models\OtherServiceAds;
-=======
-
->>>>>>> a2b62cc25650b96fc76374fe00eac6bdf7099a9e
 // في المستقبل، ستضيف الـ Models الأخرى هنا
 // use App\Models\RealEstateAd;
 // use App\Models\JobAd;
@@ -40,12 +35,8 @@ class MyAdsController extends Controller
         //Jobs Ads
         $jobAds = JobAd::where('user_id', $user->id)->get();
         $electronic = electronicAd::where('user_id', $user->id)->get();
-<<<<<<< HEAD
         $otherService=OtherServiceAds::where('user_id', $user->id)->get();
 
-=======
-        $otherService = OtherServiceAds::where('user_id', $user->id)->get();
->>>>>>> a2b62cc25650b96fc76374fe00eac6bdf7099a9e
         // --- الخطوة 2: توحيد شكل البيانات لكل قسم ---
         $formattedCarAds = $carAds->map(function ($ad) {
             return [

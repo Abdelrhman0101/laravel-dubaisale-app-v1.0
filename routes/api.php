@@ -171,14 +171,10 @@ Route::get('/other-services/search', [OtherServiceAdsController::class, 'search'
 Route::get('/other-services/offers-box/ads', [OtherServiceAdsController::class, 'getOffersBoxAds']);
 Route::get('/other-services/{id}', [OtherServiceAdsController::class, 'show']);
 
-<<<<<<< HEAD
 
 Route::get('/locations/districts', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'getAllDistricts']);
 Route::get('/system-settings/plans', [SystemSettingsController::class, 'getPlansSettings']);
 Route::get('/system-settings', [SystemSettingsController::class, 'index']);
-=======
-Route::get('/locations/districts', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'getAllDistricts']);
->>>>>>> a2b62cc25650b96fc76374fe00eac6bdf7099a9e
 /*
 |--------------------------------------------------------------------------
 | Authenticated User Routes (Requires Bearer Token from Sanctum)
@@ -229,18 +225,10 @@ Route::middleware([
     Route::delete('/electronics/{id}', [ElectronicAdController::class, 'destroy']);
 
     // --- Other Service Ads (CRUD Authenticated) ---
-<<<<<<< HEAD
     Route::post('/other-services', [OtherServiceAdsController::class, 'store']);
     Route::put('/other-services/{ad}', [OtherServiceAdsController::class, 'update']);
     Route::post('/other-services/{ad}', [OtherServiceAdsController::class, 'approveAd']);
     Route::delete('/other-services/{ad}', [OtherServiceAdsController::class, 'destroy']);
-=======
-    Route::post('/other-services', [ApiOtherServiceAdsController::class, 'store']);
-    Route::put('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'update']);
-    Route::post('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'approveAd']);
-    Route::delete('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'destroy']);
-
->>>>>>> a2b62cc25650b96fc76374fe00eac6bdf7099a9e
 
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
 
