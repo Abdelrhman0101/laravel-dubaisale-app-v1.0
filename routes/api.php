@@ -55,7 +55,7 @@ use App\Http\Middleware\IsAdmin;
 // لضمان تشغيل الجلسات (Sessions) له
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::post('/signup', [AuthController::class, 'signup']);
+Route::post('/newSignin', [AuthController::class, 'signup']);
 Route::post('/activate', [AuthController::class, 'activate']);
 Route::middleware(['SecureEndpoint'])->group(function () {
     Route::put('/verify', [AuthController::class, 'verifyOtp']);
