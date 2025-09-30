@@ -32,7 +32,11 @@ class User extends Authenticatable
         'advertiser_type',
         'advertiser_logo',
         'advertiser_location',
-
+        'otp_phone',
+        'otp_expires_at'
+        // 'is_active',
+        // 'otp_verified',
+        
     ];
 
     /**
@@ -44,6 +48,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
         'activation_code',
+        'otp_phone',
     ];
 
     /**
@@ -54,8 +59,10 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'activation_code_expires_at' => 'datetime',
+        'otp_expires_at' => 'datetime',
         'is_active' => 'boolean',
         'password' => 'hashed',
+        'otp_verified' => 'boolean',
     ];
 
     /**

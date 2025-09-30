@@ -1,7 +1,7 @@
 <?php
 
 
-use App\Http\Controllers\OtherServiceAdsController;
+use App\Http\Controllers\Api\OtherServiceAdsController;
 use App\Http\Controllers\RealEstateAdOptionsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,11 +35,8 @@ use App\Http\Controllers\Api\Admin\CarSaleFilterManagementController;
 use App\Http\Controllers\Api\Admin\OfferBoxSettingsController;
 use App\Http\Controllers\Api\Admin\SystemSettingsController;
 use App\Http\Controllers\Api\Admin\RestaurantCategoryController;
-use App\Http\Controllers\Api\OtherServiceAdsController as ApiOtherServiceAdsController;
 use App\Http\Controllers\CarSalesAdSpecController;
-use App\Http\Controllers\ElectronicAdOptionController;
 use App\Http\Controllers\JobAdValuesController;
-use App\Http\Controllers\OtherServiceOptionsController;
 use App\Http\Controllers\UserContactInfoController;
 
 
@@ -60,6 +57,11 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/activate', [AuthController::class, 'activate']);
+Route::middleware(['SecureEndpoint'])->group(function () {
+    Route::put('/verify', [AuthController::class, 'verifyOtp']);
+    Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+    Route::post('/convert-to-advertiser/{id}', [UserController::class, 'convertToAdvertiser']);
+});
 
 
 // --- Featured & Public Content ---
@@ -110,10 +112,7 @@ Route::get('/car-sales-ad-specs', [CarSalesAdSpecController::class, 'getClientSp
 Route::get('/real_estate_options', [RealEstateAdOptionsController::class, 'getClientSpecs']);
 // values of table jobs Ads
 Route::get('/jobs_ad_values', [JobAdValuesController::class, 'getClientSpecs']);
-//----Electronic Ad options
-Route::get('/electronic_ad_options', [ElectronicAdOptionController::class, 'getClientSpecs']);
-//----Other Service Options
-Route::get('/other_service_options', [OtherServiceOptionsController::class, 'getClientSpecs']);
+
 // --- Car Service Types (Public) ---
 Route::get('/car-service-types', [CarServiceTypeController::class, 'getClientOptions']);
 
@@ -167,19 +166,26 @@ Route::get('/electronics/offers-box/ads', [ElectronicAdController::class, 'getOf
 Route::get('/electronics/{id}', [ElectronicAdController::class, 'show']);
 
 //---- Other Service Ads (Public) ---
-Route::get('/other-services', [ApiOtherServiceAdsController::class, 'index']);
-Route::get('/other-services/search', [ApiOtherServiceAdsController::class, 'search']);
-Route::get('/other-services/offers-box/ads', [ApiOtherServiceAdsController::class, 'getOffersBoxAds']);
-Route::get('/other-services/{id}', [ApiOtherServiceAdsController::class, 'show']);
+Route::get('/other-services', [OtherServiceAdsController::class, 'index']);
+Route::get('/other-services/search', [OtherServiceAdsController::class, 'search']);
+Route::get('/other-services/offers-box/ads', [OtherServiceAdsController::class, 'getOffersBoxAds']);
+Route::get('/other-services/{id}', [OtherServiceAdsController::class, 'show']);
 
 
+Route::get('/locations/districts', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'getAllDistricts']);
+Route::get('/system-settings/plans', [SystemSettingsController::class, 'getPlansSettings']);
+Route::get('/system-settings', [SystemSettingsController::class, 'index']);
 /*
 |--------------------------------------------------------------------------
 | Authenticated User Routes (Requires Bearer Token from Sanctum)
 |--------------------------------------------------------------------------
 */
 // هذه المجموعة محمية بـ 'auth:sanctum' وهي لا تدعم الجلسات بشكل افتراضي
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware([
+    'auth:sanctum',
+    'EnsureUserIsVerified',
+    'EnsureUserIsAdvertiser'
+])->group(function () {
 
     // --- User & Profile Management ---
     Route::get('/user', fn(Request $request) => $request->user());
@@ -215,15 +221,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- Electronics (CRUD Authenticated) ---
     Route::post('/electronics', [ElectronicAdController::class, 'store']);
-    Route::put('/electronics/{electronicAd}', [ElectronicAdController::class, 'update']);
-    Route::delete('/electronics/{electronicAd}', [ElectronicAdController::class, 'destroy']);
+    Route::put('/electronics/{id}', [ElectronicAdController::class, 'update']);
+    Route::delete('/electronics/{id}', [ElectronicAdController::class, 'destroy']);
 
     // --- Other Service Ads (CRUD Authenticated) ---
-    Route::post('/other-services', [ApiOtherServiceAdsController::class, 'store']);
-    Route::put('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'update']);
-    Route::post('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'approveAd']);
-    Route::delete('/other-services/{ad}', [ApiOtherServiceAdsController::class, 'destroy']);    
-
+    Route::post('/other-services', [OtherServiceAdsController::class, 'store']);
+    Route::put('/other-services/{ad}', [OtherServiceAdsController::class, 'update']);
+    Route::post('/other-services/{ad}', [OtherServiceAdsController::class, 'approveAd']);
+    Route::delete('/other-services/{ad}', [OtherServiceAdsController::class, 'destroy']);
 
     Route::post('/offers-box/activate', [OfferBoxActivationController::class, 'activate']);
 
@@ -300,12 +305,17 @@ Route::middleware('auth:sanctum')->group(function () {
         // --- Admin: Offer Box & System Settings ---
         Route::get('/offer-box-settings', [OfferBoxSettingsController::class, 'index']);
         Route::post('/offer-box-settings', [OfferBoxSettingsController::class, 'store']);
-        Route::get('/system-settings', [SystemSettingsController::class, 'index']);
+
+        // System Settings
+
         Route::post('/system-settings', [SystemSettingsController::class, 'store']);
+        Route::post('/system-settings/create', [SystemSettingsController::class, 'createSetting']);
         Route::put('/system-settings/{setting:key}', [SystemSettingsController::class, 'update']);
+        Route::delete('/system-settings/{setting:key}', [SystemSettingsController::class, 'deleteSetting']);
 
         // Locations (Emirates & Districts)
         Route::get('/locations/emirates', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'index']);
+
         Route::post('/locations/emirates', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'upsertEmirate']);
         Route::post('/locations/emirates/{emirate}/districts', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'upsertDistricts']);
         Route::delete('/locations/emirates/{emirate}/district', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'deleteDistrict']);

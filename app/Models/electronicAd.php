@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 class electronicAd extends Model
 {
     //
-    protected $table = "electronics_home_ads";
+    protected $table = "electronic_ads";
     protected $guarded = [];
 
     protected $casts = [
@@ -24,6 +24,7 @@ class electronicAd extends Model
 
     protected $hidden = [
         'updated_at',
+        'thumbnail_images_urls',
         'add_status',
         'add_category',
     ];
@@ -79,27 +80,25 @@ class electronicAd extends Model
 
     public function scopeFilterByProductName(Builder $query, $name)
     {
-        if (is_string($name) && str_contains($name, ',')) {
-            $names = array_map('trim', explode(',', $name));
-            return $query->whereIn('product_name', $names);
-        } elseif (is_array($name)) {
-            return $query->whereIn('product_name', $name);
+        return $query->where('product_name', 'like', "%{$name}%");
+    }
+
+    public function scopeFilterByBrand(Builder $query, $brand)
+    {
+        if (is_string($brand) && str_contains($brand, ',')) {
+            $brands = array_map('trim', explode(',', $brand));
+            return $query->whereIn('brand', $brands);
+        } elseif (is_array($brand)) {
+            return $query->whereIn('brand', $brand);
         } else {
-            return $query->where('product_name', $name);
+            return $query->where('brand', $brand);
         }
     }
 
-    // public function scopeFilterByBrand(Builder $query, $brand)
+    // public function scopeFilterByWarranty(Builder $query, $warranty)
     // {
-    //     if (is_string($brand) && str_contains($brand, ',')) {
-    //         $brands = array_map('trim', explode(',', $brand));
-    //         return $query->whereIn('brand', $brands);
-    //     } elseif (is_array($brand)) {
-    //         return $query->whereIn('brand', $brand);
-    //     } else {
-    //         return $query->where('brand', $brand);
-    //     }
-    // }
+    //     return $query->where('warranty', (bool) $warranty);
+    // 
 
     public function scopeFilterByEmirate(Builder $query, $emirate)
     {
@@ -127,12 +126,10 @@ class electronicAd extends Model
 
     public function scopeFilterByPriceRange(Builder $query, $min = null, $max = null)
     {
-        if (!is_null($min)) {
+        if (!is_null($min))
             $query->where('price', '>=', $min);
-        }
-        if (!is_null($max)) {
+        if (!is_null($max))
             $query->where('price', '<=', $max);
-        }
         return $query;
     }
 
@@ -186,6 +183,5 @@ class electronicAd extends Model
     public function incrementViews(): void
     {
         $this->increment('views');
-
-}
+    }
 }

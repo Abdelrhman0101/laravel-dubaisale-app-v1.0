@@ -32,6 +32,14 @@ class ElectronicAdController extends Controller
         });
 
 
+        $query->when($request->query('brand'), function ($q, $brand) {
+            return $q->filterByBrand($brand);
+        });
+
+        $query->when($request->query('warranty'), function ($q, $warranty) {
+            return $q->filterByWarranty($warranty);
+        });
+
         $query->when($request->query('product_name'), function ($q, $productName) {
             return $q->filterByProductName($productName);
         });
@@ -46,7 +54,7 @@ class ElectronicAdController extends Controller
                 $subQuery->where('title', 'like', "%{$keyword}%")
                     ->orWhere('description', 'like', "%{$keyword}%")
                     ->orWhere('product_name', 'like', "%{$keyword}%")
-                    // ->orWhere('brand', 'like', "%{$keyword}%")
+                    ->orWhere('brand', 'like', "%{$keyword}%")
                     ->orWhere('section_type', 'like', "%{$keyword}%");
             });
         });
@@ -126,6 +134,14 @@ class ElectronicAdController extends Controller
             return $q->filterBySectionType($section);
         });
 
+        $query->when($request->query('brand'), function ($q, $brand) {
+            return $q->filterByBrand($brand);
+        });
+
+        $query->when($request->query('warranty'), function ($q, $warranty) {
+            return $q->filterByWarranty($warranty);
+        });
+
         $query->when($request->query('product_name'), function ($q, $name) {
             return $q->filterByProductName($name);
         });
@@ -145,6 +161,7 @@ class ElectronicAdController extends Controller
                 $subQuery->where('title', 'like', "%{$keyword}%")
                     ->orWhere('description', 'like', "%{$keyword}%")
                     ->orWhere('product_name', 'like', "%{$keyword}%")
+                    ->orWhere('brand', 'like', "%{$keyword}%")
                     ->orWhere('section_type', 'like', "%{$keyword}%");
             });
         });
@@ -214,6 +231,8 @@ class ElectronicAdController extends Controller
             // Product
             'product_name' => 'required|string|max:255',
             'section_type' => 'required|string|max:100',
+            'brand' => 'nullable|string|max:100',
+            'warranty' => 'nullable|boolean',
             'price' => 'required|numeric|min:0',
 
             // Advertiser
@@ -289,8 +308,8 @@ class ElectronicAdController extends Controller
             'district' => 'sometimes|nullable|string|max:100',
             'section_type' => 'sometimes|required|string|max:100',
             'product_name' => 'sometimes|required|string|max:255',
-            // 'brand' => 'sometimes|nullable|string|max:100',
-            // 'warranty' => 'sometimes|nullable|boolean',
+            'brand' => 'sometimes|nullable|string|max:100',
+            'warranty' => 'sometimes|nullable|boolean',
             'price' => 'sometimes|required|numeric|min:0',
             'rank' => 'nullable|integer|min:0|max:100',
 

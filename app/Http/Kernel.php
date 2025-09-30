@@ -65,12 +65,14 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'admin' => \App\Http\Middleware\IsAdmin::class, // <-- أضف هذا السطر
         'admin.web' => \App\Http\Middleware\IsAdminWeb::class,
+        // 'SecureEndpoint' => \App\Http\Middleware\SecureEndpoint::class,
+        // 'verify' => \App\Http\Middleware\EnsureUserIsVerified::class,
 
     ];
 
     protected function schedule(Schedule $schedule)
-{
-    // ...
-    $schedule->command('app:deactivate-expired-offers')->daily();
-}
+    {
+        // ...
+        $schedule->command('app:deactivate-expired-offers')->daily();
+    }
 }

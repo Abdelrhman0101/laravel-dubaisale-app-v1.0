@@ -41,7 +41,7 @@ class LocationsController extends Controller
 
         $name = $this->normalizeName($validated['name']);
         $displayName = isset($validated['display_name']) ? trim($validated['display_name']) : $name;
-        $newDistricts = collect($validated['districts'] ?? [])->map(fn ($d) => $this->normalizeName($d))->values()->all();
+        $newDistricts = collect($validated['districts'] ?? [])->map(fn($d) => $this->normalizeName($d))->values()->all();
         $replace = (bool)($validated['replace'] ?? false);
 
         [$emirates, $setting] = $this->getEmiratesSetting();
@@ -61,7 +61,7 @@ class LocationsController extends Controller
                 $current['districts'] = array_values(array_unique($newDistricts));
             } else {
                 $merged = array_merge($current['districts'] ?? [], $newDistricts);
-                $current['districts'] = array_values(array_unique(array_map(fn ($d) => $this->normalizeName($d), $merged)));
+                $current['districts'] = array_values(array_unique(array_map(fn($d) => $this->normalizeName($d), $merged)));
             }
             $emirates[$index] = $current;
         }
@@ -86,7 +86,7 @@ class LocationsController extends Controller
         ]);
 
         $name = $this->normalizeName($emirate);
-        $newDistricts = collect($validated['districts'])->map(fn ($d) => $this->normalizeName($d))->values()->all();
+        $newDistricts = collect($validated['districts'])->map(fn($d) => $this->normalizeName($d))->values()->all();
         $replace = (bool)($validated['replace'] ?? false);
 
         [$emirates, $setting] = $this->getEmiratesSetting();
@@ -103,7 +103,7 @@ class LocationsController extends Controller
             $current['districts'] = array_values(array_unique($newDistricts));
         } else {
             $merged = array_merge($current['districts'] ?? [], $newDistricts);
-            $current['districts'] = array_values(array_unique(array_map(fn ($d) => $this->normalizeName($d), $merged)));
+            $current['districts'] = array_values(array_unique(array_map(fn($d) => $this->normalizeName($d), $merged)));
         }
         $emirates[$index] = $current;
 
@@ -184,6 +184,41 @@ class LocationsController extends Controller
         ]);
     }
 
+    /**
+     * [Admin] Get all districts from all emirates.
+     */
+    public function getAllDistricts(): JsonResponse
+    {
+        [$emirates, $setting] = $this->getEmiratesSetting();
+
+        $allDistricts = [];
+        foreach ($emirates as $emirate) {
+            foreach ($emirate['districts'] ?? [] as $district) {
+                $allDistricts[] = [
+                    'district' => $district,
+                    'emirate' => $emirate['name'],
+                    'emirate_display_name' => $emirate['display_name'],
+                ];
+            }
+        }
+
+        // Remove duplicates based on district name (case-insensitive)
+        $uniqueDistricts = [];
+        $seen = [];
+        foreach ($allDistricts as $item) {
+            $key = mb_strtolower($item['district']);
+            if (!isset($seen[$key])) {
+                $uniqueDistricts[] = $item;
+                $seen[$key] = true;
+            }
+        }
+
+        return response()->json([
+            'total_districts' => count($uniqueDistricts),
+            'districts' => $uniqueDistricts,
+        ]);
+    }
+
     // ================= Helpers =================
 
     private function getEmiratesSetting(): array
@@ -198,7 +233,9 @@ class LocationsController extends Controller
         );
 
         $decoded = json_decode($setting->value ?: '[]', true);
-        if (!is_array($decoded)) { $decoded = []; }
+        if (!is_array($decoded)) {
+            $decoded = [];
+        }
 
         // Normalize internal shape
         $normalized = [];
@@ -206,12 +243,12 @@ class LocationsController extends Controller
             $normalized[] = [
                 'name' => isset($item['name']) ? $this->normalizeName($item['name']) : null,
                 'display_name' => isset($item['display_name']) && $item['display_name'] !== '' ? $item['display_name'] : (isset($item['name']) ? $this->normalizeName($item['name']) : ''),
-                'districts' => array_values(array_unique(array_map(fn ($d) => $this->normalizeName($d), (array)($item['districts'] ?? [])))),
+                'districts' => array_values(array_unique(array_map(fn($d) => $this->normalizeName($d), (array)($item['districts'] ?? [])))),
             ];
         }
 
         // Remove null/invalid entries
-        $normalized = array_values(array_filter($normalized, fn ($e) => !empty($e['name'])));
+        $normalized = array_values(array_filter($normalized, fn($e) => !empty($e['name'])));
 
         return [$normalized, $setting];
     }

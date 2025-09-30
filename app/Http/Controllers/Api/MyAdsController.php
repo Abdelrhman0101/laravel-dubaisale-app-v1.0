@@ -11,6 +11,7 @@ use App\Models\CarServicesAd;
 use App\Models\RestaurantAd;
 use App\Models\CarRentAd;
 use App\Models\JobAd;
+use App\Models\OtherServiceAds;
 // في المستقبل، ستضيف الـ Models الأخرى هنا
 // use App\Models\RealEstateAd;
 // use App\Models\JobAd;
@@ -34,6 +35,7 @@ class MyAdsController extends Controller
         //Jobs Ads
         $jobAds = JobAd::where('user_id', $user->id)->get();
         $electronic = electronicAd::where('user_id', $user->id)->get();
+        $otherService=OtherServiceAds::where('user_id', $user->id)->get();
 
         // --- الخطوة 2: توحيد شكل البيانات لكل قسم ---
         $formattedCarAds = $carAds->map(function ($ad) {
@@ -173,6 +175,25 @@ class MyAdsController extends Controller
             ];
         });
 
+        $formattedOtherServiceAds = $otherService->map(function ($ad) {
+            return [
+                'id' => $ad->id,
+                'title' => $ad->title,
+                'price' => $ad->price,
+                'emirate' => $ad->emirate,
+                'district' => $ad->district,
+                'area' => $ad->area,
+                'service_name' => $ad->service_name,
+                'section_type' => $ad->section_type,
+                'main_image_url' => asset('storage/' . $ad->main_image),
+                'category' => $ad->add_category,
+                'status' => $ad->add_status,
+                'category_slug' => 'other-services',
+                'created_at' => $ad->created_at->toDateTimeString(),
+                'created_at_timestamp' => $ad->created_at->timestamp,
+            ];
+        });
+
         // --- الخطوة 3 و 4: دمج كل القوائم وترتيبها ---
         // تحويل Collections إلى arrays لتجنب مشاكل getKey()
         $allAdsArray = array_merge(
@@ -182,7 +203,8 @@ class MyAdsController extends Controller
             $formattedCarRentAds->toArray(),
             $formattedRealEstateAds->toArray(),
             $formattedJobAds->toArray(),
-            $formattedElectronicAds->toArray()
+            $formattedElectronicAds->toArray(),
+            $formattedOtherServiceAds->toArray()
         );
 
         // ترتيب البيانات حسب created_at_timestamp

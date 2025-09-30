@@ -15,12 +15,12 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'username' => 'testuser',
-            'email' => 'test@example.com',
-            'phone' => '+971501234567',
-            'is_active' => true,
-        ]);
+        // User::factory()->create([
+        //     'username' => 'testuser',
+        //     'email' => 'test@example.com',
+        //     'phone' => '+971501234567',
+        //     'is_active' => true,
+        // ]);
 
         // Seed car sales ad specifications
         $this->call(CarSalesAdSpecSeeder::class);
@@ -32,5 +32,9 @@ class DatabaseSeeder extends Seeder
         $this->call(SystemSettingsSeeder::class);
         $this->call(ElectronicAdsOptionsSeeder::class);
         $this->call(OtherServiceOptionSeeder::class);
+        $this->call(UserSeeder::class);
+        
+        // Seed locations (Emirates and Districts)
+        $this->call(LocationsSeeder::class);
     }
 }
