@@ -57,11 +57,11 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/newSignin', [AuthController::class, 'signup']);
 Route::post('/activate', [AuthController::class, 'activate']);
-Route::middleware(['SecureEndpoint'])->group(function () {
+// Route::middleware(['SecureEndpoint'])->group(function () {
     Route::put('/verify', [AuthController::class, 'verifyOtp']);
     Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
     Route::post('/convert-to-advertiser/{id}', [UserController::class, 'convertToAdvertiser']);
-});
+// });
 
 
 // --- Featured & Public Content ---
