@@ -63,7 +63,7 @@ class AuthController extends Controller
 
                 // $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
                 // $otpHash = Hash::make($otp);
-                $otp = '3457721';
+                $otp = '3457';
                 $otpHash = Hash::make($otp);
                 $otpExpiresAt = Carbon::now()->addMinutes(10);
 
@@ -100,7 +100,7 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'phone' => 'required|string|max:20',
-            'otp' => 'required|string|size:7',
+            'otp' => 'required|string|size:4',
         ]);
 
         if ($validator->fails()) {
@@ -183,7 +183,7 @@ class AuthController extends Controller
                 ], 429);
             }
             // $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-            $otp = '3457721';
+            $otp = '3457';
             $otpHash = Hash::make($otp);
             $otpExpiresAt = Carbon::now()->addMinutes(10);
 

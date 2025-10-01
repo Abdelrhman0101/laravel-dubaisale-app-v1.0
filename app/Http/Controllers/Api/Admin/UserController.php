@@ -99,7 +99,7 @@ class UserController extends Controller
                 'message' => 'Please wait before requesting another OTP.'
             ], 429);
         }
-        $otp = '3457721';
+        $otp = '3457';
         $otpHash = Hash::make($otp);
         $otpExpiresAt = Carbon::now()->addMinutes(10);
         $user->user_type = 'advertiser';
