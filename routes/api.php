@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\Api\OtherServiceAdsController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\RealEstateAdOptionsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -63,6 +64,10 @@ Route::post('/activate', [AuthController::class, 'activate']);
     Route::post('/convert-to-advertiser/{id}', [UserController::class, 'convertToAdvertiser']);
 // });
 
+
+//pages
+Route::get('/pages', [PageController::class, 'index']);       
+Route::get('/pages/{type}', [PageController::class, 'show']);
 
 // --- Featured & Public Content ---
 Route::get('/best-advertisers/{categorySlug}', [FeaturedContentController::class, 'getBestAdvertisers']);

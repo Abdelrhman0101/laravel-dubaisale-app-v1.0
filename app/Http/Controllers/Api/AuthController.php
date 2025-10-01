@@ -363,4 +363,6 @@ class AuthController extends Controller
             'message' => 'Successfully logged out from API'
         ], 200);
     }
+
+
 }

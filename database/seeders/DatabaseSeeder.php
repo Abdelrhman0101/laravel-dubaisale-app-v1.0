@@ -36,5 +36,6 @@ class DatabaseSeeder extends Seeder
         
         // Seed locations (Emirates and Districts)
         $this->call(LocationsSeeder::class);
+        $this->call(PageSeeder::class);
     }
 }
