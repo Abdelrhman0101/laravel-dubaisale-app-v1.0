@@ -115,7 +115,7 @@ class AuthController extends Controller
                 return response()->json(['message' => 'Invalid phone or code'], 400);
             }
 
-            if ($user->user_type === 'guest') {
+            if (!$user->otp_phone && $user->user_type === 'guest') {
                 return response()->json(['message' => 'Guest users do not require OTP verification'], 200);
             }
 
@@ -126,7 +126,6 @@ class AuthController extends Controller
             if (!Hash::check($otp, $user->otp_phone)) {
                 return response()->json(['message' => 'Invalid OTP'], 400);
             }
-
             $user->otp_verified = true;
             $user->otp_phone = null;
             $user->otp_expires_at = null;

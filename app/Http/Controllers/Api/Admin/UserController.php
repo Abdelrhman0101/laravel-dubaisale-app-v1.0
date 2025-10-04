@@ -102,7 +102,7 @@ class UserController extends Controller
         $otp = '3457';
         $otpHash = Hash::make($otp);
         $otpExpiresAt = Carbon::now()->addMinutes(10);
-        $user->user_type = 'advertiser';
+        // $user->user_type = 'advertiser';
         $user->otp_phone = $otpHash;
         $user->otp_expires_at = $otpExpiresAt;
         $user->otp_verified = false;
