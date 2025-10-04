@@ -72,14 +72,12 @@ class AuthController extends Controller
                     'otp_expires_at' => $otpExpiresAt,
                     'otp_verified' => false,
                 ]);
-
-                $user->refresh();
-
                 // $this->sendOtpToPhone($phone, $otp);
 
                 $message = 'OTP has been sent to your phone. Please verify to continue.';
                 Cache::put("otp_limit:$phone", true, 60);
             }
+            $user->refresh();
 
             return response()->json([
                 'message' => $message,
