@@ -61,7 +61,10 @@ Route::post('/activate', [AuthController::class, 'activate']);
 // Route::middleware(['SecureEndpoint'])->group(function () {
     Route::put('/verify', [AuthController::class, 'verifyOtp']);
     Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
-    Route::post('/convert-to-advertiser/{id}', [UserController::class, 'convertToAdvertiser']);
+    // تم إلغاء مسار التحويل غير الآمن بالمعرف
+    // Route::post('/convert-to-advertiser/{id}', [UserController::class, 'convertToAdvertiser']);
+    // مسار آمن لطلب OTP بناءً على رقم الهاتف
+    Route::post('/request-otp', [AuthController::class, 'requestOtp']);
 // });
 
 

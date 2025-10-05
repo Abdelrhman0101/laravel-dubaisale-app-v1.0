@@ -33,7 +33,9 @@ class User extends Authenticatable
         'advertiser_logo',
         'advertiser_location',
         'otp_phone',
-        'otp_expires_at'
+        'otp_expires_at',
+        'user_type',
+        'otp_verified'
         // 'is_active',
         // 'otp_verified',
         
