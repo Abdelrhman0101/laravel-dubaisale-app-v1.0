@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Storage;
 class electronicAd extends Model
 {
     //
-    protected $table = "electronic_ads";
+    // Use the existing table created by migrations
+    protected $table = "electronics_home_ads";
     protected $guarded = [];
 
     protected $casts = [
