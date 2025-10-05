@@ -72,3 +72,133 @@
 - يتم حماية مسارات المعلنين عبر وسائط: `auth:sanctum`, `EnsureUserIsVerified`, و`EnsureUserIsAdvertiser`.
 - لا يتم حذف التوكينات القديمة عند النجاح في التحقق؛ يسمح بتعدد الجلسات.
 - `POST /api/login` مخصص للمشرفين (`role = admin`) فقط.
+
+## أمثلة JSON سريعة
+ملاحظة: الأمثلة التالية توضيحية وقد تختلف صياغة الرسائل قليلًا حسب الإصدار.
+
+- مثال 1: مستخدم جديد تمامًا (POST `/api/newSignin`)
+  - Request Body:
+    ```json
+    {
+      "phone": "+971500000000"
+    }
+    ```
+  - Response Body (200):
+    ```json
+    {
+      "message": "Signed in as guest"
+    }
+    ```
+
+- مثال 2: مستخدم Guest حالي (POST `/api/newSignin`)
+  - Request Body:
+    ```json
+    {
+      "phone": "+971500000000"
+    }
+    ```
+  - Response Body (200):
+    ```json
+    {
+      "message": "Welcome back, guest user"
+    }
+    ```
+
+- مثال 3: Guest يريد التحول إلى Advertiser
+  - خطوة الطلب (POST `/api/request-otp`)
+    - Request Body:
+      ```json
+      {
+        "phone": "+971500000000"
+      }
+      ```
+    - Response Body (200):
+      ```json
+      {
+        "message": "OTP has been sent. Verify to convert your account to advertiser.",
+        "expires_in": 600
+      }
+      ```
+  - خطوة التحقق (PUT `/api/verify`)
+    - Request Body:
+      ```json
+      {
+        "phone": "+971500000000",
+        "otp": "3457"
+      }
+      ```
+    - Response Body (200):
+      ```json
+      {
+        "message": "Verification successful",
+        "user_type": "advertiser",
+        "otp_verified": true,
+        "token": "<sanctum_plain_text_token>"
+      }
+      ```
+
+- مثال 4: Advertiser حالي يقوم بتسجيل الدخول عبر OTP
+  - خطوة الطلب (POST `/api/request-otp`)
+    - Request Body:
+      ```json
+      {
+        "phone": "+971511111111"
+      }
+      ```
+    - Response Body (200):
+      ```json
+      {
+        "message": "OTP has been sent. Verify to login as advertiser.",
+        "expires_in": 600
+      }
+      ```
+  - خطوة التحقق (PUT `/api/verify`)
+    - Request Body:
+      ```json
+      {
+        "phone": "+971511111111",
+        "otp": "3457"
+      }
+      ```
+    - Response Body (200):
+      ```json
+      {
+        "message": "Verification successful",
+        "token": "<sanctum_plain_text_token>"
+      }
+      ```
+
+- مثال 5: إعادة إرسال OTP (POST `/api/resend-otp`)
+  - Request Body:
+    ```json
+    {
+      "phone": "+971511111111"
+    }
+    ```
+  - Response Body (200):
+    ```json
+    {
+      "message": "OTP resent successfully",
+      "expires_in": 600
+    }
+    ```
+
+- أمثلة أخطاء شائعة
+  - Rate limit (429) لطلب أو إعادة إرسال OTP:
+    ```json
+    {
+      "message": "Please wait before requesting another OTP."
+    }
+    ```
+  - مستخدم غير موجود لـ `/api/request-otp` (404):
+    ```json
+    {
+      "message": "User not found. Please sign up first via /newSignin."
+    }
+    ```
+  - محاولة دخول بكلمة مرور لمستخدم غير Admin (403):
+    ```json
+    {
+      "message": "Access denied. Password login is restricted to admins only."
+    }
+    ```
