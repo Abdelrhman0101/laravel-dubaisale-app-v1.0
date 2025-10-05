@@ -85,30 +85,30 @@ class UserController extends Controller
         return response()->json(null, 204);
     }
 
-    public function convertToAdvertiser(User $user, $id)
-    {
-        $user = User::findOrFail($id);
-        if (!$user) {
-            return response()->json(['message' => 'User not found.'], 404);
-        }
-        if ($user->user_type == 'advertiser') {
-            return response()->json(['message' => 'User is already an advertiser.'], 400);
-        }
-        if (Cache::has("otp_limit:$user->phone")) {
-            return response()->json([
-                'message' => 'Please wait before requesting another OTP.'
-            ], 429);
-        }
-        $otp = '3457';
-        $otpHash = Hash::make($otp);
-        $otpExpiresAt = Carbon::now()->addMinutes(10);
-        // $user->user_type = 'advertiser';
-        $user->otp_phone = $otpHash;
-        $user->otp_expires_at = $otpExpiresAt;
-        $user->otp_verified = false;
-        $user->save();
-        Cache::put("otp_limit:$user->phone", true, 60);
+    // public function convertToAdvertiser(User $user, $id)
+    // {
+    //     $user = User::findOrFail($id);
+    //     if (!$user) {
+    //         return response()->json(['message' => 'User not found.'], 404);
+    //     }
+    //     if ($user->user_type == 'advertiser') {
+    //         return response()->json(['message' => 'User is already an advertiser.'], 400);
+    //     }
+    //     if (Cache::has("otp_limit:$user->phone")) {
+    //         return response()->json([
+    //             'message' => 'Please wait before requesting another OTP.'
+    //         ], 429);
+    //     }
+    //     $otp = '3457';
+    //     $otpHash = Hash::make($otp);
+    //     $otpExpiresAt = Carbon::now()->addMinutes(10);
+    //     // $user->user_type = 'advertiser';
+    //     $user->otp_phone = $otpHash;
+    //     $user->otp_expires_at = $otpExpiresAt;
+    //     $user->otp_verified = false;
+    //     $user->save();
+    //     Cache::put("otp_limit:$user->phone", true, 60);
 
-        return response()->json($user);
-    }
+    //     return response()->json($user);
+    // }
 }

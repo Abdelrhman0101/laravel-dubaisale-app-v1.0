@@ -424,12 +424,18 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        $user->currentAccessToken()?->delete();
+        $user->otp_verified = false;
+        $user->save();
 
         return response()->json([
             'message' => 'Successfully logged out from API'
         ], 200);
     }
-
-
 }

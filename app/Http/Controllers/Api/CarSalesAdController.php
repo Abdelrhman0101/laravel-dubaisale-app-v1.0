@@ -216,9 +216,10 @@ class CarSalesAdController extends Controller
     {
         $validatedData = $request->validate([
             // ... (نفس قواعد التحقق السابقة)
-            'title' => 'required|string|max:255',
+            'title' => 'required|string|max:100',
             'description' => 'required|string',
             'make' => 'required|string',
+            // 'advertiser_name'=>'nullable|string|max:50',
             'model' => 'required|string',
             'year' => 'required|digits:4',
             'km' => 'required|integer',

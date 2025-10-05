@@ -290,6 +290,7 @@ class CarRentAdController extends Controller
                 'title' => $ad->title,
                 'make' => $ad->make,
                 'model' => $ad->model,
+                'trim'=> $ad->trim,
                 'year' => $ad->year,
                 'price' => $ad->price,
                 'main_image' => $ad->main_image,
