@@ -352,10 +352,116 @@ class AuthController extends Controller
     /**
      * تسجيل خروج المستخدم وإبطال التوكن الحالي (للـ API).
      */
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'identifier' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $user = User::where('email', $request->identifier)
+            ->orWhere('phone', $request->identifier)
+            ->orWhere('whatsapp', $request->identifier)
+            ->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        if (!$user->is_active) {
+            return response()->json(['message' => 'Your account is not activated.'], 403);
+        }
+
+        // تقييد تسجيل الدخول عبر كلمة المرور للمشرفين فقط
+        if ($user->role !== 'admin') {
+            return response()->json([
+                'message' => 'Access denied. Password login is restricted to admins only.'
+            ], 403);
+        }
+
+        // --- لقد قمنا بحذف منطق إنشاء الجلسة من هنا بالكامل ---
+
+        // إصدار توكن الـ API (المنطق الأصلي والمستقر)
+        $user->tokens()->delete();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login successful.',
+            'user' => $user,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+        ], 200);
+    }
+
+    /**
+     * POST /request-otp
+     * إرسال OTP للمستخدمين الضيوف الراغبين في التحول إلى معلنين،
+     * أو للمعلنين الحاليين الذين يريدون تسجيل الدخول عبر OTP.
+     */
+    public function requestOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string|max:20',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Invalid phone number'], 422);
+        }
+
+        $phone = $request->get('phone');
+
+        try {
+            $user = User::where('phone', $phone)->first();
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'User not found. Please sign up first via /newSignin.'
+                ], 404);
+            }
+
+            // منع الإرسال المتكرر خلال 60 ثانية
+            if (Cache::has("otp_limit:$phone")) {
+                return response()->json([
+                    'message' => 'Please wait before requesting another OTP.'
+                ], 429);
+            }
+
+            // توليد وتخزين OTP
+            $otp = '3457';
+            $otpHash = Hash::make($otp);
+            $otpExpiresAt = Carbon::now()->addMinutes(10);
+
+            $user->update([
+                'otp_phone' => $otpHash,
+                'otp_expires_at' => $otpExpiresAt,
+                'otp_verified' => false,
+            ]);
+
+            Cache::put("otp_limit:$phone", true, 60);
+
+            // رسالة حسب نوع المستخدم
+            $message = $user->user_type === 'guest'
+                ? 'OTP has been sent. Verify to convert your account to advertiser.'
+                : 'OTP has been sent. Verify to login as advertiser.';
+
+            return response()->json([
+                'message' => $message,
+                'expires_in' => 600,
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Failed to request OTP, please try again later.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-
         return response()->json([
             'message' => 'Successfully logged out from API'
         ], 200);
