@@ -3,7 +3,7 @@
         @php $isEn = request()->is('en'); @endphp
         <div class="hero-badge mb-4">Dubisale</div>
         <h1 class="hero-title text-3xl lg:text-5xl font-extrabold mb-4">
-            {{ $isEn ? 'Dubisale App: The easiest way to buy and sell in the UAE.' : 'تطبيق Dubisale: أسهل طريقة للبيع والشراء في الإمارات.' }}
+            {{ $isEn ? 'Dubisale App: The easiest way to buy and sell in the UAE.' : 'تطبيق دبي سيل : أسهل طريقة للبيع والشراء في الإمارات.' }}
         </h1>
         <p class="hero-text text-lg lg:text-xl mb-10">
             {{ $isEn ? 'Join thousands of users on the fastest-growing classifieds platform. Safe, easy, and reliable.' : 'انضم إلى آلاف المستخدمين على منصة الإعلانات المبوبة الأسرع نموًا. آمن، سهل، وموثوق.' }}
