@@ -16,7 +16,7 @@
                 @if($isEn)
                     <span class="store-icon" aria-hidden="true">
                         <!-- Simplified Google Play icon -->
-                        <img src="{{ asset('/storage/logotype_14417695.png') }}" alt="Google Play" width="22" height="22">
+                        <img src="{{ asset('/storage/logotype.png') }}" alt="Google Play" width="22" height="22">
                     </span>
                     <span>{{ $isEn ? 'Available on Google Play' : 'متوفر على Google Play' }}</span>
                     <span class="soon-badge" aria-hidden="true">Soon</span>
@@ -25,7 +25,7 @@
                     <span>{{ $isEn ? 'Available on Google Play' : 'متوفر على Google Play' }}</span>
                     <span class="store-icon" aria-hidden="true">
                         <!-- Simplified Google Play icon -->
-                        <img src="{{ asset('/storage/logotype_14417695.png') }}" alt="Google Play" width="22" height="22">
+                        <img src="{{ asset('/storage/logotype.png') }}" alt="Google Play" width="22" height="22">
                     </span>
                 @endif
             </button>
@@ -35,7 +35,7 @@
                 @if($isEn)
                     <span class="store-icon" aria-hidden="true">
                         <!-- Simplified App Store icon -->
-                        <img src="{{ asset('/storage/apple_179309.png') }}" alt="App Store" width="22" height="22">
+                        <img src="{{ asset('/storage/apple.png') }}" alt="App Store" width="22" height="22">
                     </span>
                     <span>{{ $isEn ? 'Available on App Store' : 'متوفر على App Store' }}</span>
                     <span class="soon-badge" aria-hidden="true">Soon</span>
@@ -44,7 +44,7 @@
                     <span>{{ $isEn ? 'Available on App Store' : 'متوفر على App Store' }}</span>
                     <span class="store-icon" aria-hidden="true">
                         <!-- Simplified App Store icon -->
-                        <img src="{{ asset('/storage/apple_179309.png') }}" alt="App Store" width="22" height="22">
+                        <img src="{{ asset('/storage/apple.png') }}" alt="App Store" width="22" height="22">
                     </span>
                 @endif
             </button>

@@ -1,7 +1,7 @@
 <nav class="landing-header">
     <div class="container mx-auto px-6 py-4">
         <a href="/" class="flex items-center gap-3">
-            <img src="{{ asset('/storage/dubisale_logo_transparent 1.png') }}" alt="DubiSale Logo" style="height: 40px; width: auto;" />
+            <img src="{{ asset('/storage/dubisale_logo.png') }}" alt="DubiSale Logo" style="height: 80px; width: auto;" />
         </a>
         @php $isEn = request()->is('en'); @endphp
         <div class="landing-nav">
