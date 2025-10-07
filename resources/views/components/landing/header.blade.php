@@ -5,9 +5,9 @@
         </a>
         @php $isEn = request()->is('en'); @endphp
         <div class="landing-nav">
-            <a href="#about" class="nav-btn">{{ $isEn ? 'About Us' : 'من نحن' }}</a>
-            <a href="#features" class="nav-btn">{{ $isEn ? 'Features' : 'ميزاتنا' }}</a>
-            <a href="#contact" class="nav-btn nav-btn--accent">{{ $isEn ? 'Contact Us' : 'اتصل بنا' }}</a>
+            <a href="{{ $isEn ? url('/en#about') : url('/#about') }}" class="nav-btn">{{ $isEn ? 'About Us' : 'من نحن' }}</a>
+            <a href="{{ $isEn ? url('/en#features') : url('/#features') }}" class="nav-btn">{{ $isEn ? 'Features' : 'ميزاتنا' }}</a>
+            <a href="{{ $isEn ? url('/en#contact') : url('/#contact') }}" class="nav-btn nav-btn--accent">{{ $isEn ? 'Contact Us' : 'اتصل بنا' }}</a>
             <a href="{{ $isEn ? url('/') : url('/en') }}" class="nav-btn">
                 {{ $isEn ? 'العربية' : 'English' }}
             </a>
@@ -26,9 +26,9 @@
             <button id="drawerClose" class="drawer-close" aria-label="{{ $isEn ? 'Close menu' : 'إغلاق القائمة' }}">&times;</button>
         </div>
         <nav class="drawer-nav">
-            <a href="#about" class="drawer-link">{{ $isEn ? 'About Us' : 'من نحن' }}</a>
-            <a href="#features" class="drawer-link">{{ $isEn ? 'Features' : 'ميزاتنا' }}</a>
-            <a href="#contact" class="drawer-link">{{ $isEn ? 'Contact Us' : 'اتصل بنا' }}</a>
+            <a href="{{ $isEn ? url('/en#about') : url('/#about') }}" class="drawer-link">{{ $isEn ? 'About Us' : 'من نحن' }}</a>
+            <a href="{{ $isEn ? url('/en#features') : url('/#features') }}" class="drawer-link">{{ $isEn ? 'Features' : 'ميزاتنا' }}</a>
+            <a href="{{ $isEn ? url('/en#contact') : url('/#contact') }}" class="drawer-link">{{ $isEn ? 'Contact Us' : 'اتصل بنا' }}</a>
             <a href="{{ $isEn ? url('/') : url('/en') }}" class="drawer-link">{{ $isEn ? 'العربية' : 'English' }}</a>
         </nav>
     </aside>
