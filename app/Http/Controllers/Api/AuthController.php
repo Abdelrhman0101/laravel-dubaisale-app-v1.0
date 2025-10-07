@@ -311,6 +311,47 @@ class AuthController extends Controller
      * تسجيل دخول مستخدم موجود وإصدار token.
      * النسخة المطورة التي تدعم إنشاء جلسة ويب للمشرفين (عند استدعائها من route الويب).
      */
+    // public function login(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'identifier' => 'required|string',
+    //         'password' => 'required|string',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
+
+    //     $user = User::where('email', $request->identifier)
+    //         ->orWhere('phone', $request->identifier)
+    //         ->orWhere('whatsapp', $request->identifier)
+    //         ->first();
+
+    //     if (!$user || !Hash::check($request->password, $user->password)) {
+    //         return response()->json(['message' => 'Invalid credentials'], 401);
+    //     }
+
+    //     if (!$user->is_active) {
+    //         return response()->json(['message' => 'Your account is not activated.'], 403);
+    //     }
+
+    //     // --- لقد قمنا بحذف منطق إنشاء الجلسة من هنا بالكامل ---
+
+    //     // إصدار توكن الـ API (المنطق الأصلي والمستقر)
+    //     $user->tokens()->delete();
+    //     $token = $user->createToken('auth_token')->plainTextToken;
+
+    //     return response()->json([
+    //         'message' => 'Login successful.',
+    //         'user' => $user,
+    //         'access_token' => $token,
+    //         'token_type' => 'Bearer',
+    //     ], 200);
+    // }
+
+    /**
+     * تسجيل خروج المستخدم وإبطال التوكن الحالي (للـ API).
+     */
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -438,4 +479,5 @@ class AuthController extends Controller
             'message' => 'Successfully logged out from API'
         ], 200);
     }
+
 }

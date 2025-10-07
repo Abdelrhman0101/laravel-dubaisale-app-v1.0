@@ -67,6 +67,7 @@ Route::post('/activate', [AuthController::class, 'activate']);
     // Route::post('/convert-to-advertiser/{id}', [UserController::class, 'convertToAdvertiser']);
     // مسار آمن لطلب OTP بناءً على رقم الهاتف
     Route::post('/request-otp', [AuthController::class, 'requestOtp']);
+    Route::post('/convert-to-advertiser/{id}', [UserController::class, 'convertToAdvertiser']);
 // });
 
 

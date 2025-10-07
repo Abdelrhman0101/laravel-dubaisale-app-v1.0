@@ -1,0 +1,122 @@
+/* Privacy Policy - custom styles */
+
+:root {
+  --bg: #0f172a; /* slate-900 */
+  --surface: #ffffff;
+  --text: #1f2937; /* gray-800 */
+  --muted: #6b7280; /* gray-500 */
+  --border: #e5e7eb; /* gray-200 */
+  --accent: #5b7cfa; /* indigo-ish */
+  --accent-dark: #3843d0;
+  --shadow: 0 10px 25px rgba(2, 6, 23, 0.08);
+}
+
+.policy-wrapper {
+  padding: 56px 24px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.policy-card {
+  max-width: 960px;
+  margin: 0 auto;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.policy-header {
+  background: radial-gradient(1200px circle at 0% 0%, #0b1020 0%, #121a33 50%, #1a2240 100%);
+  color: #fff;
+  padding: 36px 32px;
+  position: relative;
+}
+
+.policy-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(91,124,250,0.2), rgba(56,67,208,0.15));
+  pointer-events: none;
+}
+
+.policy-title {
+  margin: 0 0 6px;
+  font-size: 32px;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.policy-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #cbd5e1; /* slate-300 */
+}
+
+.policy-content {
+  padding: 28px 32px 36px;
+  color: var(--text);
+}
+
+.policy-content p {
+  margin: 0 0 14px;
+  line-height: 1.7;
+}
+
+.policy-content h2 {
+  margin: 20px 0 10px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  position: relative;
+}
+
+.policy-content h2::after {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+  border-radius: 3px;
+  margin: 8px 0 0;
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 18px 0;
+}
+
+.bullet-list,
+.contact-list {
+  margin: 6px 0 14px 18px;
+  padding: 0;
+}
+
+.bullet-list li,
+.contact-list li {
+  margin: 8px 0;
+  line-height: 1.7;
+}
+
+.bullet-list {
+  list-style: disc;
+}
+
+.contact-list {
+  list-style: none;
+}
+
+.contact-list li::before {
+  content: "•";
+  color: var(--accent);
+  margin-right: 10px;
+}
+
+@media (max-width: 640px) {
+  .policy-header { padding: 28px 22px; }
+  .policy-content { padding: 22px; }
+  .policy-title { font-size: 26px; }
+}

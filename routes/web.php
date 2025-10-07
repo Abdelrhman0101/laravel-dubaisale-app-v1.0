@@ -92,8 +92,16 @@ Route::get('/send-notification', function () {
 // --- التوجيه الافتراضي ---
 // إذا حاول أي شخص الوصول إلى المسار الرئيسي /، سيتم توجيهه إلى صفحة تسجيل الدخول.
 Route::get('/', function () {
-    return redirect()->route('login');
+    return view('home');
 });
+// English landing page
+Route::get('/en', function () {
+    return view('home-en');
+})->name('home-en');
+
+// صفحات قانونية عامة
+Route::view('/privacy-policy', 'privacy')->name('privacy');
+Route::view('/terms', 'terms')->name('terms');
 
 // --- لا يوجد Route لتسجيل الخروج هنا ---
 // عملية تسجيل الخروج ستتم عبر JavaScript عن طريق حذف التوكن من localStorage وتوجيه المستخدم لصفحة الدخول.
