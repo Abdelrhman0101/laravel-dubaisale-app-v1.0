@@ -2,6 +2,8 @@
 
 
 use App\Http\Controllers\Api\OtherServiceAdsController;
+use App\Http\Controllers\ElectronicAdOptionController;
+use App\Http\Controllers\OtherServiceOptionsController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\RealEstateAdOptionsController;
 use Illuminate\Http\Request;
@@ -123,6 +125,12 @@ Route::get('/jobs_ad_values', [JobAdValuesController::class, 'getClientSpecs']);
 
 // --- Car Service Types (Public) ---
 Route::get('/car-service-types', [CarServiceTypeController::class, 'getClientOptions']);
+
+//--- electronic 
+Route::get('/electronic_ad_options',[ElectronicAdOptionController::class,'getClientSpecs']);
+
+//---other service 
+Route::get('/other_service_options',[OtherServiceOptionsController::class,'getClientSpecs']);
 
 // --- Car Sales Ads (Public) ---
 Route::get('/car-sales-ads', [CarSalesAdController::class, 'index']);
