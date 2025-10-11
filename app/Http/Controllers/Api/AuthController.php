@@ -355,7 +355,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'identifier' => 'required|string',
+            'username' => 'required|string',
             'password' => 'required|string',
         ]);
 
@@ -363,10 +363,11 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $user = User::where('email', $request->identifier)
-            ->orWhere('phone', $request->identifier)
-            ->orWhere('whatsapp', $request->identifier)
+        $user = User::where('username', $request->username)
+            // ->orWhere('phone', $request->identifier)
+            // ->orWhere('whatsapp', $request->identifier)
             ->first();
+            // echo $user;
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
