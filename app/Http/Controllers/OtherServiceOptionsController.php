@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\OtherServiceOptions;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\JsonResponse;
 
 class OtherServiceOptionsController extends Controller
 {
     //
-    public function getClientSpecs()
+    public function getClientSpecs(): JsonResponse
     {
         try {
             $specs = OtherServiceOptions::getClientOptions();
@@ -30,7 +31,7 @@ class OtherServiceOptionsController extends Controller
     /**
      * Get all specifications for admin
      */
-    public function getAdminSpecs()
+    public function getAdminSpecs(): JsonResponse
     {
         try {
             $specs = OtherServiceOptions::ordered()->get();
@@ -51,7 +52,7 @@ class OtherServiceOptionsController extends Controller
     /**
      * Get a specific specification by field name
      */
-    public function getSpecByField(string $fieldName)
+    public function getSpecByField(string $fieldName): JsonResponse
     {
         try {
             $spec = OtherServiceOptions::where('field_name', $fieldName)->first();
@@ -79,7 +80,7 @@ class OtherServiceOptionsController extends Controller
     /**
      * Update a specific specification
      */
-    public function updateSpec(Request $request, string $fieldName)
+    public function updateSpec(Request $request, string $fieldName): JsonResponse
     {
         try {
             $validated = $request->validate([
@@ -135,7 +136,7 @@ class OtherServiceOptionsController extends Controller
     /**
      * Bulk update all specifications
      */
-    public function bulkUpdateSpecs(Request $request)
+    public function bulkUpdateSpecs(Request $request): JsonResponse
     {
         try {
             $validated = $request->validate([
@@ -151,31 +152,29 @@ class OtherServiceOptionsController extends Controller
             $updatedSpecs = [];
 
             foreach ($validated['specifications'] as $specData) {
-                $spec = OtherServiceOptions::where('field_name', $specData['field_name'])->first();
-
-                if (!$spec) {
-                    continue;
-                }
-
+                // Ensure 'other' is always at the end
                 $options = collect($specData['options'])
                     ->reject(fn($option) => strtolower($option) === 'other')
                     ->push('other')
                     ->values()
                     ->toArray();
 
-                $spec->update([
-                    'display_name' => $specData['display_name'],
-                    'options' => $options,
-                    'is_active' => $specData['is_active'] ?? $spec->is_active,
-                    'sort_order' => $specData['sort_order'] ?? $spec->sort_order
-                ]);
+                $spec = OtherServiceOptions::updateOrCreate(
+                    ['field_name' => $specData['field_name']],
+                    [
+                        'display_name' => $specData['display_name'],
+                        'options' => $options,
+                        'is_active' => $specData['is_active'] ?? true,
+                        'sort_order' => $specData['sort_order'] ?? 0
+                    ]
+                );
 
                 $updatedSpecs[] = $spec->fresh();
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Specifications updated successfully',
+                'message' => 'Specifications updated or created successfully',
                 'data' => $updatedSpecs
             ]);
         } catch (ValidationException $e) {
@@ -188,6 +187,32 @@ class OtherServiceOptionsController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to update specifications',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Bulk delete specifications (admin only)
+     */
+    public function bulkDeleteSpecs(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'field_names' => 'required|array|min:1',
+                'field_names.*' => 'required|string|max:255'
+            ]);
+
+            $deleted = OtherServiceOptions::whereIn('field_name', $validated['field_names'])->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => "$deleted specifications deleted successfully"
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete specifications',
                 'error' => $e->getMessage()
             ], 500);
         }

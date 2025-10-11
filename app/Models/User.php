@@ -38,7 +38,7 @@ class User extends Authenticatable
         'otp_verified'
         // 'is_active',
         // 'otp_verified',
-        
+
     ];
 
     /**
@@ -91,5 +91,10 @@ class User extends Authenticatable
     public function bestAdvertiser()
     {
         return $this->hasOne(BestAdvertiser::class);
+    }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
     }
 }

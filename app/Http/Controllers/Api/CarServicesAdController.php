@@ -76,7 +76,7 @@ class CarServicesAdController extends Controller
         }
         
         // 3. تقسيم النتائج على صفحات
-        $ads = $query->paginate(15)->withQueryString();
+        $ads = $query->get();
 
         return response()->json($ads);
     }
@@ -133,7 +133,7 @@ class CarServicesAdController extends Controller
                 break;
         }
 
-        $ads = $query->paginate(15)->withQueryString();
+        $ads = $query->get();
 
         return response()->json($ads);
     }

@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\Api\OtherServiceAdsController;
 use App\Http\Controllers\ElectronicAdOptionController;
+use App\Http\Controllers\FavoritesController;
 use App\Http\Controllers\OtherServiceOptionsController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\RealEstateAdOptionsController;
@@ -61,18 +62,18 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/newSignin', [AuthController::class, 'signup']);
 Route::post('/activate', [AuthController::class, 'activate']);
 // Route::middleware(['SecureEndpoint'])->group(function () {
-    Route::put('/verify', [AuthController::class, 'verifyOtp']);
-    Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
-    // تم إلغاء مسار التحويل غير الآمن بالمعرف
-    // Route::post('/convert-to-advertiser/{id}', [UserController::class, 'convertToAdvertiser']);
-    // مسار آمن لطلب OTP بناءً على رقم الهاتف
-    Route::post('/request-otp', [AuthController::class, 'requestOtp']);
-    Route::post('/convert-to-advertiser/{id}', [UserController::class, 'convertToAdvertiser']);
+Route::put('/verify', [AuthController::class, 'verifyOtp']);
+Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+// تم إلغاء مسار التحويل غير الآمن بالمعرف
+// Route::post('/convert-to-advertiser/{id}', [UserController::class, 'convertToAdvertiser']);
+// مسار آمن لطلب OTP بناءً على رقم الهاتف
+Route::post('/request-otp', [AuthController::class, 'requestOtp']);
+Route::post('/convert-to-advertiser/{id}', [UserController::class, 'convertToAdvertiser']);
 // });
 
 
 //pages
-Route::get('/pages', [PageController::class, 'index']);       
+Route::get('/pages', [PageController::class, 'index']);
 Route::get('/pages/{type}', [PageController::class, 'show']);
 
 // --- Featured & Public Content ---
@@ -128,10 +129,10 @@ Route::get('/jobs_ad_values', [JobAdValuesController::class, 'getClientSpecs']);
 Route::get('/car-service-types', [CarServiceTypeController::class, 'getClientOptions']);
 
 //--- electronic 
-Route::get('/electronic_ad_options',[ElectronicAdOptionController::class,'getClientSpecs']);
+Route::get('/electronic_ad_options', [ElectronicAdOptionController::class, 'getClientSpecs']);
 
 //---other service 
-Route::get('/other_service_options',[OtherServiceOptionsController::class,'getClientSpecs']);
+Route::get('/other_service_options', [OtherServiceOptionsController::class, 'getClientSpecs']);
 
 // --- Car Sales Ads (Public) ---
 Route::get('/car-sales-ads', [CarSalesAdController::class, 'index']);
@@ -210,6 +211,11 @@ Route::middleware([
     Route::post('/profile', [ProfileController::class, 'update']);
     Route::post('/profile/password', [ProfileController::class, 'changePassword']);
     Route::post('/upload', [UploadController::class, 'upload']);
+
+    //favorites
+    Route::get('/favorites', [FavoritesController::class, 'index']);
+    Route::post('/favorites', [FavoritesController::class, 'store']);
+    Route::delete('/favorites', [FavoritesController::class, 'destroy']);
 
     // --- User's Ads & Offers Management ---
     Route::get('/my-ads', [MyAdsController::class, 'index']);
@@ -355,5 +361,30 @@ Route::middleware([
         Route::get('/electronics-ads/pending', [ElectronicAdController::class, 'getPendingAds']);
         Route::post('/electronics-ads/{id}/approve', [ElectronicAdController::class, 'approveAd']);
         Route::post('/electronics-ads/{id}/reject', [ElectronicAdController::class, 'rejectAd']);
+
+
+        // -- Admin: Real Estate Ads options  Management ---
+        Route::post('/real_estate_options', [RealEstateAdOptionsController::class, 'bulkUpdateSpecs']);
+        Route::get('/real_estate_options/{fieldName}', [RealEstateAdOptionsController::class, 'getSpecByField']);
+        Route::put('/real_estate_options/{fieldName}', [RealEstateAdOptionsController::class, 'updateSpec']);
+        Route::delete('/real_estate_options', [RealEstateAdOptionsController::class, 'bulkDeleteSpecs']);
+
+        // -- Admin: Other Service Options Management ---
+        Route::post('/other_service_options', [OtherServiceOptionsController::class, 'bulkUpdateSpecs']);
+        Route::get('/other_service_options/{fieldName}', [OtherServiceOptionsController::class, 'getSpecByField']);
+        Route::put('/other_service_options/{fieldName}', [OtherServiceOptionsController::class, 'updateSpec']);
+        Route::delete('/other_service_options', [OtherServiceOptionsController::class, 'bulkDeleteSpecs']);
+
+        // -- Admin: Electronic Ads Options Management ---
+        Route::post('/electronic_ad_options', [ElectronicAdOptionController::class, 'bulkUpdateSpecs']);
+        Route::get('/electronic_ad_options/{fieldName}', [ElectronicAdOptionController::class, 'getSpecByField']);
+        Route::put('/electronic_ad_options/{fieldName}', [ElectronicAdOptionController::class, 'updateSpec']);
+        Route::delete('/electronic_ad_options', [ElectronicAdOptionController::class, 'bulkDeleteSpecs']);
+
+        // -- Admin: Job Ads Values Management ---
+        Route::post('/jobs_ad_values', [JobAdValuesController::class, 'bulkUpdateSpecs']);
+        Route::get('/jobs_ad_values/{fieldName}', [JobAdValuesController::class, 'getSpecByField']);
+        Route::put('/jobs_ad_values/{fieldName}', [JobAdValuesController::class, 'updateSpec']);
+        Route::delete('/jobs_ad_values', [JobAdValuesController::class, 'bulkDeleteSpecs']);
     });
 });

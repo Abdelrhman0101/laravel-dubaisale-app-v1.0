@@ -11,7 +11,7 @@ class RealEstateAdOptionsController extends Controller
 {
     //
 
-    protected $table='real_estate_ads_options';
+    protected $table = 'real_estate_ads_options';
     public function getClientSpecs(): JsonResponse
     {
         try {
@@ -155,11 +155,6 @@ class RealEstateAdOptionsController extends Controller
             $updatedSpecs = [];
 
             foreach ($validated['specifications'] as $specData) {
-                $spec = RealEstateOptions::where('field_name', $specData['field_name'])->first();
-
-                if (!$spec) {
-                    continue; // Skip non-existent specifications
-                }
 
                 // Ensure 'other' is always at the end
                 $options = collect($specData['options'])
@@ -167,20 +162,23 @@ class RealEstateAdOptionsController extends Controller
                     ->push('other')
                     ->values()
                     ->toArray();
-
-                $spec->update([
-                    'display_name' => $specData['display_name'],
-                    'options' => $options,
-                    'is_active' => $specData['is_active'] ?? $spec->is_active,
-                    'sort_order' => $specData['sort_order'] ?? $spec->sort_order
-                ]);
+                    
+                $spec = RealEstateOptions::updateOrCreate(
+                    ['field_name' => $specData['field_name']], // البحث
+                    [
+                        'display_name' => $specData['display_name'],
+                        'options' => $options,
+                        'is_active' => $specData['is_active'] ?? true,
+                        'sort_order' => $specData['sort_order'] ?? 0
+                    ]
+                );
 
                 $updatedSpecs[] = $spec->fresh();
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Specifications updated successfully',
+                'message' => 'Specifications updated or created successfully',
                 'data' => $updatedSpecs
             ]);
         } catch (ValidationException $e) {
@@ -197,5 +195,33 @@ class RealEstateAdOptionsController extends Controller
             ], 500);
         }
     }
+
+
+    /**
+     * Bulk delete specifications (admin only)
+     */
+    public function bulkDeleteSpecs(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'field_names' => 'required|array|min:1',
+                'field_names.*' => 'required|string|max:255'
+            ]);
+
+            $deleted = RealEstateOptions::whereIn('field_name', $validated['field_names'])->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => "$deleted specifications deleted successfully"
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete specifications',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 }

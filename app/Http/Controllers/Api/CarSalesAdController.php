@@ -102,7 +102,7 @@ class CarSalesAdController extends Controller
 
         // 3. تقسيم النتائج على صفحات
         $perPage = $request->query('per_page', 15);
-        $ads = $query->paginate($perPage)->withQueryString();
+        $ads = $query->get();
 
         return response()->json($ads);
     }
@@ -179,7 +179,7 @@ class CarSalesAdController extends Controller
         }
 
         $perPage = $request->per_page ?? 15;
-        $ads = $query->paginate($perPage)->withQueryString();
+        $ads = $query->get();
 
         return response()->json($ads);
     }
