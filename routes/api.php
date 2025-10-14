@@ -69,6 +69,9 @@ Route::post('/activate', [AuthController::class, 'activate']);
     Route::post('/request-otp', [AuthController::class, 'requestOtp']);
 // });
 
+//all ads for specfic user
+Route::get('/user-ads/{user_id}', [MyAdsController::class, 'userAds']);
+
 
 //pages
 Route::get('/pages', [PageController::class, 'index']);       
