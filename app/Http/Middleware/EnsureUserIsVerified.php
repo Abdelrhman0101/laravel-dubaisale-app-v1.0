@@ -23,7 +23,7 @@ class EnsureUserIsVerified
             ], 401);
         }
 
-        if (!$user->otp_verified) {
+        if ($user->role == "user" && !$user->otp_verified) {
             return response()->json([
                 'message' => 'Your account is not verified.'
             ], 403);

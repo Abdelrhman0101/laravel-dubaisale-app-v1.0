@@ -55,7 +55,7 @@ class JobsAdController extends Controller
         }
 
         $perPage = (int) ($request->query('per_page', 15));
-        return response()->json($query->paginate($perPage));
+        return response()->json($query->get());
     }
 
     /**

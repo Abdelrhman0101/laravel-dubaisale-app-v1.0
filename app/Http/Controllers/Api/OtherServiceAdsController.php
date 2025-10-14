@@ -54,7 +54,7 @@ class OtherServiceAdsController extends Controller
         $perPage = min(max((int) $request->query('per_page', 15), 1), 50);
 
         return response()->json(
-            $query->paginate($perPage)->withQueryString()
+            $query->get()
         );
     }
 

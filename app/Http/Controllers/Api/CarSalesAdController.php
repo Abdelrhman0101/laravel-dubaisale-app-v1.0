@@ -102,7 +102,7 @@ class CarSalesAdController extends Controller
 
         // 3. تقسيم النتائج على صفحات
         $perPage = $request->query('per_page', 15);
-        $ads = $query->paginate($perPage)->withQueryString();
+        $ads = $query->get();
 
         return response()->json($ads);
     }
@@ -179,7 +179,7 @@ class CarSalesAdController extends Controller
         }
 
         $perPage = $request->per_page ?? 15;
-        $ads = $query->paginate($perPage)->withQueryString();
+        $ads = $query->get();
 
         return response()->json($ads);
     }
@@ -216,10 +216,9 @@ class CarSalesAdController extends Controller
     {
         $validatedData = $request->validate([
             // ... (نفس قواعد التحقق السابقة)
-            'title' => 'required|string|max:100',
+            'title' => 'required|string|max:255',
             'description' => 'required|string',
             'make' => 'required|string',
-            // 'advertiser_name'=>'nullable|string|max:50',
             'model' => 'required|string',
             'year' => 'required|digits:4',
             'km' => 'required|integer',
