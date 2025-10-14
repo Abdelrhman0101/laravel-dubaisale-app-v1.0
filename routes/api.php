@@ -3,10 +3,7 @@
 
 use App\Http\Controllers\Api\OtherServiceAdsController;
 use App\Http\Controllers\ElectronicAdOptionController;
-<<<<<<< HEAD
-=======
 use App\Http\Controllers\FavoritesController;
->>>>>>> 122a0e1306d12985e10ff41b6fa5e3b0b117cb35
 use App\Http\Controllers\OtherServiceOptionsController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\RealEstateAdOptionsController;
