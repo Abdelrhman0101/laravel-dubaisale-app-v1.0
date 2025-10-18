@@ -11,6 +11,7 @@ use App\Models\JobAd;
 use App\Models\OtherServiceAds;
 use App\Models\RealEstateAd;
 use App\Models\RestaurantAd;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,51 +19,48 @@ use Illuminate\Support\Facades\Auth;
 class FavoritesController extends Controller
 {
     //
-    public function index()
-    {
-        $userId = Auth::id();
+    public function index(User $user)
+{
+    $favorites = Favorite::where('user_id', $user->id)->get();
 
-        $favorites = Favorite::where('user_id', $userId)->get();
+    $modelMap = [
+        'Real State' => RealEstateAd::class,
+        'Cars Sales' => CarSalesAd::class,
+        'Car Rent' => CarRentAd::class,
+        'Car Services	' => CarServicesAd::class,
+        'restaurant' => RestaurantAd::class,
+        'Jop' => JobAd::class,
+        'Electronics' => electronicAd::class,
+        'Other Services' => OtherServiceAds::class,
+    ];
 
-        $modelMap = [
-            'real_estate' => RealEstateAd::class,
-            'car_sales' => CarSalesAd::class,
-            'car_rent'=>CarRentAd::class,
-            'car_services'=>CarServicesAd::class,
-            'restaurant'=>RestaurantAd::class,
-            'jobs' => JobAd::class,
-            'electronics' => electronicAd::class,
-            'other_services' => OtherServiceAds::class,
-        ];
-        $groupedFavorites = [];
+    $groupedFavorites = [];
 
-        foreach ($favorites as $fav) {
-            if (!isset($modelMap[$fav->category_slug])) {
-                continue; 
-            }
-
-            $modelClass = $modelMap[$fav->category_slug];
-            $ad = $modelClass::find($fav->ad_id);
-
-            if (!$ad) {
-                continue; 
-            }
-
-            // if ($ad->user_id == $userId) {
-            //     continue;
-            // }
-
-            $groupedFavorites[$fav->category_slug][] = [
-                'favorite_id' => $fav->id,
-                'ad' => $ad,
-            ];
+    foreach ($favorites as $fav) {
+        if (!isset($modelMap[$fav->category_slug])) {
+            continue;
         }
 
-        return response()->json([
-            'status' => true,
-            'data' => $groupedFavorites,
-        ]);
+        $modelClass = $modelMap[$fav->category_slug];
+        $ad = $modelClass::find($fav->ad_id);
+
+        if (!$ad) {
+            continue;
+        }
+
+        $groupedFavorites[$fav->category_slug][] = [
+            'favorite_id' => $fav->id,
+            'category_slug' => $fav->category_slug, // ✅ أضفنا السطر ده
+            'ad' => $ad,
+        ];
     }
+
+    return response()->json([
+        'status' => true,
+        'data' => $groupedFavorites,
+    ]);
+}
+
 
 
     public function store(Request $request)
@@ -70,20 +68,20 @@ class FavoritesController extends Controller
         $validated = $request->validate([
             'ad_id' => 'required|integer',
             'category_slug' => 'required|string|max:255',
+            'user_id' => 'required|integer|exists:users,id',
         ]);
 
-        $userId = Auth::id();
 
 
         $modelMap = [
-            'real_estate' => RealEstateAd::class,
-            'car_sales' => CarSalesAd::class,
-            'car_rent'=>CarRentAd::class,
-            'car_services'=>CarServicesAd::class,
-            'restaurant'=>RestaurantAd::class,
-            'jobs' => JobAd::class,
-            'electronics' => electronicAd::class,
-            'other_services' => OtherServiceAds::class,
+            'Real State' => RealEstateAd::class,
+            'Cars Sales' => CarSalesAd::class,
+            'Car Rent' => CarRentAd::class,
+            'Car Services	' => CarServicesAd::class,
+            'restaurant' => RestaurantAd::class,
+            'Jop' => JobAd::class,
+            'Electronics' => electronicAd::class,
+            'Other Services' => OtherServiceAds::class,
         ];
 
         if (!array_key_exists($validated['category_slug'], $modelMap)) {
@@ -103,7 +101,7 @@ class FavoritesController extends Controller
             ], 404);
         }
 
-        $exists = Favorite::where('user_id', $userId)
+        $exists = Favorite::where('user_id', $validated['user_id'])
             ->where('ad_id', $validated['ad_id'])
             ->where('category_slug', $validated['category_slug'])
             ->exists();
@@ -117,7 +115,7 @@ class FavoritesController extends Controller
 
 
         $favorite = Favorite::create([
-            'user_id' => $userId,
+            'user_id' => $validated['user_id'],
             'ad_id' => $validated['ad_id'],
             'category_slug' => $validated['category_slug'],
         ]);
@@ -131,14 +129,14 @@ class FavoritesController extends Controller
 
 
 
-    public function destroy(Request $request)
+    public function destroy(Request $request, User $user)
     {
         $validated = $request->validate([
             'ad_id' => 'required|integer',
             'category_slug' => 'required|string|max:255',
         ]);
 
-        $deleted = Favorite::where('user_id', Auth::id())
+        $deleted = Favorite::where('user_id', $user->id)
             ->where('ad_id', $validated['ad_id'])
             ->where('category_slug', $validated['category_slug'])
             ->delete();

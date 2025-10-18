@@ -79,6 +79,13 @@ Route::get('/user-ads/{user_id}', [MyAdsController::class, 'userAds']);
 Route::get('/pages', [PageController::class, 'index']);
 Route::get('/pages/{type}', [PageController::class, 'show']);
 
+
+//favorites
+Route::get('/favorites/{user}', [FavoritesController::class, 'index']);
+Route::post('/favorites', [FavoritesController::class, 'store']);
+Route::delete('/favorites/{user}', [FavoritesController::class, 'destroy']);
+
+
 // --- Featured & Public Content ---
 Route::get('/best-advertisers/{categorySlug}', [FeaturedContentController::class, 'getBestAdvertisers']);
 Route::get('/users/{user}/ads/{category}', [FeaturedContentController::class, 'getUserAdsByCategory']);
@@ -215,15 +222,12 @@ Route::middleware([
     Route::post('/profile/password', [ProfileController::class, 'changePassword']);
     Route::post('/upload', [UploadController::class, 'upload']);
 
-    //favorites
-    Route::get('/favorites', [FavoritesController::class, 'index']);
-    Route::post('/favorites', [FavoritesController::class, 'store']);
-    Route::delete('/favorites', [FavoritesController::class, 'destroy']);
 
     // --- User's Ads & Offers Management ---
     Route::get('/my-ads', [MyAdsController::class, 'index']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class)->except(['index', 'show']);
-    Route::apiResource('car-services-ads', CarServicesAdController::class)->except(['index', 'show']);;
+    Route::apiResource('car-services-ads', CarServicesAdController::class)->except(['index', 'show']);
+    ;
     Route::apiResource('car-rent-ads', CarRentAdController::class);
 
     // --- Restaurants (CRUD Authenticated) ---

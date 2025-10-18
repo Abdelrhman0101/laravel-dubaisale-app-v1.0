@@ -27,7 +27,7 @@ class electronicAd extends Model
         'updated_at',
         'thumbnail_images_urls',
         'add_status',
-        'add_category',
+        // 'add_category',
     ];
 
     protected $appends = ['main_image_url', 'thumbnail_images_urls', 'status', 'category'];

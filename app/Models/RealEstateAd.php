@@ -25,7 +25,7 @@ class RealEstateAd extends Model
         'main_image_url',
         'thumbnail_images_urls',
         'add_status',
-        'add_category',
+        // 'add_category',
     ];
 
     public function user()
