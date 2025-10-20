@@ -88,8 +88,7 @@ Route::delete('/favorites/{user}', [FavoritesController::class, 'destroy']);
 
 
 // --- Featured & Public Content ---
-Route::get('/best-advertisers/{categorySlug}', [FeaturedContentController::class, '
-']);
+Route::get('/best-advertisers/{categorySlug}', [FeaturedContentController::class, 'getBestAdvertisers']);
 Route::get('/users/{user}/ads/{category}', [FeaturedContentController::class, 'getUserAdsByCategory']);
 Route::get('/offers-box/{category}', [FeaturedContentController::class, 'getOfferBoxAds']);
 Route::get('/settings', [PublicSettingsController::class, 'index']);
