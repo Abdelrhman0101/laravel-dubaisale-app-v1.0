@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 // ===============================================
 
 use App\Http\Controllers\Controller;
+use Illuminate\Validation\Rules\Password;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -111,4 +112,39 @@ class UserController extends Controller
 
     //     return response()->json($user);
     // }
+
+
+    public function changePass(Request $request)
+    {
+        $data = $request->validate([
+            'currentPassword' => 'required|string',
+            'newPassword' => [
+                'required',
+                'string',
+                Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()
+            ],
+        ]);
+
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        if (!Hash::check($data['currentPassword'], $user->password)) {
+            return response()->json(['message' => 'Current password is incorrect'], 400);
+        }
+
+        $user->update([
+            'password' => Hash::make($data['newPassword']),
+        ]);
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Password changed successfully',
+            'user' => $user,
+            'token'=>$token
+        ]);
+    }
+
 }

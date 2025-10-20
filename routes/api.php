@@ -60,6 +60,7 @@ use App\Http\Middleware\IsAdmin;
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/newSignin', [AuthController::class, 'signup']);
+Route::post('/set-password',[AuthController::class,'setPassword']);
 Route::post('/activate', [AuthController::class, 'activate']);
 // Route::middleware(['SecureEndpoint'])->group(function () {
 Route::put('/verify', [AuthController::class, 'verifyOtp']);
@@ -87,7 +88,8 @@ Route::delete('/favorites/{user}', [FavoritesController::class, 'destroy']);
 
 
 // --- Featured & Public Content ---
-Route::get('/best-advertisers/{categorySlug}', [FeaturedContentController::class, 'getBestAdvertisers']);
+Route::get('/best-advertisers/{categorySlug}', [FeaturedContentController::class, '
+']);
 Route::get('/users/{user}/ads/{category}', [FeaturedContentController::class, 'getUserAdsByCategory']);
 Route::get('/offers-box/{category}', [FeaturedContentController::class, 'getOfferBoxAds']);
 Route::get('/settings', [PublicSettingsController::class, 'index']);
@@ -211,12 +213,13 @@ Route::get('/system-settings', [SystemSettingsController::class, 'index']);
 // هذه المجموعة محمية بـ 'auth:sanctum' وهي لا تدعم الجلسات بشكل افتراضي
 Route::middleware([
     'auth:sanctum',
-    'EnsureUserIsVerified',
+    // 'EnsureUserIsVerified',
     'EnsureUserIsAdvertiser'
 ])->group(function () {
 
     // --- User & Profile Management ---
     Route::get('/user', fn(Request $request) => $request->user());
+    Route::post('/change-password',[UserController::class,'changePass']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/profile', [ProfileController::class, 'update']);
     Route::post('/profile/password', [ProfileController::class, 'changePassword']);

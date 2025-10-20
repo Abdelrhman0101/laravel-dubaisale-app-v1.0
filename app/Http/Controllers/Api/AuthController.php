@@ -5,15 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Services\WhatsAppService; // (إذا كنت تستخدمه)
-use App\Mail\SendActivationCode;   // (إذا كنت تستخدمه)
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth; // مهم جدًا لوظيفة جلسة الويب
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 use Exception;
@@ -23,31 +18,45 @@ class AuthController extends Controller
 
     public function signup(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $phone = $request->get(key: 'phone');
+        $user = User::where('phone', $phone)->first();
+        $rules = [
             'phone' => 'required|string|max:20',
-        ]);
+        ];
 
-        if ($validator->fails()) {
-            return response()->json(['message' => 'Invalid phone number'], 422);
+        if ($user?->user_type === 'advertiser') {
+            $rules['password'] = [
+                'required',
+                'string',
+                Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised()
+            ];
         }
 
-        $phone = $request->get('phone');
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
         try {
-            $user = User::where('phone', $phone)->first();
 
+            $token = null;
             if (!$user) {
+                $defaultPassword = env('DEFAULT_Guest_PASSWORD');
+
                 // أول مرة → guest
                 $user = User::create([
                     'phone' => $phone,
                     'whatsapp' => $phone,
-                    'password' => '0123456789',
+                    'password' => Hash::make($defaultPassword),
                     'user_type' => 'guest',
                     'is_active' => true,
-                    'otp_verified' => false,
+                    // 'otp_verified' => false,
                 ]);
-
-                // $token = $user->createToken('auth_token')->plainTextToken;
 
                 $message = 'Your registration was completed successfully. Welcome as a guest.';
             } else if ($user->user_type === 'guest') {
@@ -55,34 +64,46 @@ class AuthController extends Controller
                 $message = 'Welcome back, guest.';
             } else if ($user->user_type === 'advertiser') {
 
-                if (Cache::has("otp_limit:$phone")) {
-                    return response()->json([
-                        'message' => 'Please wait before requesting another code.'
-                    ], 429);
+                if (!Hash::check($request->password, $user->password)) {
+                    return response()->json(['message' => 'Invalid credentials'], 401);
                 }
+                $token = $user->createToken('auth_token')->plainTextToken;
+                $message = 'Welcome advertiser, successfully Registration ';
 
-                // $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                // if (Cache::has("otp_limit:$phone")) {
+                //     return response()->json([
+                //         'message' => 'Please wait before requesting another code.'
+                //     ], 429);
+                // }
+
+                // // $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                // // $otpHash = Hash::make($otp);
+                // $otp = '3457';
                 // $otpHash = Hash::make($otp);
-                $otp = '3457';
-                $otpHash = Hash::make($otp);
-                $otpExpiresAt = Carbon::now()->addMinutes(10);
+                // $otpExpiresAt = Carbon::now()->addMinutes(10);
 
-                $user->update([
-                    'otp_phone' => $otpHash,
-                    'otp_expires_at' => $otpExpiresAt,
-                    'otp_verified' => false,
-                ]);
-                // $this->sendOtpToPhone($phone, $otp);
+                // $user->update([
+                //     'otp_phone' => $otpHash,
+                //     'otp_expires_at' => $otpExpiresAt,
+                //     'otp_verified' => false,
+                // ]);
+                // // $this->sendOtpToPhone($phone, $otp);
 
-                $message = 'OTP has been sent to your phone. Please verify to continue.';
-                Cache::put("otp_limit:$phone", true, 60);
+                // $message = 'OTP has been sent to your phone. Please verify to continue.';
+                // Cache::put("otp_limit:$phone", true, 60);
             }
             $user->refresh();
 
-            return response()->json([
+            $responseData = [
                 'message' => $message,
-                'user' => $user
-            ], 200);
+                'user' => $user,
+                'token' => $token,
+            ];
+
+            $filteredData = array_filter($responseData, fn($value) => !is_null($value));
+
+            return response()->json($filteredData, 200);
+
         } catch (Exception $e) {
             return response()->json([
                 'message' => 'Signup request failed, please try again later.',
@@ -367,7 +388,7 @@ class AuthController extends Controller
             // ->orWhere('phone', $request->identifier)
             // ->orWhere('whatsapp', $request->identifier)
             ->first();
-            // echo $user;
+        // echo $user;
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
@@ -473,12 +494,52 @@ class AuthController extends Controller
         }
 
         $user->currentAccessToken()?->delete();
-        $user->otp_verified = false;
+        // $user->otp_verified = false;
         $user->save();
 
         return response()->json([
             'message' => 'Successfully logged out from API'
         ], 200);
     }
+
+
+    public function setPassword(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'userId' => 'required|integer|exists:users,id',
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()
+            ],
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+        $user = User::where('id', $request->userId)->first();
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+        $defaultPassword = env('DEFAULT_Guest_PASSWORD');
+        if (!Hash::check($defaultPassword, $user->password)) {
+            return response()->json(['message' => 'User  have a password, you already advertiser'], 401);
+        }
+        $user->update([
+            'password' => Hash::make($request->password),
+            'user_type' => "advertiser"
+        ]);
+                $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response([
+            'message' => 'Set Password Successfully',
+            'user' => $user,
+            'token'=>$token
+        ]);
+    }
+
 
 }

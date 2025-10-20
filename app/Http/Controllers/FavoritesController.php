@@ -50,7 +50,8 @@ class FavoritesController extends Controller
 
         $groupedFavorites[$fav->category_slug][] = [
             'favorite_id' => $fav->id,
-            'category_slug' => $fav->category_slug, // ✅ أضفنا السطر ده
+            'category_slug' => $fav->category_slug,
+            'user'=>$user->id, // ✅ أضفنا السطر ده
             'ad' => $ad,
         ];
     }
