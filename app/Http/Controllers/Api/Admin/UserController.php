@@ -118,11 +118,7 @@ class UserController extends Controller
     {
         $data = $request->validate([
             'currentPassword' => 'required|string',
-            'newPassword' => [
-                'required',
-                'string',
-                Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()
-            ],
+            'newPassword' =>'required,string,confirmed'
         ]);
 
         $user = auth()->user();

@@ -25,15 +25,7 @@ class AuthController extends Controller
         ];
 
         if ($user?->user_type === 'advertiser') {
-            $rules['password'] = [
-                'required',
-                'string',
-                Password::min(8)
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
-                    ->uncompromised()
-            ];
+            $rules['password'] = 'required|string|min:8';
         }
 
         $validator = Validator::make($request->all(), $rules);
@@ -508,12 +500,7 @@ class AuthController extends Controller
 
         $validator = Validator::make($request->all(), [
             'userId' => 'required|integer|exists:users,id',
-            'password' => [
-                'required',
-                'string',
-                'confirmed',
-                Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised()
-            ],
+            'password' => 'required,string,confirmed',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -532,12 +519,12 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'user_type' => "advertiser"
         ]);
-                $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response([
             'message' => 'Set Password Successfully',
             'user' => $user,
-            'token'=>$token
+            'token' => $token
         ]);
     }
 
