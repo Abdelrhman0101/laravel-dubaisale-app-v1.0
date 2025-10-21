@@ -118,7 +118,7 @@ class UserController extends Controller
     {
         $data = $request->validate([
             'currentPassword' => 'required|string',
-            'newPassword' =>'required,string,confirmed'
+            'newPassword' => 'required|string',
         ]);
 
         $user = auth()->user();
@@ -134,13 +134,15 @@ class UserController extends Controller
         $user->update([
             'password' => Hash::make($data['newPassword']),
         ]);
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Password changed successfully',
             'user' => $user,
-            'token'=>$token
+            'token' => $token
         ]);
     }
+
 
 }

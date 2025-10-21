@@ -25,7 +25,7 @@ class AuthController extends Controller
         ];
 
         if ($user?->user_type === 'advertiser') {
-            $rules['password'] = 'required|string|min:8';
+            $rules['password'] = 'required|string';
         }
 
         $validator = Validator::make($request->all(), $rules);
@@ -500,7 +500,7 @@ class AuthController extends Controller
 
         $validator = Validator::make($request->all(), [
             'userId' => 'required|integer|exists:users,id',
-            'password' => 'required,string,confirmed',
+            'password' => 'required|string|confirmed',
         ]);
         if ($validator->fails()) {
             return response()->json([
