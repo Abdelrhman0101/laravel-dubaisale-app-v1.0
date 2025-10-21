@@ -240,6 +240,191 @@ class MyAdsController extends Controller
     }
 
 
+    // public function userAds($user_id)
+    // {
+    //     $carAds = CarSalesAd::where('user_id', $user_id)->get();
+    //     $carServicesAds = CarServicesAd::where('user_id', $user_id)->get();
+    //     $restaurantAds = RestaurantAd::where('user_id', $user_id)->get();
+    //     $carRentAds = CarRentAd::where('user_id', $user_id)->get();
+    //     $realEstatesAds = RealEstateAd::where('user_id', $user_id)->get();
+    //     $jobAds = JobAd::where('user_id', $user_id)->get();
+    //     $electronic = electronicAd::where('user_id', $user_id)->get();
+    //     $otherService = OtherServiceAds::where('user_id', $user_id)->get();
+
+    //     $formattedCarAds = $carAds->map(function ($ad) {
+    //         return [
+    //             'id' => $ad->id,
+    //             'title' => $ad->title,
+    //             'make' => $ad->make,
+    //             'model' => $ad->model,
+    //             'trim' => $ad->trim,
+    //             'year' => $ad->year,
+    //             'plan_type' => $ad->plan_type,
+    //             'main_image_url' => asset('storage/' . $ad->main_image),
+    //             'price' => $ad->price,
+    //             'status' => $ad->add_status,
+    //             'category' => 'Cars Sales',
+    //             'category_slug' => 'car_sales',
+    //             'created_at' => $ad->created_at->toDateTimeString(),
+    //             'created_at_timestamp' => $ad->created_at->timestamp,
+    //         ];
+    //     });
+
+    //     $formattedCarServicesAds = $carServicesAds->map(function ($ad) {
+    //         return [
+    //             'id' => $ad->id,
+    //             'title' => $ad->title,
+    //             'service_type' => $ad->service_type,
+    //             'service_name' => $ad->service_name,
+    //             'emirate' => $ad->emirate,
+    //             'district' => $ad->district,
+    //             'area' => $ad->area,
+    //             'plan_type' => $ad->plan_type,
+    //             'main_image_url' => asset('storage/' . $ad->main_image),
+    //             'price' => $ad->price,
+    //             'status' => $ad->add_status,
+    //             'category' => 'Car Services',
+    //             'category_slug' => 'car_services',
+    //             'created_at' => $ad->created_at->toDateTimeString(),
+    //             'created_at_timestamp' => $ad->created_at->timestamp,
+    //         ];
+    //     });
+
+    //     $formattedRestaurantAds = $restaurantAds->map(function ($ad) {
+    //         return [
+    //             'id' => $ad->id,
+    //             'title' => $ad->title,
+    //             'description' => $ad->description,
+    //             'emirate' => $ad->emirate,
+    //             'district' => $ad->district,
+    //             'area' => $ad->area,
+    //             'restaurant_category' => $ad->category,
+    //             'plan_type' => $ad->plan_type,
+    //             'main_image_url' => asset('storage/' . $ad->main_image),
+    //             'price' => $ad->price_range,
+    //             'status' => $ad->add_status,
+    //             'category' => 'restaurant',
+    //             'category_slug' => 'restaurant',
+    //             'created_at' => $ad->created_at->toDateTimeString(),
+    //             'created_at_timestamp' => $ad->created_at->timestamp,
+    //         ];
+    //     });
+
+    //     $formattedCarRentAds = $carRentAds->map(function ($ad) {
+    //         return [
+    //             'id' => $ad->id,
+    //             'title' => $ad->title,
+    //             'make' => $ad->make,
+    //             'model' => $ad->model,
+    //             'trim' => $ad->trim,
+    //             'year' => $ad->year,
+    //             'plan_type' => $ad->plan_type,
+    //             'main_image_url' => asset('storage/' . $ad->main_image),
+    //             'price' => $ad->price ?? $ad->day_rent ?? $ad->month_rent,
+    //             'status' => $ad->add_status,
+    //             'category' => 'Car Rent',
+    //             'category_slug' => 'car_rent',
+    //             'created_at' => $ad->created_at->toDateTimeString(),
+    //             'created_at_timestamp' => $ad->created_at->timestamp,
+    //         ];
+    //     });
+
+    //     $formattedRealEstateAds = $realEstatesAds->map(function ($ad) {
+    //         return [
+    //             'id' => $ad->id,
+    //             'title' => $ad->title,
+    //             'description' => $ad->description,
+    //             'emirate' => $ad->emirate,
+    //             'district' => $ad->district,
+    //             'area' => $ad->area,
+    //             'price' => $ad->price,
+    //             'plan_type' => $ad->plan_type,
+    //             'main_image_url' => $ad->main_image_url,
+    //             'thumbnail_images_urls' => $ad->thumbnail_images_urls,
+    //             'status' => $ad->add_status,
+    //             'category' => 'Real Estate',
+    //             'category_slug' => 'real-estate',
+    //             'created_at' => $ad->created_at->toDateTimeString(),
+    //             'created_at_timestamp' => $ad->created_at->timestamp,
+    //         ];
+    //     });
+
+    //     $formattedJobAds = $jobAds->map(function ($ad) {
+    //         return [
+    //             'id' => $ad->id,
+    //             'title' => $ad->title,
+    //             'price' => $ad->salary,
+    //             'emirate' => $ad->emirate,
+    //             'district' => $ad->district,
+    //             'category_type' => $ad->category_type,
+    //             'section_type' => $ad->section_type,
+    //             'job_name' => $ad->job_name,
+    //             'status' => $ad->add_status,
+    //             'category' => 'Jobs',
+    //             'category_slug' => 'jobs',
+    //             'created_at' => $ad->created_at->toDateTimeString(),
+    //             'created_at_timestamp' => $ad->created_at->timestamp,
+    //         ];
+    //     });
+
+    //     $formattedElectronicAds = $electronic->map(function ($ad) {
+    //         return [
+    //             'id' => $ad->id,
+    //             'title' => $ad->title,
+    //             'price' => $ad->price,
+    //             'emirate' => $ad->emirate,
+    //             'district' => $ad->district,
+    //             'area' => $ad->area,
+    //             'product_name' => $ad->product_name,
+    //             'main_image_url' => asset('storage/' . $ad->main_image),
+    //             'thumbnail_images_urls' => $ad->thumbnail_images_urls,
+    //             'category' => $ad->add_category,
+    //             'status' => $ad->add_status,
+    //             'category_slug' => 'electronics',
+    //             'created_at' => $ad->created_at->toDateTimeString(),
+    //             'created_at_timestamp' => $ad->created_at->timestamp,
+    //         ];
+    //     });
+
+    //     $formattedOtherServiceAds = $otherService->map(function ($ad) {
+    //         return [
+    //             'id' => $ad->id,
+    //             'title' => $ad->title,
+    //             'price' => $ad->price,
+    //             'emirate' => $ad->emirate,
+    //             'district' => $ad->district,
+    //             'area' => $ad->area,
+    //             'service_name' => $ad->service_name,
+    //             'section_type' => $ad->section_type,
+    //             'main_image_url' => asset('storage/' . $ad->main_image),
+    //             'category' => $ad->add_category,
+    //             'status' => $ad->add_status,
+    //             'category_slug' => 'other-services',
+    //             'created_at' => $ad->created_at->toDateTimeString(),
+    //             'created_at_timestamp' => $ad->created_at->timestamp,
+    //         ];
+    //     });
+
+    //     $allAdsArray = array_merge(
+    //         $formattedCarAds->toArray(),
+    //         $formattedCarServicesAds->toArray(),
+    //         $formattedRestaurantAds->toArray(),
+    //         $formattedCarRentAds->toArray(),
+    //         $formattedRealEstateAds->toArray(),
+    //         $formattedJobAds->toArray(),
+    //         $formattedElectronicAds->toArray(),
+    //         $formattedOtherServiceAds->toArray()
+    //     );
+
+    //     usort($allAdsArray, fn($a, $b) => $b['created_at_timestamp'] <=> $a['created_at_timestamp']);
+
+    //     return response()->json([
+    //         'user_id' => $user_id,
+    //         'total_ads' => count($allAdsArray),
+    //         'ads' => $allAdsArray,
+    //     ]);
+    // }
+
     public function userAds($user_id)
     {
         $carAds = CarSalesAd::where('user_id', $user_id)->get();
@@ -251,180 +436,26 @@ class MyAdsController extends Controller
         $electronic = electronicAd::where('user_id', $user_id)->get();
         $otherService = OtherServiceAds::where('user_id', $user_id)->get();
 
-        $formattedCarAds = $carAds->map(function ($ad) {
-            return [
-                'id' => $ad->id,
-                'title' => $ad->title,
-                'make' => $ad->make,
-                'model' => $ad->model,
-                'trim' => $ad->trim,
-                'year' => $ad->year,
-                'plan_type' => $ad->plan_type,
-                'main_image_url' => asset('storage/' . $ad->main_image),
-                'price' => $ad->price,
-                'status' => $ad->add_status,
-                'category' => 'Cars Sales',
-                'category_slug' => 'car_sales',
-                'created_at' => $ad->created_at->toDateTimeString(),
-                'created_at_timestamp' => $ad->created_at->timestamp,
-            ];
-        });
+        $allAds = collect()
+            ->merge($carAds)
+            ->merge($carServicesAds)
+            ->merge($restaurantAds)
+            ->merge($carRentAds)
+            ->merge($realEstatesAds)
+            ->merge($jobAds)
+            ->merge($electronic)
+            ->merge($otherService);
 
-        $formattedCarServicesAds = $carServicesAds->map(function ($ad) {
-            return [
-                'id' => $ad->id,
-                'title' => $ad->title,
-                'service_type' => $ad->service_type,
-                'service_name' => $ad->service_name,
-                'emirate' => $ad->emirate,
-                'district' => $ad->district,
-                'area' => $ad->area,
-                'plan_type' => $ad->plan_type,
-                'main_image_url' => asset('storage/' . $ad->main_image),
-                'price' => $ad->price,
-                'status' => $ad->add_status,
-                'category' => 'Car Services',
-                'category_slug' => 'car_services',
-                'created_at' => $ad->created_at->toDateTimeString(),
-                'created_at_timestamp' => $ad->created_at->timestamp,
-            ];
-        });
 
-        $formattedRestaurantAds = $restaurantAds->map(function ($ad) {
-            return [
-                'id' => $ad->id,
-                'title' => $ad->title,
-                'description' => $ad->description,
-                'emirate' => $ad->emirate,
-                'district' => $ad->district,
-                'area' => $ad->area,
-                'restaurant_category' => $ad->category,
-                'plan_type' => $ad->plan_type,
-                'main_image_url' => asset('storage/' . $ad->main_image),
-                'price' => $ad->price_range,
-                'status' => $ad->add_status,
-                'category' => 'restaurant',
-                'category_slug' => 'restaurant',
-                'created_at' => $ad->created_at->toDateTimeString(),
-                'created_at_timestamp' => $ad->created_at->timestamp,
-            ];
-        });
+        $allAds = $allAds->sortByDesc('created_at')->values();
 
-        $formattedCarRentAds = $carRentAds->map(function ($ad) {
-            return [
-                'id' => $ad->id,
-                'title' => $ad->title,
-                'make' => $ad->make,
-                'model' => $ad->model,
-                'trim' => $ad->trim,
-                'year' => $ad->year,
-                'plan_type' => $ad->plan_type,
-                'main_image_url' => asset('storage/' . $ad->main_image),
-                'price' => $ad->price ?? $ad->day_rent ?? $ad->month_rent,
-                'status' => $ad->add_status,
-                'category' => 'Car Rent',
-                'category_slug' => 'car_rent',
-                'created_at' => $ad->created_at->toDateTimeString(),
-                'created_at_timestamp' => $ad->created_at->timestamp,
-            ];
-        });
-
-        $formattedRealEstateAds = $realEstatesAds->map(function ($ad) {
-            return [
-                'id' => $ad->id,
-                'title' => $ad->title,
-                'description' => $ad->description,
-                'emirate' => $ad->emirate,
-                'district' => $ad->district,
-                'area' => $ad->area,
-                'price' => $ad->price,
-                'plan_type' => $ad->plan_type,
-                'main_image_url' => $ad->main_image_url,
-                'thumbnail_images_urls' => $ad->thumbnail_images_urls,
-                'status' => $ad->add_status,
-                'category' => 'Real Estate',
-                'category_slug' => 'real-estate',
-                'created_at' => $ad->created_at->toDateTimeString(),
-                'created_at_timestamp' => $ad->created_at->timestamp,
-            ];
-        });
-
-        $formattedJobAds = $jobAds->map(function ($ad) {
-            return [
-                'id' => $ad->id,
-                'title' => $ad->title,
-                'price' => $ad->salary,
-                'emirate' => $ad->emirate,
-                'district' => $ad->district,
-                'category_type' => $ad->category_type,
-                'section_type' => $ad->section_type,
-                'job_name' => $ad->job_name,
-                'status' => $ad->add_status,
-                'category' => 'Jobs',
-                'category_slug' => 'jobs',
-                'created_at' => $ad->created_at->toDateTimeString(),
-                'created_at_timestamp' => $ad->created_at->timestamp,
-            ];
-        });
-
-        $formattedElectronicAds = $electronic->map(function ($ad) {
-            return [
-                'id' => $ad->id,
-                'title' => $ad->title,
-                'price' => $ad->price,
-                'emirate' => $ad->emirate,
-                'district' => $ad->district,
-                'area' => $ad->area,
-                'product_name' => $ad->product_name,
-                'main_image_url' => asset('storage/' . $ad->main_image),
-                'thumbnail_images_urls' => $ad->thumbnail_images_urls,
-                'category' => $ad->add_category,
-                'status' => $ad->add_status,
-                'category_slug' => 'electronics',
-                'created_at' => $ad->created_at->toDateTimeString(),
-                'created_at_timestamp' => $ad->created_at->timestamp,
-            ];
-        });
-
-        $formattedOtherServiceAds = $otherService->map(function ($ad) {
-            return [
-                'id' => $ad->id,
-                'title' => $ad->title,
-                'price' => $ad->price,
-                'emirate' => $ad->emirate,
-                'district' => $ad->district,
-                'area' => $ad->area,
-                'service_name' => $ad->service_name,
-                'section_type' => $ad->section_type,
-                'main_image_url' => asset('storage/' . $ad->main_image),
-                'category' => $ad->add_category,
-                'status' => $ad->add_status,
-                'category_slug' => 'other-services',
-                'created_at' => $ad->created_at->toDateTimeString(),
-                'created_at_timestamp' => $ad->created_at->timestamp,
-            ];
-        });
-
-        $allAdsArray = array_merge(
-            $formattedCarAds->toArray(),
-            $formattedCarServicesAds->toArray(),
-            $formattedRestaurantAds->toArray(),
-            $formattedCarRentAds->toArray(),
-            $formattedRealEstateAds->toArray(),
-            $formattedJobAds->toArray(),
-            $formattedElectronicAds->toArray(),
-            $formattedOtherServiceAds->toArray()
-        );
-
-        usort($allAdsArray, fn($a, $b) => $b['created_at_timestamp'] <=> $a['created_at_timestamp']);
 
         return response()->json([
             'user_id' => $user_id,
-            'total_ads' => count($allAdsArray),
-            'ads' => $allAdsArray,
+            'total_ads' => $allAds->count(),
+            'ads' => $allAds,
         ]);
     }
-
 
 
 
