@@ -37,7 +37,7 @@ class FeaturedContentController extends Controller
         foreach ($usersGroupedByUser as $userId => $records) {
             $user = $records->first()->user;
             $userInfo = [
-                'id' => $user->id,
+                'user_id' => $user->id,
                 'advertiser_name' => $user->advertiser_name ?? $user->name ?? null,
                 'category' => $categorySlug,
                 'latest_ads' => $this->getLatestAdsForCategory($userId, $categorySlug) // لازم الميثود دي ترجع ads مناسبة
