@@ -27,7 +27,7 @@ class FavoritesController extends Controller
         'Real State' => RealEstateAd::class,
         'Cars Sales' => CarSalesAd::class,
         'Car Rent' => CarRentAd::class,
-        'Car Service' => CarServicesAd::class,
+        'Car Services' => CarServicesAd::class,
         'restaurant' => RestaurantAd::class,
         'Jop' => JobAd::class,
         'Electronics' => electronicAd::class,
