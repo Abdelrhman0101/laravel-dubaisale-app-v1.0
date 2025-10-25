@@ -74,11 +74,11 @@ class CarSalesAdController extends Controller
 
         // Filter by keyword search
         $query->when($request->query('keyword'), function ($q, $keyword) {
-            return $q->where(function($subQuery) use ($keyword) {
+            return $q->where(function ($subQuery) use ($keyword) {
                 $subQuery->where('title', 'like', "%{$keyword}%")
-                         ->orWhere('description', 'like', "%{$keyword}%")
-                         ->orWhere('make', 'like', "%{$keyword}%")
-                         ->orWhere('model', 'like', "%{$keyword}%");
+                    ->orWhere('description', 'like', "%{$keyword}%")
+                    ->orWhere('make', 'like', "%{$keyword}%")
+                    ->orWhere('model', 'like', "%{$keyword}%");
             });
         });
 
@@ -136,14 +136,22 @@ class CarSalesAdController extends Controller
             ->where('admin_approved', true);
 
         // Apply smart filters
-        if ($request->filled('make')) $query->filterByMake($request->make);
-        if ($request->filled('model')) $query->filterByModel($request->model);
-        if ($request->filled('trim')) $query->filterByTrim($request->trim);
-        if ($request->filled('year')) $query->filterByYear($request->year);
-        if ($request->filled('emirate')) $query->filterByEmirate($request->emirate);
-        if ($request->filled('district')) $query->filterByDistrict($request->district);
-        if ($request->filled('area')) $query->filterByArea($request->area);
-        if ($request->filled('trans_type')) $query->filterByTransType($request->trans_type);
+        if ($request->filled('make'))
+            $query->filterByMake($request->make);
+        if ($request->filled('model'))
+            $query->filterByModel($request->model);
+        if ($request->filled('trim'))
+            $query->filterByTrim($request->trim);
+        if ($request->filled('year'))
+            $query->filterByYear($request->year);
+        if ($request->filled('emirate'))
+            $query->filterByEmirate($request->emirate);
+        if ($request->filled('district'))
+            $query->filterByDistrict($request->district);
+        if ($request->filled('area'))
+            $query->filterByArea($request->area);
+        if ($request->filled('trans_type'))
+            $query->filterByTransType($request->trans_type);
 
         // Price range filter
         if ($request->filled('min_price') || $request->filled('max_price')) {
@@ -153,11 +161,11 @@ class CarSalesAdController extends Controller
         // Keyword search
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;
-            $query->where(function($q) use ($keyword) {
+            $query->where(function ($q) use ($keyword) {
                 $q->where('title', 'like', "%{$keyword}%")
-                  ->orWhere('description', 'like', "%{$keyword}%")
-                  ->orWhere('make', 'like', "%{$keyword}%")
-                  ->orWhere('model', 'like', "%{$keyword}%");
+                    ->orWhere('description', 'like', "%{$keyword}%")
+                    ->orWhere('make', 'like', "%{$keyword}%")
+                    ->orWhere('model', 'like', "%{$keyword}%");
             });
         }
 
@@ -198,11 +206,16 @@ class CarSalesAdController extends Controller
             ->offerBoxOnly();
 
         // Apply smart filters for offer box
-        if ($request->filled('make')) $query->filterByMake($request->make);
-        if ($request->filled('model')) $query->filterByModel($request->model);
-        if ($request->filled('emirate')) $query->filterByEmirate($request->emirate);
-        if ($request->filled('district')) $query->filterByDistrict($request->district);
-        if ($request->filled('area')) $query->filterByArea($request->area);
+        if ($request->filled('make'))
+            $query->filterByMake($request->make);
+        if ($request->filled('model'))
+            $query->filterByModel($request->model);
+        if ($request->filled('emirate'))
+            $query->filterByEmirate($request->emirate);
+        if ($request->filled('district'))
+            $query->filterByDistrict($request->district);
+        if ($request->filled('area'))
+            $query->filterByArea($request->area);
 
         $perPage = $request->query('per_page', 10);
         $ads = $query->latest()->paginate($perPage)->withQueryString();
@@ -332,8 +345,9 @@ class CarSalesAdController extends Controller
             'km' => 'sometimes|required|integer',
             'price' => 'sometimes|required|numeric',
             // --- قواعد التحقق الخاصة بالصور ---
-            'main_image' => 'sometimes|image|max:5120', // صورة واحدة، ليست مصفوفة
-            'thumbnail_images.*' => 'sometimes|image|max:5120',
+            'main_image' => 'sometimes|string|max:5120', // صورة واحدة، ليست مصفوفة
+            'thumbnail_images' => 'sometimes|array',
+            'thumbnail_images.*' => 'sometimes|string|max:5120',
             // --- Plan fields: optional and open for client control ---
             'plan_type' => 'sometimes|nullable|string|max:50',
             'plan_days' => 'sometimes|nullable|integer|min:0',

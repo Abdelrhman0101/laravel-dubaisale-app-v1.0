@@ -45,11 +45,11 @@ class RealEstateAdController extends Controller
 
         // Keyword search in title, description, property_type, contract_type
         $query->when($request->query('keyword'), function ($q, $keyword) {
-            return $q->where(function($subQuery) use ($keyword) {
+            return $q->where(function ($subQuery) use ($keyword) {
                 $subQuery->where('title', 'like', "%{$keyword}%")
-                        ->orWhere('description', 'like', "%{$keyword}%")
-                        ->orWhere('property_type', 'like', "%{$keyword}%")
-                        ->orWhere('contract_type', 'like', "%{$keyword}%");
+                    ->orWhere('description', 'like', "%{$keyword}%")
+                    ->orWhere('property_type', 'like', "%{$keyword}%")
+                    ->orWhere('contract_type', 'like', "%{$keyword}%");
             });
         });
 
@@ -81,7 +81,7 @@ class RealEstateAdController extends Controller
 
         $perPage = $request->query('per_page', 15);
         $perPage = min(max($perPage, 1), 50); // Between 1 and 50
-        
+
         return response()->json($query->get());
     }
 
@@ -149,11 +149,11 @@ class RealEstateAdController extends Controller
         });
 
         $query->when($request->query('keyword'), function ($q, $keyword) {
-            return $q->where(function($subQuery) use ($keyword) {
+            return $q->where(function ($subQuery) use ($keyword) {
                 $subQuery->where('title', 'like', "%{$keyword}%")
-                        ->orWhere('description', 'like', "%{$keyword}%")
-                        ->orWhere('property_type', 'like', "%{$keyword}%")
-                        ->orWhere('contract_type', 'like', "%{$keyword}%");
+                    ->orWhere('description', 'like', "%{$keyword}%")
+                    ->orWhere('property_type', 'like', "%{$keyword}%")
+                    ->orWhere('contract_type', 'like', "%{$keyword}%");
             });
         });
 
@@ -180,7 +180,7 @@ class RealEstateAdController extends Controller
 
         $perPage = $request->query('per_page', 15);
         $perPage = min(max($perPage, 1), 50);
-        
+
         return response()->json($query->paginate($perPage)->withQueryString());
     }
 
@@ -283,8 +283,9 @@ class RealEstateAdController extends Controller
             'phone_number' => 'sometimes|nullable|string|max:20',
             'whatsapp_number' => 'sometimes|nullable|string|max:20',
             'address' => 'sometimes|nullable|string|max:500',
-            'main_image' => 'sometimes|image|max:5120',
-            'thumbnail_images.*' => 'sometimes|image|max:5120',
+            'main_image' => 'sometimes|string|max:5120',
+            'thumbnail_images' => 'sometimes|array',
+            'thumbnail_images.*' => 'sometimes|string|max:5120',
             // Plan
             'plan_type' => 'sometimes|nullable|string|max:50',
             'plan_days' => 'sometimes|nullable|integer|min:0',

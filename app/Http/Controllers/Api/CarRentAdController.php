@@ -42,7 +42,7 @@ class CarRentAdController extends Controller
         $query->when($request->query('keyword'), function ($q, $keyword) {
             return $q->where(function ($subQuery) use ($keyword) {
                 $subQuery->where('title', 'like', '%' . $keyword . '%')
-                         ->orWhere('description', 'like', '%' . $keyword . '%');
+                    ->orWhere('description', 'like', '%' . $keyword . '%');
             });
         });
 
@@ -98,7 +98,7 @@ class CarRentAdController extends Controller
         $query->when($request->query('keyword'), function ($q, $keyword) {
             return $q->where(function ($subQuery) use ($keyword) {
                 $subQuery->where('title', 'like', '%' . $keyword . '%')
-                         ->orWhere('description', 'like', '%' . $keyword . '%');
+                    ->orWhere('description', 'like', '%' . $keyword . '%');
             });
         });
 
@@ -154,7 +154,7 @@ class CarRentAdController extends Controller
         $query->when($request->query('keyword'), function ($q, $keyword) {
             return $q->where(function ($subQuery) use ($keyword) {
                 $subQuery->where('title', 'like', '%' . $keyword . '%')
-                         ->orWhere('description', 'like', '%' . $keyword . '%');
+                    ->orWhere('description', 'like', '%' . $keyword . '%');
             });
         });
 
@@ -183,7 +183,7 @@ class CarRentAdController extends Controller
             'make' => 'nullable|string|max:100',
             'model' => 'nullable|string|max:100',
             'trim' => 'nullable|string|max:100',
-            'year' => 'nullable|integer|min:1900|max:' . (int)date('Y') + 1,
+            'year' => 'nullable|integer|min:1900|max:' . (int) date('Y') + 1,
             'car_type' => 'nullable|string|max:100',
             'trans_type' => 'nullable|string|max:100',
             'fuel_type' => 'nullable|string|max:100',
@@ -266,18 +266,18 @@ class CarRentAdController extends Controller
         // manual approval mode (car_rent specific or global fallback)
         // اتّباع نفس منطق الأقسام الأخرى: استخدام الإعداد العام مع Cache
         $manualApproval = cache()->rememberForever('setting_manual_approval_mode', function () {
-        return optional(\App\Models\SystemSetting::where('key', 'manual_approval_mode')->first())->value ?? 'true';
+            return optional(\App\Models\SystemSetting::where('key', 'manual_approval_mode')->first())->value ?? 'true';
         });
-        
+
         $isManualApprovalActive = filter_var($manualApproval, FILTER_VALIDATE_BOOLEAN);
         if ($isManualApprovalActive) {
-        // الموافقة اليدوية مفعلة => Pending
-        $data['add_status'] = 'Pending';
-        $data['admin_approved'] = false;
+            // الموافقة اليدوية مفعلة => Pending
+            $data['add_status'] = 'Pending';
+            $data['admin_approved'] = false;
         } else {
-        // القبول التلقائي مفعّل => Valid
-        $data['add_status'] = 'Valid';
-        $data['admin_approved'] = true;
+            // القبول التلقائي مفعّل => Valid
+            $data['add_status'] = 'Valid';
+            $data['admin_approved'] = true;
         }
 
         $ad = CarRentAd::create($data);
@@ -290,7 +290,7 @@ class CarRentAdController extends Controller
                 'title' => $ad->title,
                 'make' => $ad->make,
                 'model' => $ad->model,
-                'trim'=> $ad->trim,
+                'trim' => $ad->trim,
                 'year' => $ad->year,
                 'price' => $ad->price,
                 'main_image' => $ad->main_image,
@@ -306,6 +306,8 @@ class CarRentAdController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
+        $nextYear = date('Y') + 1;
+
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|required|string',
@@ -315,7 +317,7 @@ class CarRentAdController extends Controller
             'make' => 'nullable|string|max:100',
             'model' => 'nullable|string|max:100',
             'trim' => 'nullable|string|max:100',
-            'year' => 'nullable|integer|min:1900|max:' . (int)date('Y') + 1,
+            'year' => "nullable|integer|min:1900|max:$nextYear",
             'car_type' => 'nullable|string|max:100',
             'trans_type' => 'nullable|string|max:100',
             'fuel_type' => 'nullable|string|max:100',
@@ -329,8 +331,9 @@ class CarRentAdController extends Controller
             'advertiser_name' => 'nullable|string|max:255',
             'phone_number' => 'nullable|string|max:20',
             'whatsapp' => 'nullable|string|max:20',
-            'main_image' => 'nullable|image|max:5120',
-            'thumbnail_images.*' => 'image|max:5120',
+            'main_image' => 'nullable|string|max:5120',
+            'thumbnail_images' => 'sometimes|array',
+            'thumbnail_images.*' => 'string|max:5120',
             'plan_type' => 'nullable|string|max:50',
             'plan_days' => 'nullable|integer|min:0',
             'plan_expires_at' => 'nullable|date',

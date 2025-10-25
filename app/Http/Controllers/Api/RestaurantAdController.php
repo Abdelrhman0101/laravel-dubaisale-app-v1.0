@@ -41,10 +41,10 @@ class RestaurantAdController extends Controller
 
         // Keyword search in title, description, category
         $query->when($request->query('keyword'), function ($q, $keyword) {
-            return $q->where(function($subQuery) use ($keyword) {
+            return $q->where(function ($subQuery) use ($keyword) {
                 $subQuery->where('title', 'like', "%{$keyword}%")
-                        ->orWhere('description', 'like', "%{$keyword}%")
-                        ->orWhere('category', 'like', "%{$keyword}%");
+                    ->orWhere('description', 'like', "%{$keyword}%")
+                    ->orWhere('category', 'like', "%{$keyword}%");
             });
         });
 
@@ -65,7 +65,7 @@ class RestaurantAdController extends Controller
 
         $perPage = $request->query('per_page', 15);
         $perPage = min(max($perPage, 1), 50); // Between 1 and 50
-        
+
         return response()->json($query->get());
     }
 
@@ -129,10 +129,10 @@ class RestaurantAdController extends Controller
         });
 
         $query->when($request->query('keyword'), function ($q, $keyword) {
-            return $q->where(function($subQuery) use ($keyword) {
+            return $q->where(function ($subQuery) use ($keyword) {
                 $subQuery->where('title', 'like', "%{$keyword}%")
-                        ->orWhere('description', 'like', "%{$keyword}%")
-                        ->orWhere('category', 'like', "%{$keyword}%");
+                    ->orWhere('description', 'like', "%{$keyword}%")
+                    ->orWhere('category', 'like', "%{$keyword}%");
             });
         });
 
@@ -153,7 +153,7 @@ class RestaurantAdController extends Controller
 
         $perPage = $request->query('per_page', 15);
         $perPage = min(max($perPage, 1), 50);
-        
+
         return response()->json($query->paginate($perPage)->withQueryString());
     }
 
@@ -220,7 +220,8 @@ class RestaurantAdController extends Controller
         $data['thumbnail_images'] = $thumbs;
 
         // Plan handling
-        if ($request->filled('plan_type')) $data['plan_type'] = $request->input('plan_type');
+        if ($request->filled('plan_type'))
+            $data['plan_type'] = $request->input('plan_type');
         if ($request->has('plan_days')) {
             $data['plan_days'] = (int) $request->input('plan_days');
             if (!$request->filled('plan_expires_at')) {
@@ -265,8 +266,9 @@ class RestaurantAdController extends Controller
             'area' => 'sometimes|nullable|string|max:100',
             'price_range' => 'sometimes|required|string|max:100',
             'category' => 'sometimes|nullable|string|max:100|exists:restaurant_categories,name',
-            'main_image' => 'sometimes|image|max:5120',
-            'thumbnail_images.*' => 'sometimes|image|max:5120',
+            'main_image' => 'sometimes|string|max:5120',
+            'thumbnail_images' => 'sometimes|array',
+            'thumbnail_images.*' => 'sometimes|string|max:5120',
             'advertiser_name' => 'sometimes|required|string|max:255',
             'whatsapp_number' => 'sometimes|required|string|max:20',
             'phone_number' => 'sometimes|nullable|string|max:20',

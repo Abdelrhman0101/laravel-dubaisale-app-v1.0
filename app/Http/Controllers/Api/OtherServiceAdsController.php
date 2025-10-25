@@ -190,7 +190,7 @@ class OtherServiceAdsController extends Controller
             'phone_number'     => 'nullable|string|max:20',
             'whatsapp_number'  => 'nullable|string|max:20',
             'address'          => 'nullable|string|max:500',
-            'main_image'       => 'nullable|image|max:5120',
+            'main_image'       => 'nullable|string|max:5120',
             // Plan
             'plan_type'        => 'nullable|string|max:50',
             'plan_days'        => 'nullable|integer|min:0',

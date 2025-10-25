@@ -211,7 +211,7 @@ class JobsAdController extends Controller
             'phone_number'    => 'sometimes|required|string|max:20',
             'whatsapp'        => 'sometimes|nullable|string|max:20',
             'address'         => 'sometimes|nullable|string|max:500',
-            'main_image'      => 'sometimes|image|max:5120',
+            // 'main_image'      => 'sometimes|image|max:5120',
             // Plan
             'plan_type'       => 'sometimes|nullable|string|max:50',
             'plan_days'       => 'sometimes|nullable|integer|min:0',
@@ -233,7 +233,7 @@ class JobsAdController extends Controller
                 Storage::disk('public')->delete($jobAd->main_image);
             }
 
-            $updateData['main_image'] = $request->file('main_image')->store('jobs/main', 'public');
+            // $updateData['main_image'] = $request->file('main_image')->store('jobs/main', 'public');
             // return response()->json([  'message'=>'secss' ]);
         }
 
@@ -254,7 +254,7 @@ class JobsAdController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        Storage::disk('public')->delete($jobAd->main_image);
+        // Storage::disk('public')->delete($jobAd->main_image);
         $jobAd->delete();
 
         return response()->json(['message' => 'Ad deleted successfully.'], 204);

@@ -22,8 +22,8 @@ class CarServicesAdController extends Controller
     {
         // 1. نبدأ بالاستعلام الأساسي الذي يعرض الإعلانات المعتمدة فقط
         $query = CarServicesAd::query()
-                       ->where('add_status', 'Valid')
-                       ->where('admin_approved', true);
+            ->where('add_status', 'Valid')
+            ->where('admin_approved', true);
 
         // 2. تطبيق الفلاتر الذكية بشكل ديناميكي بناءً على الطلب الوارد
         // الدالة `when` تقوم بتطبيق الفلتر فقط إذا كانت القيمة موجودة في الطلب
@@ -57,7 +57,7 @@ class CarServicesAdController extends Controller
         $query->when($request->query('keyword'), function ($q, $keyword) {
             return $q->where(function ($subQuery) use ($keyword) {
                 $subQuery->where('title', 'like', '%' . $keyword . '%')
-                         ->orWhere('description', 'like', '%' . $keyword . '%');
+                    ->orWhere('description', 'like', '%' . $keyword . '%');
             });
         });
 
@@ -74,7 +74,7 @@ class CarServicesAdController extends Controller
                 $query->latest();
                 break;
         }
-        
+
         // 3. تقسيم النتائج على صفحات
         $ads = $query->get();
 
@@ -115,7 +115,7 @@ class CarServicesAdController extends Controller
         $query->when($request->query('keyword'), function ($q, $keyword) {
             return $q->where(function ($subQuery) use ($keyword) {
                 $subQuery->where('title', 'like', '%' . $keyword . '%')
-                         ->orWhere('description', 'like', '%' . $keyword . '%');
+                    ->orWhere('description', 'like', '%' . $keyword . '%');
             });
         });
 
@@ -172,7 +172,7 @@ class CarServicesAdController extends Controller
         $query->when($request->query('keyword'), function ($q, $keyword) {
             return $q->where(function ($subQuery) use ($keyword) {
                 $subQuery->where('title', 'like', '%' . $keyword . '%')
-                         ->orWhere('description', 'like', '%' . $keyword . '%');
+                    ->orWhere('description', 'like', '%' . $keyword . '%');
             });
         });
 
@@ -313,10 +313,10 @@ class CarServicesAdController extends Controller
     {
         // Increment views count
         $carServicesAd->incrementViews();
-        
+
         // Load service type relationship
         $carServicesAd->load('serviceType');
-        
+
         return response()->json($carServicesAd);
     }
 
@@ -333,7 +333,7 @@ class CarServicesAdController extends Controller
         if ($request->user()->id !== $carServicesAd->user_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        
+
         // 2. التحقق من صحة البيانات المدخلة
         $validatedData = $request->validate([
             'title' => 'sometimes|required|string|max:255',
@@ -345,8 +345,9 @@ class CarServicesAdController extends Controller
             'service_name' => 'sometimes|required|string|max:255',
             'price' => 'sometimes|required|numeric|min:0',
             'location' => 'sometimes|nullable|string|max:500',
-            'main_image' => 'sometimes|image|max:5120',
-            'thumbnail_images.*' => 'sometimes|image|max:5120',
+            'main_image' => 'sometimes|string|max:5120',
+            'thumbnail_images' => 'sometimes|array',
+            'thumbnail_images.*' => 'sometimes|string|max:5120',
             // --- Plan fields: optional and open for client control ---
             'plan_type' => 'sometimes|nullable|string|max:50',
             'plan_days' => 'sometimes|nullable|integer|min:0',
@@ -367,17 +368,17 @@ class CarServicesAdController extends Controller
         // =========================================================
         // ====        المنطق الذكي لتحديث الصور          ====
         // =========================================================
-        
+
         $updateData = [];
 
         // 4. تحديث الصورة الرئيسية (إذا تم رفع صورة جديدة)
         if ($request->hasFile('main_image')) {
             // أ. حذف الصورة القديمة من الـ storage
             Storage::disk('public')->delete($carServicesAd->main_image);
-            
+
             // ب. رفع الصورة الجديدة
             $path = $request->file('main_image')->store('car_services/main', 'public');
-            
+
             // ج. تجهيز المسار الجديد للحفظ في قاعدة البيانات
             $updateData['main_image'] = $path;
         }
@@ -388,13 +389,13 @@ class CarServicesAdController extends Controller
             if (is_array($carServicesAd->thumbnail_images)) {
                 Storage::disk('public')->delete($carServicesAd->thumbnail_images);
             }
-            
+
             // ب. رفع الصور الجديدة وتجميع مساراتها
             $thumbnailPaths = [];
             foreach ($request->file('thumbnail_images') as $file) {
                 $thumbnailPaths[] = $file->store('car_services/thumbnails', 'public');
             }
-            
+
             // ج. تجهيز مصفوفة المسارات الجديدة للحفظ
             $updateData['thumbnail_images'] = $thumbnailPaths;
         }
@@ -403,7 +404,7 @@ class CarServicesAdController extends Controller
         if (!empty($updateData)) {
             $carServicesAd->update($updateData);
         }
-        
+
         // 7. إرجاع بيانات الإعلان المحدثة بالكامل
         return response()->json($carServicesAd->fresh());
     }
@@ -506,7 +507,7 @@ class CarServicesAdController extends Controller
     // {
     //     $limit = $request->query('limit', 10);
     //     $ads = CarServicesAd::getOffersBoxAds($limit);
-        
+
     //     return response()->json($ads);
     // }
 
@@ -519,9 +520,9 @@ class CarServicesAdController extends Controller
     {
         // Return only service types; emirates & districts are served from /api/locations/emirates
         $serviceTypes = CarServiceType::where('is_active', true)
-                                      ->orderBy('sort_order')
-                                      ->orderBy('name')
-                                      ->get(['name', 'display_name']);
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['name', 'display_name']);
 
         return response()->json([
             'service_types' => $serviceTypes,
@@ -617,34 +618,34 @@ class CarServicesAdController extends Controller
         try {
             // إجمالي الإعلانات
             $totalAds = CarServicesAd::count();
-            
+
             // الإعلانات المعلقة
             $pendingAds = CarServicesAd::where('add_status', 'Pending')->count();
-            
+
             // الإعلانات المعتمدة
             $approvedAds = CarServicesAd::where('admin_approved', true)
-                                       ->where('add_status', 'Valid')
-                                       ->count();
-            
+                ->where('add_status', 'Valid')
+                ->count();
+
             // الإعلانات المرفوضة
             $rejectedAds = CarServicesAd::where('add_status', 'Rejected')->count();
-            
+
             // الإعلانات في صندوق العروض النشط
             $activeOffersBox = CarServicesAd::where('active_offers_box_days', '>', 0)
-                                           ->where('admin_approved', true)
-                                           ->count();
-            
+                ->where('admin_approved', true)
+                ->count();
+
             // إجمالي المشاهدات
             $totalViews = CarServicesAd::sum('views');
-            
+
             // إعلانات هذا الشهر
             $thisMonthAds = CarServicesAd::whereMonth('created_at', now()->month)
-                                        ->whereYear('created_at', now()->year)
-                                        ->count();
-            
+                ->whereYear('created_at', now()->year)
+                ->count();
+
             // عدد أنواع الخدمات المختلفة
             $serviceTypesCount = CarServicesAd::distinct('service_type')->count('service_type');
-            
+
             return response()->json([
                 'total_ads' => $totalAds,
                 'pending_ads' => $pendingAds,
@@ -655,7 +656,7 @@ class CarServicesAdController extends Controller
                 'this_month_ads' => $thisMonthAds,
                 'service_types_count' => $serviceTypesCount
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
