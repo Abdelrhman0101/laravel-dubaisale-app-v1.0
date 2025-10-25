@@ -253,8 +253,8 @@ Route::middleware([
 
     // --- Electronics (CRUD Authenticated) ---
     Route::post('/electronics', [ElectronicAdController::class, 'store']);
-    Route::put('/electronics/{id}', [ElectronicAdController::class, 'update']);
-    Route::delete('/electronics/{id}', [ElectronicAdController::class, 'destroy']);
+    Route::put('/electronics/{electronicAd}', [ElectronicAdController::class, 'update']);
+    Route::delete('/electronics/{electronicAd}', [ElectronicAdController::class, 'destroy']);
 
     // --- Other Service Ads (CRUD Authenticated) ---
     Route::post('/other-services', [OtherServiceAdsController::class, 'store']);
