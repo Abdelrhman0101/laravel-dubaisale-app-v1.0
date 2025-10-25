@@ -283,9 +283,8 @@ class RealEstateAdController extends Controller
             'phone_number' => 'sometimes|nullable|string|max:20',
             'whatsapp_number' => 'sometimes|nullable|string|max:20',
             'address' => 'sometimes|nullable|string|max:500',
-            'main_image' => 'sometimes|string|max:5120',
-            'thumbnail_images' => 'sometimes|array',
-            'thumbnail_images.*' => 'sometimes|string|max:5120',
+            'main_image' => 'sometimes|image|max:5120',
+            'thumbnail_images.*' => 'sometimes|image|max:5120',
             // Plan
             'plan_type' => 'sometimes|nullable|string|max:50',
             'plan_days' => 'sometimes|nullable|integer|min:0',

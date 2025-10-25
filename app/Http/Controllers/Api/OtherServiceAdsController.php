@@ -178,7 +178,7 @@ class OtherServiceAdsController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         $validated = $request->validate([
-            'title'            => 'sometimes|required|string|max:255',
+            'title'            => 'nullable|string|max:255',
             'description'      => 'nullable|string',
             'emirate'          => 'sometimes|required|string|max:100',
             'district'         => 'nullable|string|max:100',
@@ -190,7 +190,7 @@ class OtherServiceAdsController extends Controller
             'phone_number'     => 'nullable|string|max:20',
             'whatsapp_number'  => 'nullable|string|max:20',
             'address'          => 'nullable|string|max:500',
-            'main_image'       => 'nullable|string|max:5120',
+            'main_image'       => 'nullable|image|max:5120',
             // Plan
             'plan_type'        => 'nullable|string|max:50',
             'plan_days'        => 'nullable|integer|min:0',
@@ -210,6 +210,7 @@ class OtherServiceAdsController extends Controller
             }
             $updateData['main_image'] = $request->file('main_image')->store('other_services/main', 'public');
         }
+
 
         $ad->update($updateData);
 

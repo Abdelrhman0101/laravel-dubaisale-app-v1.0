@@ -312,10 +312,8 @@ class ElectronicAdController extends Controller
             'warranty' => 'sometimes|nullable|boolean',
             'price' => 'sometimes|required|numeric|min:0',
             'rank' => 'nullable|integer|min:0|max:100',
-
-            'main_image' => 'sometimes|string|max:5120',
-            'thumbnail_images' => 'sometimes|array',
-            'thumbnail_images.*' => 'sometimes|string|max:5120',
+            'main_image' => 'sometimes|image|max:5120',
+            'thumbnail_images.*' => 'sometimes|image|max:5120',
 
             'plan_type' => 'sometimes|nullable|string|max:50',
             'plan_days' => 'sometimes|nullable|integer|min:0',
