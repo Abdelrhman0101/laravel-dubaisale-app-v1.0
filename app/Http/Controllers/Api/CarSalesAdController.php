@@ -345,9 +345,8 @@ class CarSalesAdController extends Controller
             'km' => 'sometimes|required|integer',
             'price' => 'sometimes|required|numeric',
             // --- قواعد التحقق الخاصة بالصور ---
-            'main_image' => 'sometimes|string|max:5120', // صورة واحدة، ليست مصفوفة
-            'thumbnail_images' => 'sometimes|array',
-            'thumbnail_images.*' => 'sometimes|string|max:5120',
+            'main_image' => 'sometimes|image|max:5120',
+            'thumbnail_images.*' => 'sometimes|image|max:5120',
             // --- Plan fields: optional and open for client control ---
             'plan_type' => 'sometimes|nullable|string|max:50',
             'plan_days' => 'sometimes|nullable|integer|min:0',

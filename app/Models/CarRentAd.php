@@ -153,22 +153,28 @@ class CarRentAd extends Model
 
     public function scopeFilterByPriceRange($query, $min = null, $max = null)
     {
-        if (!is_null($min)) $query->where('price', '>=', $min);
-        if (!is_null($max)) $query->where('price', '<=', $max);
+        if (!is_null($min))
+            $query->where('price', '>=', $min);
+        if (!is_null($max))
+            $query->where('price', '<=', $max);
         return $query;
     }
 
     public function scopeFilterByDayRentRange($query, $min = null, $max = null)
     {
-        if (!is_null($min)) $query->where('day_rent', '>=', $min);
-        if (!is_null($max)) $query->where('day_rent', '<=', $max);
+        if (!is_null($min))
+            $query->where('day_rent', '>=', $min);
+        if (!is_null($max))
+            $query->where('day_rent', '<=', $max);
         return $query;
     }
 
     public function scopeFilterByMonthRentRange($query, $min = null, $max = null)
     {
-        if (!is_null($min)) $query->where('month_rent', '>=', $min);
-        if (!is_null($max)) $query->where('month_rent', '<=', $max);
+        if (!is_null($min))
+            $query->where('month_rent', '>=', $min);
+        if (!is_null($max))
+            $query->where('month_rent', '<=', $max);
         return $query;
     }
 
@@ -215,32 +221,38 @@ class CarRentAd extends Model
 
     public function scopeByPriceRange($query, $min = null, $max = null)
     {
-        if (!is_null($min)) $query->where('price', '>=', $min);
-        if (!is_null($max)) $query->where('price', '<=', $max);
+        if (!is_null($min))
+            $query->where('price', '>=', $min);
+        if (!is_null($max))
+            $query->where('price', '<=', $max);
         return $query;
     }
 
     public function scopeByDayRentRange($query, $min = null, $max = null)
     {
-        if (!is_null($min)) $query->where('day_rent', '>=', $min);
-        if (!is_null($max)) $query->where('day_rent', '<=', $max);
+        if (!is_null($min))
+            $query->where('day_rent', '>=', $min);
+        if (!is_null($max))
+            $query->where('day_rent', '<=', $max);
         return $query;
     }
 
     public function scopeByMonthRentRange($query, $min = null, $max = null)
     {
-        if (!is_null($min)) $query->where('month_rent', '>=', $min);
-        if (!is_null($max)) $query->where('month_rent', '<=', $max);
+        if (!is_null($min))
+            $query->where('month_rent', '>=', $min);
+        if (!is_null($max))
+            $query->where('month_rent', '<=', $max);
         return $query;
     }
 
     public function scopeInOffersBox($query)
     {
         return $query->where('active_offers_box_status', true)
-                     ->where(function($q){
-                         $q->whereNull('active_offers_box_expires_at')
-                           ->orWhere('active_offers_box_expires_at', '>', now());
-                     });
+            ->where(function ($q) {
+                $q->whereNull('active_offers_box_expires_at')
+                    ->orWhere('active_offers_box_expires_at', '>', now());
+            });
     }
 
     public function scopeLatest($query)

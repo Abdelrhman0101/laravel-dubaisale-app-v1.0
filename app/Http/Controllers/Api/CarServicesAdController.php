@@ -345,9 +345,8 @@ class CarServicesAdController extends Controller
             'service_name' => 'sometimes|required|string|max:255',
             'price' => 'sometimes|required|numeric|min:0',
             'location' => 'sometimes|nullable|string|max:500',
-            'main_image' => 'sometimes|string|max:5120',
-            'thumbnail_images' => 'sometimes|array',
-            'thumbnail_images.*' => 'sometimes|string|max:5120',
+            'main_image' => 'sometimes|image|max:5120',
+            'thumbnail_images.*' => 'sometimes|image|max:5120',
             // --- Plan fields: optional and open for client control ---
             'plan_type' => 'sometimes|nullable|string|max:50',
             'plan_days' => 'sometimes|nullable|integer|min:0',

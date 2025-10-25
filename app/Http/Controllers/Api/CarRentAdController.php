@@ -302,12 +302,14 @@ class CarRentAdController extends Controller
     // Auth: update
     public function update(Request $request, CarRentAd $carRentAd)
     {
+        // ✅ تحقق من صلاحية المستخدم
         if ($request->user()->id !== $carRentAd->user_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $nextYear = date('Y') + 1;
 
+        // ✅ التحقق من البيانات
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|required|string',
@@ -338,41 +340,69 @@ class CarRentAdController extends Controller
             'plan_expires_at' => 'nullable|date',
         ]);
 
+        // ✅ تحديث الحقول النصية
         $carRentAd->fill($validated);
 
+        // ✅ تحديث الصورة الرئيسية
         if ($request->hasFile('main_image')) {
-            if ($carRentAd->main_image) {
-                Storage::disk('public')->delete($carRentAd->main_image);
+            $oldMain = $carRentAd->main_image;
+
+            // تأكد إن القيمة القديمة نص فعلاً قبل الحذف
+            if (is_string($oldMain) && !empty($oldMain)) {
+                Storage::disk('public')->delete($oldMain);
             }
+
+            // ارفع الصورة الجديدة
             $carRentAd->main_image = $request->file('main_image')->store('car_rent/main', 'public');
         }
 
+        // ✅ تحديث الصور المصغّرة thumbnail_images
         if ($request->hasFile('thumbnail_images')) {
-            $thumbs = $carRentAd->thumbnail_images ?? [];
-            foreach ($request->file('thumbnail_images') as $file) {
-                $thumbs[] = $file->store('car_rent/thumbnails', 'public');
+            // تأكد من تحويل القديمة إلى array
+            $oldThumbs = $carRentAd->thumbnail_images;
+
+            if (is_string($oldThumbs)) {
+                $oldThumbs = json_decode($oldThumbs, true) ?: [];
+            } elseif (!is_array($oldThumbs)) {
+                $oldThumbs = [];
             }
-            $carRentAd->thumbnail_images = $thumbs;
+
+            foreach ($request->file('thumbnail_images') as $file) {
+                $oldThumbs[] = $file->store('car_rent/thumbnails', 'public');
+            }
+
+            $carRentAd->thumbnail_images = $oldThumbs;
         }
 
-        // plan fields
+        // ✅ تحديث بيانات الباقة (plan)
         if ($request->filled('plan_type')) {
             $carRentAd->plan_type = $request->input('plan_type');
         }
+
         if ($request->has('plan_days')) {
             $carRentAd->plan_days = (int) $request->input('plan_days');
             if (!$request->filled('plan_expires_at')) {
                 $carRentAd->plan_expires_at = now()->addDays($carRentAd->plan_days);
             }
         }
+
         if ($request->filled('plan_expires_at')) {
             $carRentAd->plan_expires_at = $request->input('plan_expires_at');
         }
 
+        // ✅ حفظ البيانات بعد كل التحديثات
         $carRentAd->save();
 
-        return response()->json(['success' => true, 'message' => 'تم تحديث الإعلان بنجاح', 'data' => $carRentAd]);
+        // ✅ الرد النهائي
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تحديث الإعلان بنجاح',
+            'data' => $carRentAd->fresh(),
+        ]);
     }
+
+
+
 
     // Auth: delete
     public function destroy(Request $request, CarRentAd $carRentAd)
