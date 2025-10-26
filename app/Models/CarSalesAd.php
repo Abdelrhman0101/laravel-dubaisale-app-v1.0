@@ -81,7 +81,7 @@ class CarSalesAd extends Model
         }
         return $query->whereIn('trim', array_map('trim', $trim));
     }
-    
+
     /**
      * Smart Filter by Year - supports multiple values.
      * @param Builder $query
@@ -178,7 +178,11 @@ class CarSalesAd extends Model
     public function scopeOfferBoxOnly(Builder $query): Builder
     {
         return $query->where('active_offers_box_status', true)
-                    ->where('active_offers_box_expires_at', '>', now());
+            ->where('active_offers_box_expires_at', '>', now());
+    }
+    public function scopeOrderedByRank($query)
+    {
+        return $query->orderBy('rank', 'asc');
     }
 
     /**

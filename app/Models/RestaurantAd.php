@@ -202,6 +202,10 @@ class RestaurantAd extends Model
     {
         $this->increment('views');
     }
+    public function scopeOrderedByRank($query)
+    {
+        return $query->orderBy('rank', 'asc');
+    }
 
     public function isInActiveOffersBox(): bool
     {

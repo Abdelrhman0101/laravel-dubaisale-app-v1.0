@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Traits\HasRank;
 use Illuminate\Http\Request;
 use App\Models\OtherServiceAds;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class OtherServiceAdsController extends Controller
 {
     //
+
+    use HasRank;
     public function index(Request $request)
     {
         $query = OtherServiceAds::active();
@@ -40,10 +43,10 @@ class OtherServiceAdsController extends Controller
         // Sorting options
         match ($request->query('sort_by', 'latest')) {
             'most_viewed' => $query->mostViewed(),
-            'rank'        => $query->byRank(),
-            'price_low'   => $query->orderBy('price', 'asc'),
-            'price_high'  => $query->orderBy('price', 'desc'),
-            default       => $query->latest(),
+            'rank' => $query->byRank(),
+            'price_low' => $query->orderBy('price', 'asc'),
+            'price_high' => $query->orderBy('price', 'desc'),
+            default => $query->orderedByRank(),
         };
 
         // In offers box filter
@@ -89,18 +92,18 @@ class OtherServiceAdsController extends Controller
         // Sorting options
         match ($request->query('sort_by', 'latest')) {
             'most_viewed' => $query->mostViewed(),
-            'rank'        => $query->byRank(),
-            'price_low'   => $query->orderBy('price', 'asc'),
-            'price_high'  => $query->orderBy('price', 'desc'),
-            default       => $query->latest(),
+            'rank' => $query->byRank(),
+            'price_low' => $query->orderBy('price', 'asc'),
+            'price_high' => $query->orderBy('price', 'desc'),
+            default => $query->orderedByRank(),
         };
 
-        $perPage = min(max((int) $request->query('per_page', 15), 1), 50);
-
+        // Return all results (no pagination)
         return response()->json(
-            $query->paginate($perPage)->withQueryString()
+            $query->get()
         );
     }
+
 
     /**
      * GET /other-services/{id}
@@ -123,23 +126,23 @@ class OtherServiceAdsController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title'            => 'required|string|max:255',
-            'description'      => 'nullable|string',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'emirate' => 'required|string|max:100',
             'district' => 'nullable|string|max:100',
             'area' => 'nullable|string|max:150',
-            'service_name'     => 'required|string|max:150',
-            'section_type'     => 'required|string|max:50',
-            'price'            => 'required|numeric|min:0',
-            'advertiser_name'  => 'required|string|max:255',
-            'phone_number'     => 'nullable|string|max:20',
-            'whatsapp_number'  => 'nullable|string|max:20',
-            'address'          => 'nullable|string|max:500',
-            'main_image'       => 'required|image|max:5120',
+            'service_name' => 'required|string|max:150',
+            'section_type' => 'required|string|max:50',
+            'price' => 'required|numeric|min:0',
+            'advertiser_name' => 'required|string|max:255',
+            'phone_number' => 'nullable|string|max:20',
+            'whatsapp_number' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+            'main_image' => 'required|image|max:5120',
             // Plan
-            'plan_type'        => 'nullable|string|max:50',
-            'plan_days'        => 'nullable|integer|min:0',
-            'plan_expires_at'  => 'nullable|date',
+            'plan_type' => 'nullable|string|max:50',
+            'plan_days' => 'nullable|integer|min:0',
+            'plan_expires_at' => 'nullable|date',
         ]);
 
         $data = $validated;
@@ -164,6 +167,9 @@ class OtherServiceAdsController extends Controller
         $data['add_status'] = filter_var($manualApproval, FILTER_VALIDATE_BOOLEAN) ? 'Pending' : 'Valid';
         $data['admin_approved'] = $data['add_status'] === 'Valid';
 
+        $rank = $this->getNextRank(OtherServiceAds::class);
+        $data['rank'] = $rank;
+
         $ad = OtherServiceAds::create($data);
 
         return response()->json($ad, 201);
@@ -178,23 +184,23 @@ class OtherServiceAdsController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         $validated = $request->validate([
-            'title'            => 'nullable|string|max:255',
-            'description'      => 'nullable|string',
-            'emirate'          => 'sometimes|required|string|max:100',
-            'district'         => 'nullable|string|max:100',
-            'area'             => 'nullable|string|max:150',
-            'service_name'     => 'sometimes|required|string|max:150',
-            'section_type'     => 'sometimes|required|string|max:50',
-            'price'            => 'sometimes|required|numeric|min:0',
-            'advertiser_name'  => 'sometimes|required|string|max:255',
-            'phone_number'     => 'nullable|string|max:20',
-            'whatsapp_number'  => 'nullable|string|max:20',
-            'address'          => 'nullable|string|max:500',
-            'main_image'       => 'nullable|image|max:5120',
+            'title' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'emirate' => 'sometimes|required|string|max:100',
+            'district' => 'nullable|string|max:100',
+            'area' => 'nullable|string|max:150',
+            'service_name' => 'sometimes|required|string|max:150',
+            'section_type' => 'sometimes|required|string|max:50',
+            'price' => 'sometimes|required|numeric|min:0',
+            'advertiser_name' => 'sometimes|required|string|max:255',
+            'phone_number' => 'nullable|string|max:20',
+            'whatsapp_number' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+            'main_image' => 'nullable|image|max:5120',
             // Plan
-            'plan_type'        => 'nullable|string|max:50',
-            'plan_days'        => 'nullable|integer|min:0',
-            'plan_expires_at'  => 'nullable|date',
+            'plan_type' => 'nullable|string|max:50',
+            'plan_days' => 'nullable|integer|min:0',
+            'plan_expires_at' => 'nullable|date',
         ]);
         $updateData = $validated;
 
@@ -229,7 +235,7 @@ class OtherServiceAdsController extends Controller
         Storage::disk('public')->delete($ad->main_image);
         $ad->delete();
         return response()->json([
-            'status'  => 'success',
+            'status' => 'success',
             'message' => 'Ad deleted successfully.'
         ], 200);
     }

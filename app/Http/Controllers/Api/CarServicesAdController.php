@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CarServicesAd;
+use App\Traits\HasRank;
 use App\Models\CarServiceType;
 // use App\Models\SystemSetting; // removed: no longer needed here
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Gate;
 
 class CarServicesAdController extends Controller
 {
+    use HasRank;
     /**
      * Display a listing of car services ads with smart filtering.
      *
@@ -71,7 +73,7 @@ class CarServicesAdController extends Controller
                 $query->byRank();
                 break;
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -129,7 +131,7 @@ class CarServicesAdController extends Controller
                 $query->byRank();
                 break;
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -283,7 +285,8 @@ class CarServicesAdController extends Controller
             $data['add_status'] = 'Valid';
             $data['admin_approved'] = true;
         }
-
+        $rank = $this->getNextRank(CarServicesAd::class);
+        $data['rank'] = $rank;
         $ad = CarServicesAd::create($data);
 
         return response()->json([

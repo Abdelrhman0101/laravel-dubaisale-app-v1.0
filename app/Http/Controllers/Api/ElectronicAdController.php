@@ -5,15 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\electronicAd;
 use App\Models\SystemSetting;
+use App\Traits\HasRank;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ElectronicAdController extends Controller
 {
-    /**
-     * GET /electronics - Public index with smart filters
-     */
+    use HasRank;
     public function index(Request $request)
     {
         $query = electronicAd::active();
@@ -76,7 +75,7 @@ class ElectronicAdController extends Controller
                 break;
             case 'latest':
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -183,7 +182,7 @@ class ElectronicAdController extends Controller
                 break;
             case 'latest':
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -282,6 +281,8 @@ class ElectronicAdController extends Controller
             $data['add_status'] = 'Valid';
             $data['admin_approved'] = true;
         }
+        $rank = $this->getNextRank(electronicAd::class);
+        $data['rank'] = $rank;
 
         $ad = electronicAd::create($data);
         return response()->json($ad, 201);

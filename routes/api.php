@@ -7,6 +7,7 @@ use App\Http\Controllers\FavoritesController;
 use App\Http\Controllers\OtherServiceOptionsController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\RealEstateAdOptionsController;
+use App\Http\Controllers\SetRankOneController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -60,7 +61,7 @@ use App\Http\Middleware\IsAdmin;
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/newSignin', [AuthController::class, 'signup']);
-Route::post('/set-password',[AuthController::class,'setPassword']);
+Route::post('/set-password', [AuthController::class, 'setPassword']);
 Route::post('/activate', [AuthController::class, 'activate']);
 // Route::middleware(['SecureEndpoint'])->group(function () {
 Route::put('/verify', [AuthController::class, 'verifyOtp']);
@@ -218,7 +219,7 @@ Route::middleware([
 
     // --- User & Profile Management ---
     Route::get('/user', fn(Request $request) => $request->user());
-    Route::post('/change-password',[UserController::class,'changePass']);
+    Route::post('/change-password', [UserController::class, 'changePass']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/profile', [ProfileController::class, 'update']);
     Route::post('/profile/password', [ProfileController::class, 'changePassword']);
@@ -272,7 +273,8 @@ Route::middleware([
         Route::put('/bulk-update', [UserContactInfoController::class, 'bulkUpdateContactInfo']);
         Route::post('/initialize', [UserContactInfoController::class, 'initializeFromUserData']);
     });
-
+    // Set Rank =>1 
+    Route::post('/make-rank-one', [SetRankOneController::class, 'makeRankOne']);
     /*
     |--------------------------------------------------------------------------
     | Admin-Only Routes (Requires Admin Role)

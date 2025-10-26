@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\CarRentAd;
 use Illuminate\Http\Request;
+use App\Traits\HasRank;
 use Illuminate\Support\Facades\Storage;
 
 class CarRentAdController extends Controller
 {
+    use HasRank;
     // Public: list with smart filters
     public function index(Request $request)
     {
@@ -56,7 +58,7 @@ class CarRentAdController extends Controller
                 $query->byRank();
                 break;
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -112,7 +114,7 @@ class CarRentAdController extends Controller
                 $query->byRank();
                 break;
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -183,7 +185,7 @@ class CarRentAdController extends Controller
             'make' => 'nullable|string|max:100',
             'model' => 'nullable|string|max:100',
             'trim' => 'nullable|string|max:100',
-            'year' => 'nullable|integer|min:1900|max:' . ((int) date('Y') + 1),
+            'year' => 'nullable|integer|min:1900|max:' . (int) date('Y') + 1,
             'car_type' => 'nullable|string|max:100',
             'trans_type' => 'nullable|string|max:100',
             'fuel_type' => 'nullable|string|max:100',
@@ -231,29 +233,25 @@ class CarRentAdController extends Controller
             'location' => $validated['location'] ?? null,
             'user_id' => $user->id,
             'add_category' => 'Car Rent',
-            'advertiser_name' => $validated['advertiser_name'],
-            'phone_number' => $validated['phone_number'],
-            'whatsapp' => $validated['whatsapp'] ?? null,
         ];
 
-        // ✅ رفع الصورة الرئيسية
-        $data['main_image'] = $request->file('main_image')->store('car_rent/main', 'public');
+        $data['advertiser_name'] = $validated['advertiser_name'];
+        $data['phone_number'] = $validated['phone_number'];
+        $data['whatsapp'] = $validated['whatsapp'] ?? null;
 
-        // ✅ رفع صور الثامبنيلز مع التحقق من صحتها
+        // upload images
+        $mainImagePath = $request->file('main_image')->store('car_rent/main', 'public');
+        $data['main_image'] = $mainImagePath;
+
         $thumbnailPaths = [];
         if ($request->hasFile('thumbnail_images')) {
             foreach ($request->file('thumbnail_images') as $file) {
-                if ($file && $file->isValid()) {
-                    $thumbnailPaths[] = $file->store('car_rent/thumbnails', 'public');
-                }
+                $thumbnailPaths[] = $file->store('car_rent/thumbnails', 'public');
             }
         }
-
-        // ✅ تنظيف المصفوفة من أي عناصر فاضية
-        $thumbnailPaths = array_values(array_filter($thumbnailPaths, fn($p) => is_string($p) && !empty($p)));
         $data['thumbnail_images'] = $thumbnailPaths;
 
-        // ✅ إعدادات الخطة (plan)
+        // plan fields
         if ($request->filled('plan_type')) {
             $data['plan_type'] = $request->input('plan_type');
         }
@@ -267,24 +265,26 @@ class CarRentAdController extends Controller
             $data['plan_expires_at'] = $request->input('plan_expires_at');
         }
 
-        // ✅ تحديد حالة الموافقة (يدوي / تلقائي)
+        // manual approval mode (car_rent specific or global fallback)
+        // اتّباع نفس منطق الأقسام الأخرى: استخدام الإعداد العام مع Cache
         $manualApproval = cache()->rememberForever('setting_manual_approval_mode', function () {
             return optional(\App\Models\SystemSetting::where('key', 'manual_approval_mode')->first())->value ?? 'true';
         });
 
         $isManualApprovalActive = filter_var($manualApproval, FILTER_VALIDATE_BOOLEAN);
         if ($isManualApprovalActive) {
+            // الموافقة اليدوية مفعلة => Pending
             $data['add_status'] = 'Pending';
             $data['admin_approved'] = false;
         } else {
+            // القبول التلقائي مفعّل => Valid
             $data['add_status'] = 'Valid';
             $data['admin_approved'] = true;
         }
-
-        // ✅ إنشاء الإعلان
+        $rank = $this->getNextRank(CarRentAd::class);
+        $data['rank'] = $rank;
         $ad = CarRentAd::create($data);
 
-        // ✅ الاستجابة النهائية
         return response()->json([
             'success' => true,
             'message' => 'تم إضافة الإعلان بنجاح',
@@ -302,17 +302,17 @@ class CarRentAdController extends Controller
         ], 201);
     }
 
-
     // Auth: update
     public function update(Request $request, CarRentAd $carRentAd)
     {
-
+        // ✅ تحقق من صلاحية المستخدم
         if ($request->user()->id !== $carRentAd->user_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $nextYear = date('Y') + 1;
 
+        // ✅ التحقق من البيانات
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|required|string',
@@ -343,39 +343,67 @@ class CarRentAdController extends Controller
             'plan_expires_at' => 'nullable|date',
         ]);
 
-        $updateFields = $request->except(['main_image', 'thumbnail_images']);
+        // ✅ تحديث الحقول النصية
+        $carRentAd->fill($validated);
 
-        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
-            $updateFields['plan_expires_at'] = now()->addDays((int) $request->input('plan_days'));
-        }
-
-        $carRentAd->update($updateFields);
-        $updateData = [];
+        // ✅ تحديث الصورة الرئيسية
         if ($request->hasFile('main_image')) {
-            Storage::disk('public')->delete($carRentAd->main_image);
-            $updateData['main_image'] = $request->file('main_image')->store('car_rent/main', 'public');
+            $oldMain = $carRentAd->main_image;
+
+            // تأكد إن القيمة القديمة نص فعلاً قبل الحذف
+            if (is_string($oldMain) && !empty($oldMain)) {
+                Storage::disk('public')->delete($oldMain);
+            }
+
+            // ارفع الصورة الجديدة
+            $carRentAd->main_image = $request->file('main_image')->store('car_rent/main', 'public');
         }
+
+        // ✅ تحديث الصور المصغّرة thumbnail_images
         if ($request->hasFile('thumbnail_images')) {
-            if (is_array($carRentAd->thumbnail_images)) {
-                Storage::disk('public')->delete($carRentAd->thumbnail_images);
+            // تأكد من تحويل القديمة إلى array
+            $oldThumbs = $carRentAd->thumbnail_images;
+
+            if (is_string($oldThumbs)) {
+                $oldThumbs = json_decode($oldThumbs, true) ?: [];
+            } elseif (!is_array($oldThumbs)) {
+                $oldThumbs = [];
             }
-            $thumbs = [];
+
             foreach ($request->file('thumbnail_images') as $file) {
-                $thumbs[] = $file->store('car_rent/thumbnails', 'public');
+                $oldThumbs[] = $file->store('car_rent/thumbnails', 'public');
             }
-            $updateData['thumbnail_images'] = $thumbs;
+
+            $carRentAd->thumbnail_images = $oldThumbs;
         }
-        if (!empty($updateData)) {
-            $carRentAd->update($updateData);
+
+        // ✅ تحديث بيانات الباقة (plan)
+        if ($request->filled('plan_type')) {
+            $carRentAd->plan_type = $request->input('plan_type');
         }
+
+        if ($request->has('plan_days')) {
+            $carRentAd->plan_days = (int) $request->input('plan_days');
+            if (!$request->filled('plan_expires_at')) {
+                $carRentAd->plan_expires_at = now()->addDays($carRentAd->plan_days);
+            }
+        }
+
+        if ($request->filled('plan_expires_at')) {
+            $carRentAd->plan_expires_at = $request->input('plan_expires_at');
+        }
+
+        // ✅ حفظ البيانات بعد كل التحديثات
         $carRentAd->save();
 
+        // ✅ الرد النهائي
         return response()->json([
             'success' => true,
             'message' => 'تم تحديث الإعلان بنجاح',
             'data' => $carRentAd->fresh(),
         ]);
     }
+
 
 
 

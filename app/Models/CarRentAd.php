@@ -257,7 +257,10 @@ class CarRentAd extends Model
                     ->orWhere('active_offers_box_expires_at', '>', now());
             });
     }
-
+    public function scopeOrderedByRank($query)
+    {
+        return $query->orderBy('rank', 'asc');
+    }
     public function scopeLatest($query)
     {
         return $query->orderBy('created_at', 'desc');

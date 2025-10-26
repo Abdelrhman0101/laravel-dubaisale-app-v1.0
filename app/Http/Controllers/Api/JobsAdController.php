@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\JobAd;
+use App\Traits\HasRank;
 // use App\Models\JopAD;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class JobsAdController extends Controller
 {
+    use HasRank;
     //
     public function index(Request $request)
     {
@@ -50,7 +52,7 @@ class JobsAdController extends Controller
                 break;
             case 'latest':
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -108,7 +110,7 @@ class JobsAdController extends Controller
         } elseif ($sort === 'rank') {
             $query->byRank();
         } else {
-            $query->latest();
+            $query->orderedByRank();
         }
 
         $limit = (int) $request->query('limit', 10);
@@ -183,7 +185,8 @@ class JobsAdController extends Controller
             $data['add_status'] = 'Valid';
             $data['admin_approved'] = true;
         }
-
+        $rank = $this->getNextRank(JobAd::class);
+        $data['rank'] = $rank;
         $ad = JobAd::create($data);
         return response()->json($ad, 201);
     }
@@ -199,22 +202,22 @@ class JobsAdController extends Controller
 
         // 2. Validation
         $validated = $request->validate([
-            'emirate'         => 'sometimes|required|string|max:100',
-            'district'        => 'sometimes|nullable|string|max:100',
-            'category_type'   => 'sometimes|required|string|max:100',
-            'section_type'    => 'sometimes|required|string|max:100',
-            'job_name'        => 'sometimes|required|string|max:255',
-            'salary'          => 'sometimes|nullable|string|max:100',
-            'title'           => 'sometimes|required|string|max:255',
-            'description'     => 'sometimes|nullable|string',
+            'emirate' => 'sometimes|required|string|max:100',
+            'district' => 'sometimes|nullable|string|max:100',
+            'category_type' => 'sometimes|required|string|max:100',
+            'section_type' => 'sometimes|required|string|max:100',
+            'job_name' => 'sometimes|required|string|max:255',
+            'salary' => 'sometimes|nullable|string|max:100',
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|nullable|string',
             'advertiser_name' => 'sometimes|nullable|string|max:255',
-            'phone_number'    => 'sometimes|required|string|max:20',
-            'whatsapp'        => 'sometimes|nullable|string|max:20',
-            'address'         => 'sometimes|nullable|string|max:500',
+            'phone_number' => 'sometimes|required|string|max:20',
+            'whatsapp' => 'sometimes|nullable|string|max:20',
+            'address' => 'sometimes|nullable|string|max:500',
             // 'main_image'      => 'sometimes|image|max:5120',
             // Plan
-            'plan_type'       => 'sometimes|nullable|string|max:50',
-            'plan_days'       => 'sometimes|nullable|integer|min:0',
+            'plan_type' => 'sometimes|nullable|string|max:50',
+            'plan_days' => 'sometimes|nullable|integer|min:0',
             'plan_expires_at' => 'sometimes|nullable|date',
         ]);
 
@@ -285,17 +288,17 @@ class JobsAdController extends Controller
         $data = [
             'job_offer' => [
                 'category' => 'Job Offer',
-                'image'    => $settings['job_offer_main_image']->value ?? null,
+                'image' => $settings['job_offer_main_image']->value ?? null,
             ],
             'job_seeker' => [
                 'category' => 'Job Seeker',
-                'image'    => $settings['job_seeker_main_image']->value ?? null,
+                'image' => $settings['job_seeker_main_image']->value ?? null,
             ],
         ];
 
         return response()->json([
             'success' => true,
-            'data'    => $data,
+            'data' => $data,
         ]);
     }
 }

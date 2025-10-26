@@ -169,7 +169,10 @@ class electronicAd extends Model
     {
         return $query->orderBy('created_at', 'desc');
     }
-
+    public function scopeOrderedByRank($query)
+    {
+        return $query->orderBy('rank', 'asc');
+    }
     public function scopeMostViewed(Builder $query)
     {
         return $query->orderBy('views', 'desc');

@@ -182,7 +182,10 @@ class RealEstateAd extends Model
     {
         return $query->orderBy('views', 'desc');
     }
-
+    public function scopeOrderedByRank($query)
+    {
+        return $query->orderBy('rank', 'asc');
+    }
     public function incrementViews(): void
     {
         $this->increment('views');

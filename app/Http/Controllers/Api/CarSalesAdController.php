@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
+use App\Traits\HasRank;
 use App\Http\Controllers\Controller;
 use App\Models\CarSalesAd;
 use Illuminate\Http\Request;
@@ -11,6 +11,8 @@ use App\Models\CarMake;
 
 class CarSalesAdController extends Controller
 {
+
+    use HasRank;
     /**
      * Display a listing of the resource with smart filtering.
      *
@@ -96,7 +98,7 @@ class CarSalesAdController extends Controller
                 break;
             case 'latest':
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -182,7 +184,7 @@ class CarSalesAdController extends Controller
                 break;
             case 'latest':
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -218,7 +220,7 @@ class CarSalesAdController extends Controller
             $query->filterByArea($request->area);
 
         $perPage = $request->query('per_page', 10);
-        $ads = $query->latest()->paginate($perPage)->withQueryString();
+        $ads = $query->orderedByRank()->paginate($perPage)->withQueryString();
 
         return response()->json($ads);
     }
@@ -308,7 +310,8 @@ class CarSalesAdController extends Controller
         }
 
         // =========================================================
-
+        $rank = $this->getNextRank(CarSalesAd::class);
+        $data['rank'] = $rank;
         $ad = CarSalesAd::create($data);
 
         return response()->json($ad, 201);

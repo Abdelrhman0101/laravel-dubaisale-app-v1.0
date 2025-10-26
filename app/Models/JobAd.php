@@ -94,6 +94,10 @@ class JobAd extends Model
     {
         $query->orderBy('created_at', 'desc');
     }
+    public function scopeOrderedByRank($query)
+    {
+        return $query->orderBy('rank', 'asc');
+    }
 
     public function scopeMostViewed(Builder $query): void
     {
@@ -135,14 +139,15 @@ class JobAd extends Model
     | Smart Filtering Scopes (Support Multiple Values)
     |--------------------------------------------------------------------------
     */
-    
+
     public function scopeFilterByEmirate(Builder $query, $emirates): void
     {
-        if (empty($emirates)) return;
-        
+        if (empty($emirates))
+            return;
+
         $emiratesArray = is_array($emirates) ? $emirates : explode(',', $emirates);
         $emiratesArray = array_filter(array_map('trim', $emiratesArray));
-        
+
         if (!empty($emiratesArray)) {
             $query->whereIn('emirate', $emiratesArray);
         }
@@ -150,11 +155,12 @@ class JobAd extends Model
 
     public function scopeFilterByDistrict(Builder $query, $districts): void
     {
-        if (empty($districts)) return;
-        
+        if (empty($districts))
+            return;
+
         $districtsArray = is_array($districts) ? $districts : explode(',', $districts);
         $districtsArray = array_filter(array_map('trim', $districtsArray));
-        
+
         if (!empty($districtsArray)) {
             $query->whereIn('district', $districtsArray);
         }
@@ -162,11 +168,12 @@ class JobAd extends Model
 
     public function scopeFilterByCategoryType(Builder $query, $categoryTypes): void
     {
-        if (empty($categoryTypes)) return;
-        
+        if (empty($categoryTypes))
+            return;
+
         $categoryTypesArray = is_array($categoryTypes) ? $categoryTypes : explode(',', $categoryTypes);
         $categoryTypesArray = array_filter(array_map('trim', $categoryTypesArray));
-        
+
         if (!empty($categoryTypesArray)) {
             $query->whereIn('category_type', $categoryTypesArray);
         }
@@ -174,11 +181,12 @@ class JobAd extends Model
 
     public function scopeFilterBySectionType(Builder $query, $sectionTypes): void
     {
-        if (empty($sectionTypes)) return;
-        
+        if (empty($sectionTypes))
+            return;
+
         $sectionTypesArray = is_array($sectionTypes) ? $sectionTypes : explode(',', $sectionTypes);
         $sectionTypesArray = array_filter(array_map('trim', $sectionTypesArray));
-        
+
         if (!empty($sectionTypesArray)) {
             $query->whereIn('section_type', $sectionTypesArray);
         }
@@ -187,24 +195,25 @@ class JobAd extends Model
     public function scopeOfferBoxOnly(Builder $query): void
     {
         $query->where('active_offers_box_status', true)
-              ->where(function($q) {
-                  $q->whereNull('active_offers_box_expires_at')
+            ->where(function ($q) {
+                $q->whereNull('active_offers_box_expires_at')
                     ->orWhere('active_offers_box_expires_at', '>', now());
-              });
+            });
     }
 
     public function scopeKeywordSearch(Builder $query, $keyword): void
     {
-        if (empty($keyword)) return;
-        
+        if (empty($keyword))
+            return;
+
         $keyword = trim($keyword);
         if (!empty($keyword)) {
-            $query->where(function($q) use ($keyword) {
+            $query->where(function ($q) use ($keyword) {
                 $q->where('title', 'LIKE', "%{$keyword}%")
-                  ->orWhere('description', 'LIKE', "%{$keyword}%")
-                  ->orWhere('company_name', 'LIKE', "%{$keyword}%")
-                  ->orWhere('emirate', 'LIKE', "%{$keyword}%")
-                  ->orWhere('district', 'LIKE', "%{$keyword}%");
+                    ->orWhere('description', 'LIKE', "%{$keyword}%")
+                    ->orWhere('company_name', 'LIKE', "%{$keyword}%")
+                    ->orWhere('emirate', 'LIKE', "%{$keyword}%")
+                    ->orWhere('district', 'LIKE', "%{$keyword}%");
             });
         }
     }

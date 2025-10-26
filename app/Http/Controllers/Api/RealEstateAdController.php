@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
+use App\Traits\HasRank;
 use App\Http\Controllers\Controller;
 use App\Models\RealEstateAd;
 use Illuminate\Http\Request;
@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class RealEstateAdController extends Controller
 {
+    use HasRank;
     /**
      * GET /real-estates - Public index with smart filters
      */
@@ -70,7 +71,7 @@ class RealEstateAdController extends Controller
                 break;
             case 'latest':
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -174,7 +175,7 @@ class RealEstateAdController extends Controller
                 break;
             case 'latest':
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -256,7 +257,8 @@ class RealEstateAdController extends Controller
             $data['add_status'] = 'Valid';
             $data['admin_approved'] = true;
         }
-
+        $rank = $this->getNextRank(RealEstateAd::class);
+        $data['rank'] = $rank;
         $ad = RealEstateAd::create($data);
         return response()->json($ad, 201);
     }

@@ -233,10 +233,10 @@ class CarServicesAd extends Model
     public function scopeInOffersBox(Builder $query): void
     {
         $query->where('active_offers_box_status', true)
-              ->where(function ($q) {
-                  $q->whereNull('active_offers_box_expires_at')
+            ->where(function ($q) {
+                $q->whereNull('active_offers_box_expires_at')
                     ->orWhere('active_offers_box_expires_at', '>', now());
-              });
+            });
     }
 
     /**
@@ -245,6 +245,10 @@ class CarServicesAd extends Model
     public function scopeLatest(Builder $query): void
     {
         $query->orderBy('created_at', 'desc');
+    }
+    public function scopeOrderedByRank($query)
+    {
+        return $query->orderBy('rank', 'asc');
     }
 
     /**
@@ -276,8 +280,8 @@ class CarServicesAd extends Model
      */
     public function isInActiveOffersBox()
     {
-        return $this->active_offers_box_status && 
-               (is_null($this->active_offers_box_expires_at) || 
+        return $this->active_offers_box_status &&
+            (is_null($this->active_offers_box_expires_at) ||
                 $this->active_offers_box_expires_at->isFuture());
     }
 
@@ -295,9 +299,9 @@ class CarServicesAd extends Model
     public static function getOffersBoxAds($limit = 10)
     {
         return self::active()
-                   ->inOffersBox()
-                   ->inRandomOrder()
-                   ->limit($limit)
-                   ->get();
+            ->inOffersBox()
+            ->inRandomOrder()
+            ->limit($limit)
+            ->get();
     }
 }

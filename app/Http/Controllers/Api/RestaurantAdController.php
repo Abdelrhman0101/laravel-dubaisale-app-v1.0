@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
+use App\Traits\HasRank;
 use App\Http\Controllers\Controller;
 use App\Models\RestaurantAd;
 use Illuminate\Http\Request;
@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 
 class RestaurantAdController extends Controller
 {
+
+    use HasRank;
     /**
      * GET /restaurants - Public index with smart filters
      */
@@ -59,7 +61,7 @@ class RestaurantAdController extends Controller
                 break;
             case 'latest':
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -147,7 +149,7 @@ class RestaurantAdController extends Controller
                 break;
             case 'latest':
             default:
-                $query->latest();
+                $query->orderedByRank();
                 break;
         }
 
@@ -244,7 +246,8 @@ class RestaurantAdController extends Controller
             $data['add_status'] = 'Valid';
             $data['admin_approved'] = true;
         }
-
+        $rank = $this->getNextRank(RestaurantAd::class);
+        $data['rank'] = $rank;
         $ad = RestaurantAd::create($data);
         return response()->json($ad, 201);
     }
