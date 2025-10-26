@@ -302,14 +302,14 @@ class CarRentAdController extends Controller
     // Auth: update
     public function update(Request $request, CarRentAd $carRentAd)
     {
-        // ✅ تحقق من صلاحية المستخدم
+        // ✅ التحقق من أن المستخدم هو صاحب الإعلان
         if ($request->user()->id !== $carRentAd->user_id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $nextYear = date('Y') + 1;
 
-        // ✅ التحقق من البيانات
+        // ✅ التحقق من صحة البيانات
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'description' => 'sometimes|required|string',
@@ -343,22 +343,27 @@ class CarRentAdController extends Controller
         // ✅ تحديث الحقول النصية
         $carRentAd->fill($validated);
 
-        // ✅ تحديث الصورة الرئيسية
+        // ✅ تحديث الصورة الرئيسية main_image
         if ($request->hasFile('main_image')) {
-            $oldMain = $carRentAd->main_image;
-
-            // تأكد إن القيمة القديمة نص فعلاً قبل الحذف
-            if (is_string($oldMain) && !empty($oldMain)) {
-                Storage::disk('public')->delete($oldMain);
+            // ✅ تأكد إنها string قبل الحذف
+            if (!empty($carRentAd->main_image)) {
+                $oldMain = $carRentAd->main_image;
+                if (is_array($oldMain)) {
+                    $oldMain = $oldMain[0] ?? null;
+                }
+                if (is_string($oldMain) && !empty($oldMain)) {
+                    Storage::disk('public')->delete($oldMain);
+                }
             }
 
-            // ارفع الصورة الجديدة
+            // ✅ خزّن المسار الجديد كسلسلة نصية مش array
             $carRentAd->main_image = $request->file('main_image')->store('car_rent/main', 'public');
         }
 
+
         // ✅ تحديث الصور المصغّرة thumbnail_images
         if ($request->hasFile('thumbnail_images')) {
-            // تأكد من تحويل القديمة إلى array
+            // تأكد من تحويل القيمة القديمة إلى مصفوفة صحيحة
             $oldThumbs = $carRentAd->thumbnail_images;
 
             if (is_string($oldThumbs)) {
@@ -390,17 +395,15 @@ class CarRentAdController extends Controller
             $carRentAd->plan_expires_at = $request->input('plan_expires_at');
         }
 
-        // ✅ حفظ البيانات بعد كل التحديثات
+        // ✅ حفظ التعديلات
         $carRentAd->save();
 
-        // ✅ الرد النهائي
         return response()->json([
             'success' => true,
             'message' => 'تم تحديث الإعلان بنجاح',
             'data' => $carRentAd->fresh(),
         ]);
     }
-
 
 
 

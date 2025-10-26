@@ -20,7 +20,7 @@ class CarRentAd extends Model
         'admin_approved' => 'boolean',
     ];
 
-    protected $hidden = ['main_image', 'thumbnail_images'];
+    // protected $hidden = ['main_image', 'thumbnail_images'];
 
     protected $appends = ['main_image_url', 'thumbnail_images_urls', 'status', 'category'];
 
