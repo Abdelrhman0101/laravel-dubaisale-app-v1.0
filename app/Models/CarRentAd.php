@@ -38,9 +38,12 @@ class CarRentAd extends Model
 
     public function getThumbnailImagesUrlsAttribute()
     {
-        $images = $this->thumbnail_images ?? [];
-        return array_map(fn($path) => Storage::url($path), $images);
+        if ($this->thumbnail_images && is_array($this->thumbnail_images)) {
+            return array_map(fn($img) => Storage::url($img), $this->thumbnail_images);
+        }
+        return [];
     }
+
 
     public function getStatusAttribute()
     {
