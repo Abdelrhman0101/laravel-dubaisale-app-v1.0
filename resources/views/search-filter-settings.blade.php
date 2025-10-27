@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-block justify-content-between align-items-center mb-4">
                 <div>
                     <h2 class="text-primary mb-1">البحث والفلتر</h2>
                     <p class="text-muted mb-0">Search & Filter Management</p>
@@ -14,32 +14,65 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="/dashboard">الرئيسية</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">البحث والفلتر</li>
+                        <li class="breadcrumb-item active" aria-current="page">/البحث والفلتر</li>
                     </ol>
                 </nav>
-            </div>
-        </div>
-    </div>
-
-    <!-- Navigation Tabs -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="tabs-container">
+                <div class="tabs-container">
                 <div class="tabs-wrapper">
                     <button class="tab-btn active" data-tab="car-sale">
                         <i class="fas fa-car"></i>
                         <span class="tab-text">
-                            <span class="en">Car Sale</span>
-                            <span class="ar">بيع السيارات</span>
+                            <span class="en">Car</span>
+                            <span class="ar">السيارات</span>
+                        </span>
+                    </button>
+                    <button class="tab-btn" data-tab="restaurant">
+                        <i class="fas fa-utensils"></i>
+                        <span class="tab-text">
+                            <span class="en">Restaurant</span>
+                            <span class="ar">المطاعم</span>
+                        </span>
+                    </button>
+                    <button class="tab-btn" data-tab="jobs">
+                        <i class="fas fa-briefcase"></i>
+                        <span class="tab-text">
+                            <span class="en">Jobs</span>
+                            <span class="ar">الوظائف</span>
+                        </span>
+                    </button>
+                    <button class="tab-btn" data-tab="other-services">
+                        <i class="fas fa-cogs"></i>
+                        <span class="tab-text">
+                            <span class="en">Other Services</span>
+                            <span class="ar">الخدمات الأخرى</span>
+                        </span>
+                    </button>
+                    <button class="tab-btn" data-tab="real-estate">
+                        <i class="fas fa-home"></i>
+                        <span class="tab-text">
+                            <span class="en">Real Estate</span>
+                            <span class="ar">العقارات</span>
+                        </span>
+                    </button>
+                    <button class="tab-btn" data-tab="electronics">
+                        <i class="fas fa-laptop"></i>
+                        <span class="tab-text">
+                            <span class="en">Electronics</span>
+                            <span class="ar">الإلكترونيات</span>
                         </span>
                     </button>
                 </div>
             </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            
         </div>
     </div>
 
-    <!-- Car Sale Tab Content -->
+    <!-- Tab Content -->
     <div class="tab-content-wrapper">
+        <!-- Car Sale Tab -->
         <div class="tab-content active" id="car-sale-content">
             <div class="row">
                 <div class="col-12">
@@ -91,6 +124,52 @@
                                 </div>
                             </div>
 
+                            <!-- Service Type Section -->
+                            <div class="filter-section mb-4">
+                                <div class="section-header">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-cogs me-2"></i>
+                                        نوع الخدمة - Service Type
+                                    </h5>
+                                </div>
+                                <div class="static-list-container">
+                                    <div class="static-list" id="service-types-container">
+                                        <!-- Service types will be dynamically added here -->
+                                    </div>
+                                    <div class="add-item-section fixed-footer">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="إضافة نوع خدمة جديد" id="new-service-type-input">
+                                            <button class="btn btn-success add-item-btn add-service-type-btn" type="button">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Service Name Section -->
+                            <div class="filter-section mb-4">
+                                <div class="section-header">
+                                    <h5 class="section-title">
+                                        <i class="fas fa-tag me-2"></i>
+                                        اسم الخدمة - Service Name
+                                    </h5>
+                                </div>
+                                <div class="static-list-container">
+                                    <div class="static-list" id="service-names-container">
+                                        <!-- Service names will be dynamically added here -->
+                                    </div>
+                                    <div class="add-item-section fixed-footer">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="إضافة اسم خدمة جديد" id="new-service-name-input">
+                                            <button class="btn btn-success add-item-btn add-service-name-btn" type="button">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Preview Section -->
                             <div class="preview-section">
                                 <h5 class="section-title">
@@ -109,6 +188,31 @@
                 </div>
             </div>
         </div>
+
+        <!-- Restaurant Tab -->
+        <div class="tab-content" id="restaurant-content">
+            <x-restaurant-filter />
+        </div>
+
+        <!-- Jobs Tab -->
+        <div class="tab-content" id="jobs-content">
+            <x-jobs-filter />
+        </div>
+
+        <!-- Other Services Tab -->
+        <div class="tab-content" id="other-services-content">
+            <x-other-services-filter />
+        </div>
+
+        <!-- Real Estate Tab -->
+        <div class="tab-content" id="real-estate-content">
+            <x-real-estate-filter />
+        </div>
+
+        <!-- Electronics Tab -->
+        <div class="tab-content" id="electronics-content">
+            <x-electronics-filter />
+        </div>
     </div>
 </div>
 
@@ -125,7 +229,10 @@
             </div>
             <div class="modal-body">
                 <form id="addMakeForm">
-                    
+                    <div class="mb-3">
+                        <label for="makeName" class="form-label">اسم الماركة بالعربية</label>
+                        <input type="text" class="form-control" id="makeName" placeholder="مثال: تويوتا، بي إم دبليو، مرسيدس" required>
+                    </div>
                     <div class="mb-3">
                         <label for="makeNameEn" class="form-label">اسم الماركة بالإنجليزية</label>
                         <input type="text" class="form-control" id="makeNameEn" placeholder="Example: Toyota, BMW, Mercedes" required>
@@ -160,7 +267,10 @@
                         <label class="form-label">الماركة المحددة</label>
                         <input type="text" class="form-control" id="selectedMake" readonly>
                     </div>
-                    
+                    <div class="mb-3">
+                        <label for="modelName" class="form-label">اسم الموديل بالعربية</label>
+                        <input type="text" class="form-control" id="modelName" placeholder="مثال: كامري، كورولا، بريوس" required>
+                    </div>
                     <div class="mb-3">
                         <label for="modelNameEn" class="form-label">اسم الموديل بالإنجليزية</label>
                         <input type="text" class="form-control" id="modelNameEn" placeholder="Example: Camry, Corolla, Prius" required>
@@ -195,7 +305,10 @@
                         <label class="form-label">الماركة والموديل</label>
                         <input type="text" class="form-control" id="selectedMakeModel" readonly>
                     </div>
-                    
+                    <div class="mb-3">
+                        <label for="trimName" class="form-label">اسم التريم بالعربية</label>
+                        <input type="text" class="form-control" id="trimName" placeholder="مثال: إل إي، إكس إل إي، ليمتد" required>
+                    </div>
                     <div class="mb-3">
                         <label for="trimNameEn" class="form-label">اسم التريم بالإنجليزية</label>
                         <input type="text" class="form-control" id="trimNameEn" placeholder="Example: LE, XLE, Limited" required>
@@ -261,34 +374,35 @@
 /* Tabs Styling */
 .tabs-container {
     background: var(--gradient-blue);
-    border-radius: 20px;
-    padding: 8px;
+    border-radius: 15px;
+    padding: 6px;
     box-shadow: var(--shadow-lg);
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .tabs-wrapper {
     display: flex;
-    gap: 8px;
+    gap: 4px;
     overflow-x: auto;
-    padding: 4px;
+    padding: 2px;
 }
 
 .tab-btn {
     background: rgba(255, 255, 255, 0.1);
     border: none;
     color: white;
-    padding: 12px 20px;
-    border-radius: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 8px;
-    min-width: 140px;
+    gap: 4px;
+    flex: 1;
     justify-content: center;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.85rem;
 }
 
 .tab-btn:hover {
@@ -302,6 +416,32 @@
     color: var(--primary-blue);
     font-weight: 600;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Tab Content Styling */
+.tab-content {
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .tab-text {
@@ -324,7 +464,7 @@
 /* Car Filter Card */
 .car-filter-card {
     background: white;
-    border-radius: 20px;
+    border-radius: 15px;
     box-shadow: var(--shadow-lg);
     border: none;
     overflow: hidden;
@@ -333,22 +473,23 @@
 .car-filter-card .card-header {
     background: var(--gradient-blue);
     color: white;
-    padding: 20px 30px;
+    padding: 15px 20px;
     border: none;
     border-radius: 0;
 }
 
 .car-filter-card .card-body {
-    padding: 30px;
+    padding: 20px;
 }
 
 /* Filter Section */
 .filter-section {
     background: #f8fafc;
-    border-radius: 16px;
-    padding: 25px;
+    border-radius: 12px;
+    padding: 15px;
     border: 2px solid #e2e8f0;
     transition: all 0.3s ease;
+    margin-bottom: 1rem;
 }
 
 .filter-section:hover {
@@ -360,7 +501,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .section-title {
@@ -369,16 +510,18 @@
     margin: 0;
     display: flex;
     align-items: center;
+    font-size: 1rem;
 }
 
 .add-make-btn {
     background: var(--gradient-blue);
     border: none;
-    border-radius: 10px;
-    padding: 8px 16px;
+    border-radius: 8px;
+    padding: 6px 12px;
     font-weight: 500;
     transition: all 0.3s ease;
     box-shadow: var(--shadow-blue);
+    font-size: 0.85rem;
 }
 
 .add-make-btn:hover {
@@ -389,13 +532,13 @@
 /* Makes Container */
 .makes-container {
     display: grid;
-    gap: 20px;
+    gap: 12px;
 }
 
 .make-item {
     background: white;
-    border-radius: 16px;
-    padding: 20px;
+    border-radius: 12px;
+    padding: 15px;
     border: 2px solid #e2e8f0;
     transition: all 0.3s ease;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -780,54 +923,113 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .section-header {
-        flex-direction: column;
-        gap: 15px;
-        align-items: stretch;
-    }
-    
-    .models-grid {
-        grid-template-columns: 1fr;
-    }
-    
     .tabs-wrapper {
-        flex-direction: column;
+        flex-wrap: wrap;
     }
     
     .tab-btn {
-        min-width: auto;
+        min-width: 100px;
+        padding: 6px 10px;
+    }
+    
+    .tab-text .en {
+        font-size: 0.75rem;
+    }
+    
+    .tab-text .ar {
+        font-size: 0.65rem;
+    }
+    
+    .car-filter-card .card-body {
+        padding: 15px;
+    }
+    
+    .filter-section {
+        padding: 12px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .make-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .model-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
     }
 }
 
-/* Animation Classes */
-.fade-in {
-    animation: fadeIn 0.5s ease-in;
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
-.slide-in {
-    animation: slideIn 0.3s ease-out;
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+/* Success/Error States */
+.success-message {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 8px 0;
+    font-size: 0.85rem;
+    border: 1px solid #a7f3d0;
+}
+
+.error-message {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 8px 0;
+    font-size: 0.85rem;
+    border: 1px solid #fca5a5;
+}
+
+/* Custom Scrollbar */
+.static-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.static-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.static-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.static-list::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 </style>
 
@@ -835,15 +1037,61 @@
 // Global variables
 let carData = {
     makes: [],
-    years: []
+    years: [],
+    serviceTypes: [],
+    serviceNames: []
 };
 let currentMakeId = null;
 let currentModelId = null;
 
+// Toast notification function
+function showToast(message, type = 'success') {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.custom-toast');
+    existingToasts.forEach(toast => toast.remove());
+    
+    const toast = document.createElement('div');
+    toast.className = `custom-toast toast-${type}`;
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Show toast
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    // Hide toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching functionality
+    document.querySelectorAll('.tab-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+            
+            // Remove active class from all tabs and content
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            this.classList.add('active');
+            document.getElementById(targetTab + '-content').classList.add('active');
+        });
+    });
+
     initializeEventListeners();
     loadSampleData();
+    renderServiceTypes();
+    renderServiceNames();
     updatePreview();
 });
 
@@ -863,13 +1111,13 @@ function initializeEventListeners() {
             // Validate year
             const year = parseInt(yearValue);
             if (isNaN(year) || year < 1900 || year > 2030) {
-                alert('يرجى إدخال سنة صحيحة بين 1900 و 2030');
+                showToast('يرجى إدخال سنة صحيحة بين 1900 و 2030', 'error');
                 return;
             }
             
             // Check for duplicates
             if (carData.years.some(y => y.value === year)) {
-                alert('هذه السنة موجودة بالفعل');
+                showToast('هذه السنة موجودة بالفعل', 'error');
                 return;
             }
             
@@ -885,6 +1133,59 @@ function initializeEventListeners() {
             
             renderYears();
             input.value = '';
+            showToast('تم إضافة السنة بنجاح', 'success');
+        }
+    });
+    
+    // Add Service Type button (from input field)
+    document.querySelector('.add-service-type-btn').addEventListener('click', function() {
+        const input = document.getElementById('new-service-type-input');
+        const serviceTypeValue = input.value.trim();
+        
+        if (serviceTypeValue) {
+            // Check for duplicates
+            if (carData.serviceTypes.some(st => st.name === serviceTypeValue)) {
+                showToast('هذا النوع موجود بالفعل', 'error');
+                return;
+            }
+            
+            // Add service type
+            const newServiceType = {
+                id: Date.now(),
+                name: serviceTypeValue
+            };
+            
+            carData.serviceTypes.push(newServiceType);
+            renderServiceTypes();
+            updatePreview();
+            input.value = '';
+            showToast('تم إضافة نوع الخدمة بنجاح', 'success');
+        }
+    });
+    
+    // Add Service Name button (from input field)
+    document.querySelector('.add-service-name-btn').addEventListener('click', function() {
+        const input = document.getElementById('new-service-name-input');
+        const serviceNameValue = input.value.trim();
+        
+        if (serviceNameValue) {
+            // Check for duplicates
+            if (carData.serviceNames.some(sn => sn.name === serviceNameValue)) {
+                showToast('هذا الاسم موجود بالفعل', 'error');
+                return;
+            }
+            
+            // Add service name
+            const newServiceName = {
+                id: Date.now(),
+                name: serviceNameValue
+            };
+            
+            carData.serviceNames.push(newServiceName);
+            renderServiceNames();
+            updatePreview();
+            input.value = '';
+            showToast('تم إضافة اسم الخدمة بنجاح', 'success');
         }
     });
     
@@ -1005,23 +1306,82 @@ function saveMake() {
     const nameEn = document.getElementById('makeNameEn').value.trim();
     
     if (!name || !nameEn) {
-        alert('يرجى ملء جميع الحقول');
+        showToast('يرجى ملء جميع الحقول', 'error');
         return;
     }
     
-    const newMake = {
-        id: Date.now(),
-        name: name,
-        nameEn: nameEn,
-        models: []
-    };
-    
-    carData.makes.push(newMake);
-    renderMakes();
-    updatePreview();
-    
-    // Close modal
-    bootstrap.Modal.getInstance(document.getElementById('addMakeModal')).hide();
+    // Check for duplicates in local data
+    if (carData.makes.some(make => make.nameEn === nameEn || make.name === name)) {
+        showToast('هذه الماركة موجودة بالفعل', 'error');
+        return;
+    }
+
+    // Show loading state
+    const saveBtn = document.getElementById('saveMakeBtn');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>جاري الحفظ...';
+    saveBtn.disabled = true;
+
+    // Send AJAX request to backend
+    fetch('/api/makes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify({
+            name: name,
+            name_en: nameEn
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Add to local data with the returned ID from database
+        const newMake = {
+            id: data.id,
+            name: data.name,
+            nameEn: data.name_en,
+            models: []
+        };
+        
+        carData.makes.push(newMake);
+        renderMakes();
+        updatePreview();
+        
+        // Close modal and reset form
+        bootstrap.Modal.getInstance(document.getElementById('addMakeModal')).hide();
+        document.getElementById('makeName').value = '';
+        document.getElementById('makeNameEn').value = '';
+        
+        showToast('تم إضافة الماركة بنجاح', 'success');
+    })
+    .catch(error => {
+        console.error('Error saving make:', error);
+        let errorMessage = 'حدث خطأ أثناء حفظ الماركة';
+        
+        if (error.errors) {
+            // Laravel validation errors
+            const firstError = Object.values(error.errors)[0];
+            if (firstError && firstError[0]) {
+                errorMessage = firstError[0];
+            }
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        
+        showToast(errorMessage, 'error');
+    })
+    .finally(() => {
+        // Reset button state
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+    });
 }
 
 // Save Model
@@ -1030,11 +1390,22 @@ function saveModel() {
     const nameEn = document.getElementById('modelNameEn').value.trim();
     
     if (!name || !nameEn) {
-        alert('يرجى ملء جميع الحقول');
+        showToast('يرجى ملء جميع الحقول', 'error');
         return;
     }
     
     const make = carData.makes.find(m => m.id === currentMakeId);
+    if (!make) {
+        showToast('الماركة المحددة غير موجودة', 'error');
+        return;
+    }
+    
+    // Check for duplicates within the same make
+    if (make.models.some(model => model.nameEn === nameEn || model.name === name)) {
+        showToast('هذا الموديل موجود بالفعل لهذه الماركة', 'error');
+        return;
+    }
+    
     const newModel = {
         id: Date.now(),
         name: name,
@@ -1046,8 +1417,12 @@ function saveModel() {
     renderMakes();
     updatePreview();
     
-    // Close modal
+    // Close modal and reset form
     bootstrap.Modal.getInstance(document.getElementById('addModelModal')).hide();
+    document.getElementById('modelName').value = '';
+    document.getElementById('modelNameEn').value = '';
+    
+    showToast('تم إضافة الموديل بنجاح', 'success');
 }
 
 // Save Trim
@@ -1056,12 +1431,27 @@ function saveTrim() {
     const nameEn = document.getElementById('trimNameEn').value.trim();
     
     if (!name || !nameEn) {
-        alert('يرجى ملء جميع الحقول');
+        showToast('يرجى ملء جميع الحقول', 'error');
         return;
     }
     
     const make = carData.makes.find(m => m.id === currentMakeId);
+    if (!make) {
+        showToast('الماركة المحددة غير موجودة', 'error');
+        return;
+    }
+    
     const model = make.models.find(m => m.id === currentModelId);
+    if (!model) {
+        showToast('الموديل المحدد غير موجود', 'error');
+        return;
+    }
+    
+    // Check for duplicates within the same model
+    if (model.trims.some(trim => trim.nameEn === nameEn || trim.name === name)) {
+        showToast('هذا التريم موجود بالفعل لهذا الموديل', 'error');
+        return;
+    }
     
     const newTrim = {
         id: Date.now(),
@@ -1073,8 +1463,12 @@ function saveTrim() {
     renderMakes();
     updatePreview();
     
-    // Close modal
+    // Close modal and reset form
     bootstrap.Modal.getInstance(document.getElementById('addTrimModal')).hide();
+    document.getElementById('trimName').value = '';
+    document.getElementById('trimNameEn').value = '';
+    
+    showToast('تم إضافة التريم بنجاح', 'success');
 }
 
 // Save Year
@@ -1083,13 +1477,13 @@ function saveYear() {
     const description = document.getElementById('yearDescription').value.trim();
     
     if (!value || value < 1900 || value > 2030) {
-        alert('يرجى إدخال سنة صحيحة بين 1900 و 2030');
+        showToast('يرجى إدخال سنة صحيحة بين 1900 و 2030', 'error');
         return;
     }
     
     // Check if year already exists
     if (carData.years.find(y => y.value === value)) {
-        alert('هذه السنة موجودة بالفعل');
+        showToast('هذه السنة موجودة بالفعل', 'error');
         return;
     }
     
@@ -1105,6 +1499,14 @@ function saveYear() {
     carData.years.sort((a, b) => b.value - a.value);
     
     renderYears();
+    updatePreview();
+    
+    // Close modal and reset form
+    bootstrap.Modal.getInstance(document.getElementById('addYearModal')).hide();
+    document.getElementById('yearValue').value = '';
+    document.getElementById('yearDescription').value = '';
+    
+    showToast('تم إضافة السنة بنجاح', 'success');
     
     // Close modal
     bootstrap.Modal.getInstance(document.getElementById('addYearModal')).hide();
@@ -1112,40 +1514,62 @@ function saveYear() {
 
 // Delete Make
 function deleteMake(makeId) {
-    if (confirm('هل أنت متأكد من حذف هذه الماركة وجميع موديلاتها؟')) {
+    const make = carData.makes.find(m => m.id === makeId);
+    if (!make) return;
+    
+    if (confirm(`هل أنت متأكد من حذف ماركة "${make.name}" وجميع موديلاتها؟`)) {
         carData.makes = carData.makes.filter(m => m.id !== makeId);
         renderMakes();
         updatePreview();
+        showToast('تم حذف الماركة بنجاح', 'success');
     }
 }
 
 // Delete Model
 function deleteModel(makeId, modelId) {
-    if (confirm('هل أنت متأكد من حذف هذا الموديل وجميع تريماته؟')) {
-        const make = carData.makes.find(m => m.id === makeId);
+    const make = carData.makes.find(m => m.id === makeId);
+    if (!make) return;
+    
+    const model = make.models.find(m => m.id === modelId);
+    if (!model) return;
+    
+    if (confirm(`هل أنت متأكد من حذف موديل "${model.name}" وجميع تريماته؟`)) {
         make.models = make.models.filter(m => m.id !== modelId);
         renderMakes();
         updatePreview();
+        showToast('تم حذف الموديل بنجاح', 'success');
     }
 }
 
 // Delete Trim
 function deleteTrim(makeId, modelId, trimId) {
-    if (confirm('هل أنت متأكد من حذف هذا التريم؟')) {
-        const make = carData.makes.find(m => m.id === makeId);
-        const model = make.models.find(m => m.id === modelId);
+    const make = carData.makes.find(m => m.id === makeId);
+    if (!make) return;
+    
+    const model = make.models.find(m => m.id === modelId);
+    if (!model) return;
+    
+    const trim = model.trims.find(t => t.id === trimId);
+    if (!trim) return;
+    
+    if (confirm(`هل أنت متأكد من حذف تريم "${trim.name}"؟`)) {
         model.trims = model.trims.filter(t => t.id !== trimId);
-        
         renderMakes();
         updatePreview();
+        showToast('تم حذف التريم بنجاح', 'success');
     }
 }
 
 // Delete Year
 function deleteYear(yearId) {
-    if (confirm('هل أنت متأكد من حذف هذه السنة؟')) {
+    const year = carData.years.find(y => y.id === yearId);
+    if (!year) return;
+    
+    if (confirm(`هل أنت متأكد من حذف سنة "${year.value}"؟`)) {
         carData.years = carData.years.filter(y => y.id !== yearId);
         renderYears();
+        updatePreview();
+        showToast('تم حذف السنة بنجاح', 'success');
     }
 }
 
@@ -1246,15 +1670,52 @@ function renderYears() {
     `).join('');
 }
 
+// Render Service Names
+function renderServiceNames() {
+    const container = document.getElementById('service-names-container');
+    
+    if (carData.serviceNames.length === 0) {
+        container.innerHTML = `
+            <div class="service-names-empty-state">
+                <i class="fas fa-tag"></i>
+                <p>لم يتم إضافة أي أسماء خدمات بعد</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = carData.serviceNames.map(serviceName => `
+        <div class="service-name-item" data-service-name-id="${serviceName.id}" style="opacity: 0; transform: translateY(20px);">
+            <div class="service-name-content">
+                <div class="service-name-name">${serviceName.name}</div>
+            </div>
+            <button class="service-name-delete" onclick="deleteServiceName(${serviceName.id})" title="حذف اسم الخدمة">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `).join('');
+    
+    // Animate in new items
+    setTimeout(() => {
+        document.querySelectorAll('.service-name-item').forEach((item, index) => {
+            setTimeout(() => {
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+                item.style.transition = 'all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            }, index * 100);
+        });
+    }, 50);
+}
+
 // Update Preview
 function updatePreview() {
     const container = document.getElementById('preview-container');
     
-    if (carData.makes.length === 0) {
+    if (carData.makes.length === 0 && carData.years.length === 0 && carData.serviceTypes.length === 0 && carData.serviceNames.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <i class="fas fa-info-circle"></i>
-                <p>قم بإضافة الماركات والموديلات لرؤية المعاينة</p>
+                <p>قم بإضافة البيانات لرؤية المعاينة</p>
             </div>
         `;
         return;
@@ -1265,29 +1726,53 @@ function updatePreview() {
     const totalTrims = carData.makes.reduce((sum, make) => 
         sum + make.models.reduce((modelSum, model) => modelSum + model.trims.length, 0), 0
     );
+    const totalYears = carData.years.length;
+    const totalServiceTypes = carData.serviceTypes.length;
+    const totalServiceNames = carData.serviceNames.length;
     
     container.innerHTML = `
         <div class="preview-stats">
             <div class="row text-center">
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <div class="stat-card">
                         <i class="fas fa-industry text-primary"></i>
                         <h4 class="text-primary">${totalMakes}</h4>
                         <p class="mb-0">ماركة</p>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <div class="stat-card">
                         <i class="fas fa-car text-success"></i>
                         <h4 class="text-success">${totalModels}</h4>
                         <p class="mb-0">موديل</p>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <div class="stat-card">
                         <i class="fas fa-cog text-info"></i>
                         <h4 class="text-info">${totalTrims}</h4>
                         <p class="mb-0">تريم</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-card">
+                        <i class="fas fa-calendar-alt text-warning"></i>
+                        <h4 class="text-warning">${totalYears}</h4>
+                        <p class="mb-0">سنة</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-card">
+                        <i class="fas fa-cogs text-purple"></i>
+                        <h4 class="text-purple">${totalServiceTypes}</h4>
+                        <p class="mb-0">نوع خدمة</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-card">
+                        <i class="fas fa-tag text-danger"></i>
+                        <h4 class="text-danger">${totalServiceNames}</h4>
+                        <p class="mb-0">اسم خدمة</p>
                     </div>
                 </div>
             </div>
@@ -1296,25 +1781,57 @@ function updatePreview() {
         <div class="preview-data mt-4">
             <h6 class="mb-3">هيكل البيانات:</h6>
             <div class="data-structure">
-                ${carData.makes.map(make => `
-                    <div class="make-preview">
-                        <strong>${make.name}</strong>
-                        ${make.models.length > 0 ? `
-                            <ul class="models-preview">
-                                ${make.models.map(model => `
-                                    <li>
-                                        ${model.name}
-                                        ${model.trims.length > 0 ? `
-                                            <ul class="trims-preview">
-                                                ${model.trims.map(trim => `<li>${trim.name}</li>`).join('')}
-                                            </ul>
-                                        ` : ''}
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        ` : ''}
+                ${carData.makes.length > 0 ? `
+                    <div class="section-preview">
+                        <strong>الماركات والموديلات:</strong>
+                        ${carData.makes.map(make => `
+                            <div class="make-preview">
+                                <strong>${make.name}</strong>
+                                ${make.models.length > 0 ? `
+                                    <ul class="models-preview">
+                                        ${make.models.map(model => `
+                                            <li>
+                                                ${model.name}
+                                                ${model.trims.length > 0 ? `
+                                                    <ul class="trims-preview">
+                                                        ${model.trims.map(trim => `<li>${trim.name}</li>`).join('')}
+                                                    </ul>
+                                                ` : ''}
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                ` : ''}
+                            </div>
+                        `).join('')}
                     </div>
-                `).join('')}
+                ` : ''}
+                
+                ${carData.years.length > 0 ? `
+                    <div class="section-preview">
+                        <strong>السنوات:</strong>
+                        <div class="years-preview">
+                            ${carData.years.map(year => `<span class="year-badge">${year.value}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${carData.serviceTypes.length > 0 ? `
+                    <div class="section-preview">
+                        <strong>أنواع الخدمات:</strong>
+                        <div class="service-types-preview">
+                            ${carData.serviceTypes.map(st => `<span class="service-type-badge">${st.name}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${carData.serviceNames.length > 0 ? `
+                    <div class="section-preview">
+                        <strong>أسماء الخدمات:</strong>
+                        <div class="service-names-preview">
+                            ${carData.serviceNames.map(sn => `<span class="service-name-badge">${sn.name}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
             </div>
         </div>
     `;
@@ -1327,6 +1844,100 @@ function resetModalForms() {
     });
     currentMakeId = null;
     currentModelId = null;
+}
+
+// Render Service Types
+function renderServiceTypes() {
+    const container = document.getElementById('service-types-container');
+    
+    if (!container) return;
+    
+    if (carData.serviceTypes.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-cogs"></i>
+                <p>لا توجد أنواع خدمات مضافة بعد. قم بإضافة نوع خدمة جديد للبدء.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = carData.serviceTypes.map(serviceType => `
+        <div class="service-type-item fade-in">
+            <div class="service-type-header">
+                <h6 class="service-type-title">
+                    <i class="fas fa-cogs"></i>
+                    ${serviceType.name}
+                </h6>
+                <div class="service-type-actions">
+                    <button class="btn btn-action btn-delete-service-type" onclick="deleteServiceType(${serviceType.id})">
+                        <i class="fas fa-trash"></i>
+                        حذف
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Render Service Names
+function renderServiceNames() {
+    const container = document.getElementById('service-names-container');
+    
+    if (!container) return;
+    
+    if (carData.serviceNames.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-tags"></i>
+                <p>لا توجد أسماء خدمات مضافة بعد. قم بإضافة اسم خدمة جديد للبدء.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = carData.serviceNames.map(serviceName => `
+        <div class="service-name-item fade-in">
+            <div class="service-name-header">
+                <h6 class="service-name-title">
+                    <i class="fas fa-tag"></i>
+                    ${serviceName.name}
+                </h6>
+                <div class="service-name-actions">
+                    <button class="btn btn-action btn-delete-service-name" onclick="deleteServiceName(${serviceName.id})">
+                        <i class="fas fa-trash"></i>
+                        حذف
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Delete Service Type
+function deleteServiceType(serviceTypeId) {
+    const serviceType = carData.serviceTypes.find(st => st.id === serviceTypeId);
+    if (!serviceType) return;
+    
+    if (confirm(`هل أنت متأكد من حذف نوع الخدمة "${serviceType.name}"؟`)) {
+        carData.serviceTypes = carData.serviceTypes.filter(st => st.id !== serviceTypeId);
+        renderServiceTypes();
+        updatePreview();
+        showToast('تم حذف نوع الخدمة بنجاح', 'success');
+    }
+}
+
+// Delete Service Name
+function deleteServiceName(serviceNameId) {
+    const serviceName = carData.serviceNames.find(sn => sn.id === serviceNameId);
+    if (!serviceName) return;
+    
+    if (confirm(`هل أنت متأكد من حذف اسم الخدمة "${serviceName.name}"؟`)) {
+        carData.serviceNames = carData.serviceNames.filter(sn => sn.id !== serviceNameId);
+        renderServiceNames();
+        updatePreview();
+        showToast('تم حذف اسم الخدمة بنجاح', 'success');
+    }
 }
 </script>
 

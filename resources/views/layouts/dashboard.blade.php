@@ -274,11 +274,13 @@
         }
         
         .dropdown-arrow {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
             font-weight: 300;
-            margin-right: 0.5rem;
-            transition: opacity 0.3s ease;
+            margin-right: auto;
+            margin-left: 0.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center;
         }
         
         .dropdown-nav:hover .dropdown-arrow {
@@ -406,21 +408,40 @@
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4)) !important;
         }
         
-        /* أنماط القائمة الفرعية الثابتة */
+        /* أنماط القائمة الفرعية القابلة للطي */
         .app-management-submenu {
             background: linear-gradient(135deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.08) 50%, rgba(0, 0, 0, 0.03) 100%);
             border-radius: 16px;
             width: 95%;
             margin: 0.5rem 0.4rem 1rem 0.4rem;
-            /* padding: 0.8rem 0.6rem;
-            padding-right: 0;
-            padding-left: 1.5rem; */
             padding-top: 0.8rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(15px);
             box-shadow: 
                 0 8px 32px rgba(0, 0, 0, 0.12),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* إخفاء القائمة الفرعية عند الإغلاق */
+        .app-management-submenu:not(.show) {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+            opacity: 0;
+            transform: translateY(-10px);
+            border-width: 0;
+        }
+        
+        /* إظهار القائمة الفرعية عند الفتح */
+        .app-management-submenu.show {
+            max-height: 800px;
+            opacity: 1;
+            transform: translateY(0);
+            padding-bottom: 0.8rem;
         }
         
         .app-management-submenu .submenu-link {
@@ -510,7 +531,7 @@
         }
         
         .submenu-link .nav-primary {
-            font-size: 0.9rem;
+            /* font-size: 0.9rem; */
             font-weight: 500;
         }
         
@@ -579,6 +600,12 @@
                 padding: 0.7rem 1.2rem !important;
                 margin: 0.25rem 0.6rem !important;
                 font-size: 0.85rem !important;
+            }
+            
+            /* تكبير حجم أسماء الصفحات الفرعية في القوائم المنسدلة على الموبايل */
+            .submenu-link .nav-primary {
+                font-size: 1.05rem !important;
+                line-height: 1.35 !important;
             }
             
             .sidebar .user-info {
@@ -1486,6 +1513,114 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <style>
+        /* ========= Mobile Header & Sidebar Toggle ========= */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 75px;
+            background: #294B86;
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 1040;
+            padding: 0 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .mobile-header .mobile-title {
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 2rem;
+        }
+        .hamburger-btn {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+        }
+        .hamburger-btn .bar,
+        .hamburger-btn .bar::before,
+        .hamburger-btn .bar::after {
+            content: "";
+            display: block;
+            width: 18px;
+            height: 2px;
+            background: #111827;
+            border-radius: 2px;
+            position: relative;
+        }
+        .hamburger-btn .bar::before { top: -6px; position: absolute; }
+        .hamburger-btn .bar::after { top: 6px; position: absolute; }
+
+        .mobile-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 1030;
+            display: none;
+        }
+        .mobile-overlay.show { display: block; }
+
+        @media (max-width: 992px) {
+            .mobile-header { display: flex; }
+            .main-content { padding-top: 56px; }
+
+            /* Make sidebar offcanvas on mobile */
+            .sidebar {
+                position: fixed;
+                top: 0;
+                right: 0; /* RTL-friendly: slide from right */
+                height: 100vh;
+                z-index: 1050;
+                transform: translateX(100%);
+                transition: transform 0.25s ease-in-out;
+                width: 80vw;           /* عرض 80% على الموبايل */
+                max-width: 80vw;
+                min-width: 80vw;
+            }
+            .sidebar.is-open {
+                transform: translateX(0);
+            }
+
+            /* Ensure content takes full width when sidebar is hidden */
+            .d-flex { flex-direction: column; }
+            .main-content { width: 100%; }
+
+            /* تكبير عناصر القائمة للوضوح على الموبايل */
+            .sidebar .logo {
+                width: 68px;
+                height: 68px;
+                font-size: 2rem;
+            }
+            .sidebar h4 { font-size: 1.6rem; }
+            .sidebar .logo-subtitle { font-size: 1rem; }
+
+            .sidebar .nav-link {
+                padding: 1rem 1.4rem;
+                font-size: 1rem;
+            }
+            .sidebar .nav-link i { font-size: 1.4rem; }
+            .nav-primary { font-size: 2.05rem; }
+            .submenu-link {
+                font-size: 0.95rem !important;
+                padding: 0.9rem 1.4rem !important;
+            }
+            .logout-btn {
+                font-size: 2.05rem;
+            }
+            .sidebar .user-info strong {
+                font-size: 2rem;
+            }
+            
+        }
+    </style>
+
 </head>
 <body>
     <script>
@@ -1494,8 +1629,53 @@
             window.location.href = '/login';
         }
     </script>
+    <header class="mobile-header" dir="rtl">
+        <button id="mobileMenuButton" class="hamburger-btn" aria-label="فتح القائمة" aria-expanded="false" aria-controls="dashboardSidebar">
+            <span class="bar"></span>
+        </button>
+        <div class="mobile-title">DubaiSale</div>
+    </header>
+    <div id="mobileOverlay" class="mobile-overlay" hidden></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('dashboardSidebar');
+            const btn = document.getElementById('mobileMenuButton');
+            const overlay = document.getElementById('mobileOverlay');
+
+            if (!sidebar || !btn || !overlay) return;
+
+            function openSidebar() {
+                sidebar.classList.add('is-open');
+                overlay.classList.add('show');
+                overlay.removeAttribute('hidden');
+                btn.setAttribute('aria-expanded', 'true');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeSidebar() {
+                sidebar.classList.remove('is-open');
+                overlay.classList.remove('show');
+                overlay.setAttribute('hidden', '');
+                btn.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+            }
+            btn.addEventListener('click', function () {
+                if (sidebar.classList.contains('is-open')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+            overlay.addEventListener('click', closeSidebar);
+            window.addEventListener('resize', function () {
+                // Reset state when leaving mobile breakpoint
+                if (window.innerWidth > 992) {
+                    closeSidebar();
+                }
+            });
+        });
+    </script>
     <div class="d-flex">
-        <nav class="sidebar d-flex flex-column">
+        <nav id="dashboardSidebar" class="sidebar d-flex flex-column">
             <div class="logo-section">
                 
                 <div class="logo-text">
@@ -1523,14 +1703,15 @@
                 
                 
                 
-                <li class="nav-item">
-                    <div class="nav-link">
+                <li class="nav-item dropdown-nav">
+                    <div class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#appManagementSubmenu" aria-expanded="false" aria-controls="appManagementSubmenu" role="button">
                         <i class="bi bi-gear"></i>
                         <div class="nav-text">
                             <span class="nav-primary">إدارة التطبيق</span>
                         </div>
+                        <i class="bi bi-chevron-down dropdown-arrow"></i>
                     </div>
-                    <div class="app-management-submenu">
+                    <div class="collapse app-management-submenu" id="appManagementSubmenu">
                         <ul class="nav flex-column">
                             <li class="nav-item">
                                 <a href="/search-filter-settings" class="nav-link submenu-link">
@@ -1596,6 +1777,85 @@
                                     </div>
                                 </a>
                             </li> --}}
+                
+                <li class="nav-item dropdown-nav">
+                    <div class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#sectionsManagementSubmenu" aria-expanded="false" aria-controls="sectionsManagementSubmenu" role="button">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                        <div class="nav-text">
+                            <span class="nav-primary">إدارة الأقسام</span>
+                        </div>
+                        <i class="bi bi-chevron-down dropdown-arrow"></i>
+                    </div>
+                    <div class="collapse app-management-submenu" id="sectionsManagementSubmenu">
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a href="/sections/car-sale" class="nav-link submenu-link">
+                                    <i class="bi bi-car-front"></i>
+                                    <div class="nav-text">
+                                        <span class="nav-primary">Car Sale</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/sections/car-services" class="nav-link submenu-link">
+                                    <i class="bi bi-tools"></i>
+                                    <div class="nav-text">
+                                        <span class="nav-primary">Car Services</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/sections/car-rent" class="nav-link submenu-link">
+                                    <i class="bi bi-key"></i>
+                                    <div class="nav-text">
+                                        <span class="nav-primary">Car Rent</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <!-- <li class="nav-item">
+                                <a href="/sections/restaurant" class="nav-link submenu-link">
+                                    <i class="bi bi-cup-hot"></i>
+                                    <div class="nav-text">
+                                        <span class="nav-primary">Restaurant</span>
+                                    </div>
+                                </a>
+                            </li> -->
+                            <li class="nav-item">
+                                <a href="/sections/jobs" class="nav-link submenu-link">
+                                    <i class="bi bi-briefcase"></i>
+                                    <div class="nav-text">
+                                        <span class="nav-primary">Jobs</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/sections/other-services" class="nav-link submenu-link">
+                                    <i class="bi bi-three-dots"></i>
+                                    <div class="nav-text">
+                                        <span class="nav-primary">Other Services</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/sections/real-estate" class="nav-link submenu-link">
+                                    <i class="bi bi-house"></i>
+                                    <div class="nav-text">
+                                        <span class="nav-primary">Real Estate</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/sections/electronics" class="nav-link submenu-link">
+                                    <i class="bi bi-laptop"></i>
+                                    <div class="nav-text">
+                                        <span class="nav-primary">Electronics</span>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
                <li class="nav-item">
                                 <a href="/best-advertisers" class="nav-link">
                                     <i class="bi bi-star"></i>
@@ -1605,14 +1865,14 @@
                                 </a>
                             </li>
 
-                            {{-- <li class="nav-item">
+                            <li class="nav-item">
                                 <a href="/users-management" class="nav-link">
                                     <i class="bi bi-people-fill"></i>
                                     <div class="nav-text">
                                         <span class="nav-primary">إدارة المستخدمين</span>
                                     </div>
                                 </a>
-                            </li> --}}
+                            </li>
                             <li class="nav-item">
                                 <a href="/ads-management" class="nav-link">
                                     <i class="bi bi-megaphone"></i>
@@ -1644,8 +1904,7 @@
         if (user) {
             document.getElementById('userInfo').innerHTML = `
                 <div>
-                    <strong>${user.name}</strong><br>
-                    <small>${user.email}</small>
+                    <strong>Admin</strong><br>
                 </div>
             `;
         }
@@ -1778,6 +2037,76 @@ document.addEventListener('DOMContentLoaded', function() {
     const submenuLinks = document.querySelectorAll('.submenu-link');
     const navLinks = document.querySelectorAll('.nav-link');
     
+    // وظيفة الـ dropdown للقائمة الفرعية - إدارة التطبيق
+    const dropdownToggle = document.querySelector('[data-bs-target="#appManagementSubmenu"]');
+    const submenu = document.getElementById('appManagementSubmenu');
+    const dropdownArrow = document.querySelector('.dropdown-arrow');
+    
+    if (dropdownToggle && submenu && dropdownArrow) {
+        // إضافة مستمع الأحداث للنقر
+        dropdownToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            if (isExpanded) {
+                // إغلاق القائمة
+                submenu.classList.remove('show');
+                this.setAttribute('aria-expanded', 'false');
+                dropdownArrow.style.transform = 'rotate(0deg)';
+            } else {
+                // فتح القائمة
+                submenu.classList.add('show');
+                this.setAttribute('aria-expanded', 'true');
+                dropdownArrow.style.transform = 'rotate(180deg)';
+            }
+        });
+        
+        // تأثير hover للسهم
+        dropdownToggle.addEventListener('mouseenter', function() {
+            dropdownArrow.style.color = 'rgba(255, 255, 255, 0.9)';
+        });
+        
+        dropdownToggle.addEventListener('mouseleave', function() {
+            dropdownArrow.style.color = 'rgba(255, 255, 255, 0.7)';
+        });
+    }
+    
+    // وظيفة الـ dropdown للقائمة الفرعية - إدارة الأقسام
+    const sectionsDropdownToggle = document.querySelector('[data-bs-target="#sectionsManagementSubmenu"]');
+    const sectionsSubmenu = document.getElementById('sectionsManagementSubmenu');
+    const sectionsDropdownArrow = sectionsDropdownToggle ? sectionsDropdownToggle.querySelector('.dropdown-arrow') : null;
+    
+    if (sectionsDropdownToggle && sectionsSubmenu && sectionsDropdownArrow) {
+        // إضافة مستمع الأحداث للنقر
+        sectionsDropdownToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            
+            if (isExpanded) {
+                // إغلاق القائمة
+                sectionsSubmenu.classList.remove('show');
+                this.setAttribute('aria-expanded', 'false');
+                sectionsDropdownArrow.style.transform = 'rotate(0deg)';
+            } else {
+                // فتح القائمة
+                sectionsSubmenu.classList.add('show');
+                this.setAttribute('aria-expanded', 'true');
+                sectionsDropdownArrow.style.transform = 'rotate(180deg)';
+            }
+        });
+        
+        // تأثير hover للسهم
+        sectionsDropdownToggle.addEventListener('mouseenter', function() {
+            sectionsDropdownArrow.style.color = 'rgba(255, 255, 255, 0.9)';
+        });
+        
+        sectionsDropdownToggle.addEventListener('mouseleave', function() {
+            sectionsDropdownArrow.style.color = 'rgba(255, 255, 255, 0.7)';
+        });
+    }
+    const navLinks = document.querySelectorAll('.nav-link');
     // تحسين تأثيرات الروابط الفرعية
     submenuLinks.forEach(link => {
         link.addEventListener('mouseenter', function() {

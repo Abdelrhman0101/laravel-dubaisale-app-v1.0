@@ -4,9 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Home</title>
-        @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-            @vite(['resources/css/app.css', 'resources/css/landing.css', 'resources/js/app.js'])
-        @endif
+        @vite(['resources/css/app.css', 'resources/css/landing.css', 'resources/js/app.js'])
     </head>
     <body class="min-h-screen bg-gray-50 text-gray-900">
         <x-landing.header />

@@ -350,12 +350,10 @@ class CarRentAdController extends Controller
         if ($request->hasFile('main_image')) {
             $oldMain = $carRentAd->main_image;
 
-            // تأكد إن القيمة القديمة نص فعلاً قبل الحذف
             if (is_string($oldMain) && !empty($oldMain)) {
                 Storage::disk('public')->delete($oldMain);
             }
 
-            // ارفع الصورة الجديدة
             $carRentAd->main_image = $request->file('main_image')->store('car_rent/main', 'public');
         }
 
@@ -370,11 +368,16 @@ class CarRentAdController extends Controller
                 $oldThumbs = [];
             }
 
+            // أضف الصور الجديدة
             foreach ($request->file('thumbnail_images') as $file) {
-                $oldThumbs[] = $file->store('car_rent/thumbnails', 'public');
+                if ($file) {
+                    $oldThumbs[] = $file->store('car_rent/thumbnails', 'public');
+                }
             }
 
-            $carRentAd->thumbnail_images = $oldThumbs;
+            // نظّف المصفوفة من العناصر الفارغة
+            $oldThumbs = array_filter($oldThumbs, fn($v) => !empty($v));
+            $carRentAd->thumbnail_images = array_values($oldThumbs);
         }
 
         // ✅ تحديث بيانات الباقة (plan)
@@ -403,6 +406,7 @@ class CarRentAdController extends Controller
             'data' => $carRentAd->fresh(),
         ]);
     }
+
 
 
 

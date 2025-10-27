@@ -88,6 +88,122 @@ Route::get('/send-notification', function () {
     return view('send-notification');
 })->name('send-notification');
 
+// صفحة إدارة المستخدمين
+Route::get('/users-management', function () {
+    // إنشاء مجموعة مستخدمين وهمية للعرض
+    $users = collect([
+        (object) [
+            'id' => 1,
+            'name' => 'أحمد محمد',
+            'email' => 'ahmed@example.com',
+            'phone' => '+971501234567',
+            'role' => 'user',
+            'status' => 'active',
+            'user_type' => 'advertiser',
+            'ads_count' => 5,
+            'registration_method' => 'تطبيق الجوال',
+            'registration_method_en' => 'Mobile App',
+            'created_at' => now()->subDays(10),
+            'email_verified_at' => now()->subDays(9),
+        ],
+        (object) [
+            'id' => 2,
+            'name' => 'فاطمة علي',
+            'email' => 'fatima@example.com',
+            'phone' => '+971507654321',
+            'role' => 'user',
+            'status' => 'active',
+            'user_type' => 'normal_user',
+            'ads_count' => 0,
+            'registration_method' => 'الموقع الإلكتروني',
+            'registration_method_en' => 'Website',
+            'created_at' => now()->subDays(5),
+            'email_verified_at' => now()->subDays(4),
+        ],
+        (object) [
+            'id' => 3,
+            'name' => 'محمد خالد',
+            'email' => 'mohammed@example.com',
+            'phone' => '+971509876543',
+            'role' => 'admin',
+            'status' => 'blocked',
+            'user_type' => 'advertiser',
+            'ads_count' => 12,
+            'registration_method' => 'جوجل',
+            'registration_method_en' => 'Google',
+            'created_at' => now()->subDays(15),
+            'email_verified_at' => null,
+        ]
+    ]);
+    
+    $filter = request('filter', 'all');
+    
+    return view('users-management', compact('users', 'filter'));
+})->name('users-management');
+
+// صفحة تفاصيل المستخدم
+Route::get('/user-details/{id}', function ($id) {
+    // بيانات وهمية لتفاصيل المستخدم
+    $user = (object) [
+        'id' => $id,
+        'name' => 'أحمد محمد',
+        'email' => 'ahmed@example.com',
+        'phone' => '+971501234567',
+        'role' => 'user',
+        'status' => 'active',
+        'user_type' => 'advertiser',
+        'ads_count' => 5,
+        'registration_method' => 'تطبيق الجوال',
+        'registration_method_en' => 'Mobile App',
+        'created_at' => now()->subDays(10),
+        'email_verified_at' => now()->subDays(9),
+    ];
+    
+    return view('user-details', compact('user'));
+})->name('user-details');
+
+// --- صفحات إدارة الأقسام ---
+
+// صفحة إدارة بيع السيارات
+Route::get('/sections/car-sale', function () {
+    return view('sections.car-sale');
+})->name('sections.car-sale');
+
+// صفحة إدارة خدمات السيارات
+Route::get('/sections/car-services', function () {
+    return view('sections.car-services');
+})->name('sections.car-services');
+
+// صفحة إدارة تأجير السيارات
+Route::get('/sections/car-rent', function () {
+    return view('sections.car-rent');
+})->name('sections.car-rent');
+
+// صفحة إدارة المطاعم
+Route::get('/sections/restaurant', function () {
+    return view('sections.restaurant');
+})->name('sections.restaurant');
+
+// صفحة إدارة الوظائف
+Route::get('/sections/jobs', function () {
+    return view('sections.jobs');
+})->name('sections.jobs');
+
+// صفحة إدارة الخدمات الأخرى
+Route::get('/sections/other-services', function () {
+    return view('sections.other-services');
+})->name('sections.other-services');
+
+// صفحة إدارة العقارات
+Route::get('/sections/real-estate', function () {
+    return view('sections.real-estate');
+})->name('sections.real-estate');
+
+// صفحة إدارة الإلكترونيات
+Route::get('/sections/electronics', function () {
+    return view('sections.electronics');
+})->name('sections.electronics');
+
 
 // --- التوجيه الافتراضي ---
 // إذا حاول أي شخص الوصول إلى المسار الرئيسي /، سيتم توجيهه إلى صفحة تسجيل الدخول.
