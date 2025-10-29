@@ -35,7 +35,8 @@ class User extends Authenticatable
         'otp_phone',
         'otp_expires_at',
         'user_type',
-        'otp_verified'
+        'otp_verified',
+        'referral_code_list',
         // 'is_active',
         // 'otp_verified',
 
@@ -60,6 +61,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'referral_code_list' => 'array',
         'activation_code_expires_at' => 'datetime',
         'otp_expires_at' => 'datetime',
         'is_active' => 'boolean',

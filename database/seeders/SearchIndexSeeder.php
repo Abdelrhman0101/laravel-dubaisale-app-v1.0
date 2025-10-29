@@ -9,7 +9,7 @@ use App\Models\RealEstateAd;
 use App\Models\JobAd;
 use App\Models\CarRentAd;
 use App\Models\CarServicesAd;
-use App\Models\ElectronicAd;
+use App\Models\electronicAd;
 use App\Models\OtherServiceAds;
 use App\Models\RestaurantAd;
 
@@ -26,7 +26,7 @@ class SearchIndexSeeder extends Seeder
             'Car Services' => CarServicesAd::class,
             'Restaurant' => RestaurantAd::class,
             'Job' => JobAd::class,
-            'Electronics' => ElectronicAd::class,
+            'Electronics' => electronicAd::class,
             'Other Services' => OtherServiceAds::class,
         ];
 

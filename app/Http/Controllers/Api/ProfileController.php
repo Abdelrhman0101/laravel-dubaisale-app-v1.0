@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User; // <<< من الأفضل دائمًا استدعاء الـ Models التي تستخدمها
+use Faker\Core\Number;
 
 class ProfileController extends Controller
 {
@@ -29,7 +30,10 @@ class ProfileController extends Controller
             'advertiser_type' => 'nullable|string|max:255',
             'advertiser_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:20480',
             'advertiser_location' => 'nullable|string',
+            'referral_code' => 'sometimes|string|max:255',
         ]);
+
+
 
         // 2. تعامل مع رفع صورة الشعار (إذا تم إرسالها)
         if ($request->hasFile('advertiser_logo')) {
@@ -37,32 +41,48 @@ class ProfileController extends Controller
             if ($user->advertiser_logo) {
                 Storage::disk('public')->delete($user->advertiser_logo);
             }
-            
+
             // ب. ارفع الشعار الجديد واحصل على مساره
             $path = $request->file('advertiser_logo')->store('logos', 'public');
-            
-            // ج. أضف المسار الجديد إلى البيانات التي سيتم حفظها
+
+
             $validatedData['advertiser_logo'] = $path;
         }
 
-        // 3. قم بتحديث بيانات المستخدم باستخدام البيانات التي تم التحقق منها فقط
+        if (!empty($validatedData['referral_code'])) {
+            $referralId = (int) $validatedData['referral_code'];
+            if ($referralId == $request->user()->id) {
+                return response()->json([
+                    'error' => "You can't add yourself as a referral",
+                ], 400);
+            }
+            $userReferral = User::where('id', $referralId)->first();
+            if ($userReferral) {
+                $referrals = $userReferral->referral_code_list ?? [];
+                $referrals[] = $request->user()->id;
+                $userReferral->referral_code_list = $referrals;
+                $userReferral->save();
+            } else {
+                return response()->json([
+                    'error' => "Referral ID {$referralId} Not found",
+                ], 400);
+            }
+        }
+
+
         $user->update($validatedData);
-        
-        // 4. أرجع بيانات المستخدم المحدثة بالكامل
-        //    ->fresh() يضمن أننا نرسل أحدث نسخة من قاعدة البيانات
+
         return response()->json($user->fresh());
     }
 
-    /**
-     * تغيير كلمة المرور للمستخدم الحالي.
-     */
+
     public function changePassword(Request $request)
     {
         $validatedData = $request->validate([
             'current_password' => 'required|string',
             'new_password' => ['required', 'string', Password::min(8)->letters()->symbols(), 'confirmed'],
         ]);
-        
+
         /** @var \App\Models\User $user */
         $user = $request->user();
 
