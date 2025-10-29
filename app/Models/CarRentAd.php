@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use App\Traits\HandlesSearchIndex;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class CarRentAd extends Model
 {
-    use HasFactory;
+    use HasFactory, HandlesSearchIndex ;
 
     protected $guarded = [];
+    protected static $searchType = 'Car Rent';
 
     protected $casts = [
         'thumbnail_images' => 'array',

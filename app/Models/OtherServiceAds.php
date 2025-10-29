@@ -5,12 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\HandlesSearchIndex;
+
 
 class OtherServiceAds extends Model
 {
-    //
+    use HandlesSearchIndex;
     protected $table = "other_service_ads";
     protected $guarded = [];
+
+    // Used by search indexing to identify the ad type
+    protected static $searchType = 'Other Services';
 
     protected $casts = [
         'admin_approved' => 'boolean',

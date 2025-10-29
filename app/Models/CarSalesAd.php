@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder; // استدعاء Builder
+use App\Traits\HandlesSearchIndex;
+
 
 class CarSalesAd extends Model
 {
-    use HasFactory;
+    use HasFactory,HandlesSearchIndex;
+    protected static $searchType = 'Cars Sales';
 
     /**
      * The attributes that aren't mass assignable.

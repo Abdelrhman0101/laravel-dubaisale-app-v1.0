@@ -8,6 +8,7 @@ use App\Http\Controllers\OtherServiceOptionsController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\RealEstateAdOptionsController;
 use App\Http\Controllers\SetRankOneController;
+use App\Http\Controllers\SmartSearchController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -75,7 +76,8 @@ Route::post('/convert-to-advertiser/{id}', [UserController::class, 'convertToAdv
 
 //all ads for specfic user
 Route::get('/user-ads/{user_id}', [MyAdsController::class, 'userAds']);
-
+//smart search
+Route::get('/smart-search', [SmartSearchController::class, 'search']);
 
 //pages
 Route::get('/pages', [PageController::class, 'index']);

@@ -5,12 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\HandlesSearchIndex;
+
 
 class RealEstateAd extends Model
 {
+    use HandlesSearchIndex;
     //
     protected $table = "real_estate_ads";
     protected $guarded = [];
+
+    // Used by search indexing to identify the ad type
+    protected static $searchType = 'Real State';
 
     protected $casts = [
         'thumbnail_images' => 'array',

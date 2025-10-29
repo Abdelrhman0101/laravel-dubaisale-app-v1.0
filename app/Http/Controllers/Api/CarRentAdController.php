@@ -62,7 +62,8 @@ class CarRentAdController extends Controller
                 break;
         }
 
-        $ads = $query->paginate(15)->withQueryString();
+        // $ads = $query->paginate(15)->withQueryString();
+        $ads = $query->get();
         return response()->json($ads);
     }
 

@@ -6,13 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\HandlesSearchIndex;
+
 
 class JobAd extends Model
 {
     //
-    use HasFactory;
+    use HasFactory,HandlesSearchIndex;
     protected $table = 'job_ads';
     protected $guarded = [];
+    protected static $searchType = 'Job';
     protected $casts = [
         'warranty' => 'boolean',
         'admin_approved' => 'boolean',

@@ -5,14 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\HandlesSearchIndex;
+
 
 
 class electronicAd extends Model
 {
+    use HandlesSearchIndex;
     //
     // Use the existing table created by migrations
     protected $table = "electronics_home_ads";
     protected $guarded = [];
+    protected static $searchType = 'Electronics';
 
     protected $casts = [
         'thumbnail_images' => 'array',

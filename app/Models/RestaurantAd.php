@@ -6,12 +6,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\HandlesSearchIndex;
+
 
 class RestaurantAd extends Model
 {
-    use HasFactory;
+    use HasFactory, HandlesSearchIndex;
 
     protected $guarded = [];
+
+    protected static $searchType = 'Restaurant';
 
     protected $casts = [
         'thumbnail_images' => 'array',
