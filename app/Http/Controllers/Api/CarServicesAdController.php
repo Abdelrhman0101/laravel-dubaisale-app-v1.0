@@ -238,7 +238,7 @@ class CarServicesAdController extends Controller
                 $data['plan_type'] = $packageResult['package_type'];
                 $data['payment'] = false;
             } else {
-                if (!empty($validated['payment']) && $validatedData['payment'] == true) {
+                if (!empty($validatedData['payment']) && $validatedData['payment'] == true) {
                     $data['plan_type'] = $validatedData['plan_type'];
                     // $data['payment'] = true;
                 } else {
