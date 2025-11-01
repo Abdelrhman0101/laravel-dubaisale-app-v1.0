@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use App\Traits\HasRank;
+use App\Traits\PackageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\RealEstateAd;
 use Illuminate\Http\Request;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class RealEstateAdController extends Controller
 {
-    use HasRank;
+    use HasRank, PackageHelper;
     /**
      * GET /real-estates - Public index with smart filters
      */
@@ -224,12 +226,37 @@ class RealEstateAdController extends Controller
             'plan_type' => 'nullable|string|max:50',
             'plan_days' => 'nullable|integer|min:0',
             'plan_expires_at' => 'nullable|date',
+            'payment' => 'nullable|boolean',
         ]);
 
         $data = $validated;
+        $user = $request->user();
         $data['user_id'] = $request->user()->id;
         $data['add_category'] = 'Real State';
 
+        // --- Package deduction / payment handling ---
+        if (!empty($validated['plan_type']) && $validated['plan_type'] !== 'free') {
+            $packageResult = $this->autoDeductAd($user, $validated['plan_type']);
+
+            if ($packageResult['success']) {
+                $data['plan_type'] = $packageResult['package_type'];
+                $data['payment'] = false;
+            } else {
+                if (!empty($validated['payment']) && $validated['payment'] == true) {
+                    $data['plan_type'] = $validated['plan_type'];
+                    // $data['payment'] = true;
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No active package found. Please purchase or pay for this ad.',
+                    ], 403);
+                }
+            }
+        } else {
+
+            $data['plan_type'] = 'free';
+            $data['payment'] = false;
+        }
         // Upload images
         $data['main_image'] = $request->file('main_image')->store('real_estates/main', 'public');
         $thumbs = [];
@@ -244,7 +271,6 @@ class RealEstateAdController extends Controller
         if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
             $data['plan_expires_at'] = now()->addDays((int) $request->plan_days);
         }
-
         // Manual approval check
         $manualApproval = cache()->rememberForever('setting_manual_approval_mode', function () {
             return \App\Models\SystemSetting::where('key', 'manual_approval_mode')->first()->value ?? 'true';

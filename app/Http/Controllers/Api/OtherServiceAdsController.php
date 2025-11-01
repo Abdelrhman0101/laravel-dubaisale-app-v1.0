@@ -154,18 +154,24 @@ class OtherServiceAdsController extends Controller
         if (!empty($validated['plan_type']) && $validated['plan_type'] !== 'free') {
             $packageResult = $this->autoDeductAd($user, $validated['plan_type']);
 
-            if (!$packageResult['success']) {
-                if (!empty($validated['payment']) && $validated['payment'] == false) {
+            if ($packageResult['success']) {
+                $data['plan_type'] = $packageResult['package_type'];
+                $data['payment'] = false;
+            } else {
+                if (!empty($validated['payment']) && $validated['payment'] == true) {
+                    $data['plan_type'] = $validated['plan_type'];
+                    // $data['payment'] = true;
+                } else {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Package expired or not available. Please complete payment first.',
+                        'message' => 'No active package found. Please purchase or pay for this ad.',
                     ], 403);
                 }
-            } else {
-                $data['plan_type'] = $packageResult['package_type'];
             }
         } else {
-            $data['plan_type'] = "free";
+
+            $data['plan_type'] = 'free';
+            $data['payment'] = false;
         }
 
 

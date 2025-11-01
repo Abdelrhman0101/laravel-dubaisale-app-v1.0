@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\CarServicesAd;
 use App\Traits\HasRank;
+use App\Traits\PackageHelper;
 use App\Models\CarServiceType;
 // use App\Models\SystemSetting; // removed: no longer needed here
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Gate;
 
 class CarServicesAdController extends Controller
 {
-    use HasRank;
+    use HasRank, PackageHelper;
     /**
      * Display a listing of car services ads with smart filtering.
      *
@@ -211,6 +212,7 @@ class CarServicesAdController extends Controller
             'plan_type' => 'nullable|string|max:50',
             'plan_days' => 'nullable|integer|min:0',
             'plan_expires_at' => 'nullable|date',
+            'payment' => 'nullable|boolean',
         ]);
 
         $user = $request->user();
@@ -229,7 +231,28 @@ class CarServicesAdController extends Controller
             'user_id' => $user->id,
             'add_category' => 'Car Services',
         ];
+        if (!empty($validatedData['plan_type']) && $validatedData['plan_type'] !== 'free') {
+            $packageResult = $this->autoDeductAd($user, $validatedData['plan_type']);   
 
+            if ($packageResult['success']) {
+                $data['plan_type'] = $packageResult['package_type'];
+                $data['payment'] = false;
+            } else {
+                if (!empty($validated['payment']) && $validatedData['payment'] == true) {
+                    $data['plan_type'] = $validatedData['plan_type'];
+                    // $data['payment'] = true;
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No active package found. Please purchase or pay for this ad.',
+                    ], 403);
+                }
+            }
+        } else {
+
+            $data['plan_type'] = 'free';
+            $data['payment'] = false;
+        }
         // Set contact info from request data
         $data['advertiser_name'] = $validatedData['advertiser_name'];
         $data['phone_number'] = $validatedData['phone_number'];
@@ -262,6 +285,8 @@ class CarServicesAdController extends Controller
         if ($request->filled('plan_expires_at')) {
             $data['plan_expires_at'] = $request->input('plan_expires_at');
         }
+
+
 
         // =========================================================
         // ====   هنا يبدأ المنطق الذكي للموافقة التلقائية    ====
@@ -658,7 +683,6 @@ class CarServicesAdController extends Controller
                 'this_month_ads' => $thisMonthAds,
                 'service_types_count' => $serviceTypesCount
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use App\Traits\HasRank;
+use App\Traits\PackageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\CarSalesAd;
 use Illuminate\Http\Request;
@@ -12,7 +14,7 @@ use App\Models\CarMake;
 class CarSalesAdController extends Controller
 {
 
-    use HasRank;
+    use HasRank, PackageHelper;
     /**
      * Display a listing of the resource with smart filtering.
      *
@@ -229,7 +231,7 @@ class CarSalesAdController extends Controller
     // إنشاء إعلان جديد
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
+        $validated = $request->validate([
             // ... (نفس قواعد التحقق السابقة)
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -247,12 +249,39 @@ class CarSalesAdController extends Controller
             'plan_type' => 'nullable|string|max:50',
             'plan_days' => 'nullable|integer|min:0',
             'plan_expires_at' => 'nullable|date',
+            'payment' => 'nullable|boolean',
         ]);
 
         $data = $request->all();
+        $user = $request->user();
+        $data['user_id'] = $request->user()->id;
+        $data['add_category'] = $data['add_category'] ?? 'Car Sales';
+        
+        if (!empty($validated['plan_type']) && $validated['plan_type'] !== 'free') {
+            $packageResult = $this->autoDeductAd($user, $validated['plan_type']);
 
+            if ($packageResult['success']) {
+                $data['plan_type'] = $packageResult['package_type'];
+                $data['payment'] = false;
+            } else {
+                if (!empty($validated['payment']) && $validated['payment'] == true) {
+                    $data['plan_type'] = $validated['plan_type'];
+                    // $data['payment'] = true;
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No active package found. Please purchase or pay for this ad.',
+                    ], 403);
+                }
+            }
+        } else {
+
+            $data['plan_type'] = 'free';
+            $data['payment'] = false;
+        }
         // (هذا الجزء الخاص بالصلاحيات مؤقت وغير مثالي، الأفضل معالجته على مستوى الخادم)
-        $fixPermissions = function ($path) { /* ... */};
+        $fixPermissions = function ($path) { /* ... */
+        };
 
         // رفع الصورة الأساسية
         $mainImagePath = $request->file('main_image')->store('cars/main', 'public');
@@ -281,8 +310,7 @@ class CarSalesAdController extends Controller
             $data['plan_expires_at'] = $request->input('plan_expires_at');
         }
 
-        // ربط الإعلان بالمستخدم
-        $data['user_id'] = $request->user()->id;
+
 
         // =========================================================
         // ====   هنا يبدأ المنطق الذكي للموافقة التلقائية    ====
@@ -535,7 +563,6 @@ class CarSalesAdController extends Controller
                 'this_month_ads' => $thisMonthAds,
                 'brands_count' => $brandsCount
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

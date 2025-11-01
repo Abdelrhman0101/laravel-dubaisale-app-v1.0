@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\JobAd;
 use App\Traits\HasRank;
+use App\Traits\PackageHelper;
 // use App\Models\JopAD;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class JobsAdController extends Controller
 {
-    use HasRank;
+    use HasRank, PackageHelper;
     //
     public function index(Request $request)
     {
@@ -158,14 +159,40 @@ class JobsAdController extends Controller
             'plan_type' => 'nullable|string|max:50',
             'plan_days' => 'nullable|integer|min:0',
             'plan_expires_at' => 'nullable|date',
+            'payment' => 'nullable|boolean',
 
 
         ]);
 
         $data = $validated;
         $data['user_id'] = $request->user()->id;
+        $user = $request->user();
         $data['add_category'] = 'Jop';
 
+
+        // --- Package deduction / payment handling ---
+        if (!empty($validated['plan_type']) && $validated['plan_type'] !== 'free') {
+            $packageResult = $this->autoDeductAd($user, $validated['plan_type']);
+
+            if ($packageResult['success']) {
+                $data['plan_type'] = $packageResult['package_type'];
+                $data['payment'] = false;
+            } else {
+                if (!empty($validated['payment']) && $validated['payment'] == true) {
+                    $data['plan_type'] = $validated['plan_type'];
+                    // $data['payment'] = true;
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No active package found. Please purchase or pay for this ad.',
+                    ], 403);
+                }
+            }
+        } else {
+
+            $data['plan_type'] = 'free';
+            $data['payment'] = false;
+        }
         // Upload main image
         // $data['main_image'] = $request->file('main_image')->store('jobs/main', 'public');
         // Plan
