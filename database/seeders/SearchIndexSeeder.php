@@ -54,3 +54,4 @@ class SearchIndexSeeder extends Seeder
         $this->command->info('🎯 Search index seeding completed successfully!');
     }
 }
+

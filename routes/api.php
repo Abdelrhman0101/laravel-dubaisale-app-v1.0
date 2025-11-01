@@ -41,6 +41,7 @@ use App\Http\Controllers\Api\Admin\CarSaleFilterManagementController;
 use App\Http\Controllers\Api\Admin\OfferBoxSettingsController;
 use App\Http\Controllers\Api\Admin\SystemSettingsController;
 use App\Http\Controllers\Api\Admin\RestaurantCategoryController;
+use App\Http\Controllers\Api\Admin\UserPackageController;
 use App\Http\Controllers\CarSalesAdSpecController;
 use App\Http\Controllers\JobAdValuesController;
 use App\Http\Controllers\UserContactInfoController;
@@ -226,13 +227,16 @@ Route::middleware([
     Route::post('/profile', [ProfileController::class, 'update']);
     Route::post('/profile/password', [ProfileController::class, 'changePassword']);
     Route::post('/upload', [UploadController::class, 'upload']);
+    //Packages
+    Route::get('/user-packages', [UserPackageController::class, 'index']);
+
+
 
 
     // --- User's Ads & Offers Management ---
     Route::get('/my-ads', [MyAdsController::class, 'index']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class)->except(['index', 'show']);
-    Route::apiResource('car-services-ads', CarServicesAdController::class)->except(['index', 'show']);
-    ;
+    Route::apiResource('car-services-ads', CarServicesAdController::class)->except(['index', 'show']);;
     Route::apiResource('car-rent-ads', CarRentAdController::class);
 
     // --- Restaurants (CRUD Authenticated) ---
@@ -399,5 +403,12 @@ Route::middleware([
         Route::get('/jobs_ad_values/{fieldName}', [JobAdValuesController::class, 'getSpecByField']);
         Route::put('/jobs_ad_values/{fieldName}', [JobAdValuesController::class, 'updateSpec']);
         Route::delete('/jobs_ad_values', [JobAdValuesController::class, 'bulkDeleteSpecs']);
+
+        //Packages
+        Route::prefix('user-packages')->group(function () {
+            Route::get('/', [UserPackageController::class, 'index']);
+            Route::post('/', [UserPackageController::class, 'storeOrUpdate']);
+            Route::delete('/{id}', [UserPackageController::class, 'destroy']);
+        });
     });
 });

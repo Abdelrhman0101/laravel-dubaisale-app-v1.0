@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\HasRank;
 use Illuminate\Http\Request;
 use App\Models\OtherServiceAds;
+use App\Traits\PackageHelper;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -13,7 +14,7 @@ class OtherServiceAdsController extends Controller
 {
     //
 
-    use HasRank;
+    use HasRank, PackageHelper;
     public function index(Request $request)
     {
         $query = OtherServiceAds::active();
@@ -143,11 +144,35 @@ class OtherServiceAdsController extends Controller
             'plan_type' => 'nullable|string|max:50',
             'plan_days' => 'nullable|integer|min:0',
             'plan_expires_at' => 'nullable|date',
+            'payment' => 'nullable|boolean',
         ]);
 
+        $user = $request->user();
         $data = $validated;
-        $data['user_id'] = $request->user()->id;
+        $data['user_id'] = $user->id;
         $data['add_category'] = 'Other Services';
+        if (!empty($validated['plan_type']) && $validated['plan_type'] !== 'free') {
+            $packageResult = $this->autoDeductAd($user, $validated['plan_type']);
+
+            if (!$packageResult['success']) {
+                if (!empty($validated['payment']) && $validated['payment'] == false) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Package expired or not available. Please complete payment first.',
+                    ], 403);
+                }
+            } else {
+                $data['plan_type'] = $packageResult['package_type'];
+            }
+        } else {
+            $data['plan_type'] = "free";
+        }
+
+
+
+        // $data = $validated;
+        // $data['user_id'] = $request->user()->id;
+        // $data['add_category'] = 'Other Services';
 
         // Upload images
         $data['main_image'] = $request->file('main_image')->store('other_services/main', 'public');
@@ -169,7 +194,6 @@ class OtherServiceAdsController extends Controller
 
         $rank = $this->getNextRank(OtherServiceAds::class);
         $data['rank'] = $rank;
-
         $ad = OtherServiceAds::create($data);
 
         return response()->json($ad, 201);
