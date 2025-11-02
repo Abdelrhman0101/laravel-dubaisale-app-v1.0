@@ -150,6 +150,7 @@ class MyAdsController extends Controller
                 'job_name' => $ad->job_name,
                 'status' => $ad->add_status,
                 'category' => 'Jobs',
+                'plan_type' => $ad->plan_type,
                 'category_slug' => 'jobs',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
@@ -169,6 +170,7 @@ class MyAdsController extends Controller
                 'thumbnail_images_urls' => $ad->thumbnail_images_urls,
                 'category' => $ad->add_category,
                 'status' => $ad->add_status,
+                'plan_type' => $ad->plan_type,
                 'category_slug' => 'electronics',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
@@ -187,6 +189,7 @@ class MyAdsController extends Controller
                 'main_image_url' => asset('storage/' . $ad->main_image),
                 'category' => $ad->add_category,
                 'status' => $ad->add_status,
+                'plan_type' => $ad->plan_type,
                 'category_slug' => 'other-services',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
@@ -207,6 +210,7 @@ class MyAdsController extends Controller
                 'main_image_url' => asset('storage/' . $ad->main_image),
                 'category' => $ad->add_category,
                 'status' => $ad->add_status,
+                'plan_type' => $ad->plan_type,
                 'category_slug' => 'other-services',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
@@ -456,7 +460,4 @@ class MyAdsController extends Controller
             'ads' => $allAds,
         ]);
     }
-
-
-
 }
