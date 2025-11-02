@@ -37,6 +37,8 @@ class User extends Authenticatable
         'user_type',
         'otp_verified',
         'referral_code_list',
+        'latitude',
+        'longitude',
         // 'is_active',
         // 'otp_verified',
 

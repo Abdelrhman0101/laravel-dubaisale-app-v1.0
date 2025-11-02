@@ -61,7 +61,7 @@ use App\Http\Middleware\IsAdmin;
 // هذا هو التغيير الرئيسي: نحن نطبق middleware 'web' على هذا الـ route مباشرة
 // لضمان تشغيل الجلسات (Sessions) له
 Route::post('/login', [AuthController::class, 'login']);
-
+Route::put('/Address/{user}',[UserController::class,'setAddress']);
 Route::post('/newSignin', [AuthController::class, 'signup']);
 Route::post('/set-password', [AuthController::class, 'setPassword']);
 Route::post('/activate', [AuthController::class, 'activate']);

@@ -12,6 +12,7 @@ use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
+
 class UserController extends Controller
 {
     /**
@@ -121,7 +122,7 @@ class UserController extends Controller
             'newPassword' => 'required|string',
         ]);
 
-        $user = auth()->user();
+        $user = $request->user();
 
         if (!$user) {
             return response()->json(['message' => 'User not authenticated'], 401);
@@ -144,5 +145,14 @@ class UserController extends Controller
         ]);
     }
 
+    public function setAddress(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180', 
+        ]);
 
+        $user->update($data);
+        return response()->json($user->fresh());
+    }
 }
