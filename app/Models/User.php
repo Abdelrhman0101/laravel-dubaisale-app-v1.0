@@ -41,7 +41,6 @@ class User extends Authenticatable
         'longitude',
         // 'is_active',
         // 'otp_verified',
-
     ];
 
     /**

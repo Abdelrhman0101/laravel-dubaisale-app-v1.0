@@ -366,6 +366,7 @@ class CarRentAdController extends Controller
             'plan_type' => 'nullable|string|max:50',
             'plan_days' => 'nullable|integer|min:0',
             'plan_expires_at' => 'nullable|date',
+            'payment' => 'sometimes|nullable|boolean',
         ]);
 
         // ✅ تحديث الحقول النصية

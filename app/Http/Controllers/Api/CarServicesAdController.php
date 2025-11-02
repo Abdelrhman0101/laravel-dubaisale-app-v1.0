@@ -232,7 +232,7 @@ class CarServicesAdController extends Controller
             'add_category' => 'Car Services',
         ];
         if (!empty($validatedData['plan_type']) && $validatedData['plan_type'] !== 'free') {
-            $packageResult = $this->autoDeductAd($user, $validatedData['plan_type']);   
+            $packageResult = $this->autoDeductAd($user, $validatedData['plan_type']);
 
             if ($packageResult['success']) {
                 $data['plan_type'] = $packageResult['package_type'];
@@ -379,6 +379,7 @@ class CarServicesAdController extends Controller
             'plan_type' => 'sometimes|nullable|string|max:50',
             'plan_days' => 'sometimes|nullable|integer|min:0',
             'plan_expires_at' => 'sometimes|nullable|date',
+            'payment' => 'sometimes|nullable|boolean',
         ]);
 
         // 3. تحديث الحقول النصية

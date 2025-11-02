@@ -246,6 +246,7 @@ class JobsAdController extends Controller
             'plan_type' => 'sometimes|nullable|string|max:50',
             'plan_days' => 'sometimes|nullable|integer|min:0',
             'plan_expires_at' => 'sometimes|nullable|date',
+            'payment'=>'sometimes|nullable|boolean',
         ]);
 
 

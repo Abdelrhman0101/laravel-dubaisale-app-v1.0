@@ -256,7 +256,7 @@ class CarSalesAdController extends Controller
         $user = $request->user();
         $data['user_id'] = $request->user()->id;
         $data['add_category'] = $data['add_category'] ?? 'Car Sales';
-        
+
         if (!empty($validated['plan_type']) && $validated['plan_type'] !== 'free') {
             $packageResult = $this->autoDeductAd($user, $validated['plan_type']);
 
@@ -382,6 +382,7 @@ class CarSalesAdController extends Controller
             'plan_type' => 'sometimes|nullable|string|max:50',
             'plan_days' => 'sometimes|nullable|integer|min:0',
             'plan_expires_at' => 'sometimes|nullable|date',
+            'payment' => 'sometimes|nullable|boolean',
         ]);
 
         // 3. تحديث الحقول النصية
