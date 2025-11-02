@@ -17,7 +17,7 @@ return new class extends Migration
                 'car_sales_ads',
                 'car_rent_ads',
                 'other_service_ads',
-                'jobs',
+                'job_ads',
                 'electronics_home_ads',
                 'real_estate_ads',
                 'restaurant_ads'
