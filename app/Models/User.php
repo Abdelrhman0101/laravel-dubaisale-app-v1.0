@@ -8,6 +8,8 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\CarSalesAd;
 use App\Models\UserContactInfo;
+use Illuminate\Support\Facades\Storage;
+
 
 class User extends Authenticatable
 {
@@ -39,6 +41,7 @@ class User extends Authenticatable
         'referral_code_list',
         'latitude',
         'longitude',
+        'advertiser_logo'
         // 'is_active',
         // 'otp_verified',
     ];
@@ -73,7 +76,12 @@ class User extends Authenticatable
     /**
      * Get the car sale ads for the user.
      */
+    protected $appends=['advertiser_logo_url'];
 
+    public function getAdvertiserLogoUrlAttribute()
+    {
+        return $this->advertiser_logo ? Storage::url($this->advertiser_logo) : null;
+    }
     public function carSalesAds()
     {
         return $this->hasMany(CarSalesAd::class);

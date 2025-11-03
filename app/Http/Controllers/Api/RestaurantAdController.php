@@ -6,6 +6,7 @@ use App\Traits\HasRank;
 use App\Traits\PackageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\RestaurantAd;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -190,9 +191,9 @@ class RestaurantAdController extends Controller
             'phone_number' => 'nullable|string|max:20',
             'address' => 'required|string|max:500',
             // Plan fields
-            'plan_type' => 'nullable|string|max:50',
-            'plan_days' => 'nullable|integer|min:0',
-            'plan_expires_at' => 'nullable|date',
+            'plan_type' => 'nullable|string|max:50|in:featured,premium_star,premium,free',
+            // 'plan_days' => 'nullable|integer|min:0',
+            // 'plan_expires_at' => 'nullable|date',
             'payment' => 'nullable|boolean',
         ]);
 
@@ -210,6 +211,7 @@ class RestaurantAdController extends Controller
             'address' => $validated['address'],
             'user_id' => $request->user()->id,
             'add_category' => 'restaurant',
+            'plan_type' => $validated['plan_type'] ?? "free"
         ];
         $user = $request->user();
         if (!empty($validated['plan_type']) && $validated['plan_type'] !== 'free') {
@@ -221,7 +223,6 @@ class RestaurantAdController extends Controller
             } else {
                 if (!empty($validated['payment']) && $validated['payment'] == true) {
                     $data['plan_type'] = $validated['plan_type'];
-                    // $data['payment'] = true;
                 } else {
                     return response()->json([
                         'success' => false,
@@ -230,6 +231,18 @@ class RestaurantAdController extends Controller
                 }
             }
         } else {
+            $freeAdsLimit = SystemSetting::where('key', 'free_ads_limit')->value('value') ?? 0;
+
+            $userFreeAdsCount = RestaurantAd::where('user_id', $user->id)
+                ->where('plan_type', 'free')
+                ->count();
+
+            if ($userFreeAdsCount >= (int)$freeAdsLimit) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have reached the maximum number of free ads allowed.',
+                ], 403);
+            }
 
             $data['plan_type'] = 'free';
             $data['payment'] = false;
@@ -249,15 +262,15 @@ class RestaurantAdController extends Controller
         // Plan handling
         if ($request->filled('plan_type'))
             $data['plan_type'] = $request->input('plan_type');
-        if ($request->has('plan_days')) {
-            $data['plan_days'] = (int) $request->input('plan_days');
-            if (!$request->filled('plan_expires_at')) {
-                $data['plan_expires_at'] = now()->addDays($data['plan_days']);
-            }
-        }
-        if ($request->filled('plan_expires_at')) {
-            $data['plan_expires_at'] = $request->input('plan_expires_at');
-        }
+        // if ($request->has('plan_days')) {
+        //     $data['plan_days'] = (int) $request->input('plan_days');
+        //     if (!$request->filled('plan_expires_at')) {
+        //         $data['plan_expires_at'] = now()->addDays($data['plan_days']);
+        //     }
+        // }
+        // if ($request->filled('plan_expires_at')) {
+        //     $data['plan_expires_at'] = $request->input('plan_expires_at');
+        // }
 
 
         // Manual approval setting (reuse SystemSetting key manual_approval_mode)
@@ -302,17 +315,17 @@ class RestaurantAdController extends Controller
             'phone_number' => 'sometimes|nullable|string|max:20',
             'address' => 'sometimes|required|string|max:500',
             // Plan fields
-            'plan_type' => 'sometimes|nullable|string|max:50',
-            'plan_days' => 'sometimes|nullable|integer|min:0',
-            'plan_expires_at' => 'sometimes|nullable|date',
+            // 'plan_type' => 'sometimes|nullable|string|max:50',
+            // 'plan_days' => 'sometimes|nullable|integer|min:0',
+            // 'plan_expires_at' => 'sometimes|nullable|date',
             'payment' => 'sometimes|nullable|boolean',
         ]);
 
         $updateFields = $request->except(['main_image', 'thumbnail_images']);
 
-        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
-            $updateFields['plan_expires_at'] = now()->addDays((int) $request->input('plan_days'));
-        }
+        // if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+        //     $updateFields['plan_expires_at'] = now()->addDays((int) $request->input('plan_days'));
+        // }
 
         $restaurantAd->update($updateFields);
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\JobAd;
+use App\Models\SystemSetting;
 use App\Traits\HasRank;
 use App\Traits\PackageHelper;
 // use App\Models\JopAD;
@@ -156,7 +157,7 @@ class JobsAdController extends Controller
             // 'whatsapp' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             // Plan
-            'plan_type' => 'nullable|string|max:50',
+            'plan_type' => 'nullable|string|max:50|in:featured,premium_star,premium,free',
             'plan_days' => 'nullable|integer|min:0',
             'plan_expires_at' => 'nullable|date',
             'payment' => 'nullable|boolean',
@@ -180,7 +181,6 @@ class JobsAdController extends Controller
             } else {
                 if (!empty($validated['payment']) && $validated['payment'] == true) {
                     $data['plan_type'] = $validated['plan_type'];
-                    // $data['payment'] = true;
                 } else {
                     return response()->json([
                         'success' => false,
@@ -189,16 +189,29 @@ class JobsAdController extends Controller
                 }
             }
         } else {
+            $freeAdsLimit = SystemSetting::where('key', 'free_ads_limit')->value('value') ?? 0;
+
+            $userFreeAdsCount = JobAd::where('user_id', $user->id)
+                ->where('plan_type', 'free')
+                ->count();
+
+            if ($userFreeAdsCount >= (int)$freeAdsLimit) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have reached the maximum number of free ads allowed.',
+                ], 403);
+            }
 
             $data['plan_type'] = 'free';
             $data['payment'] = false;
         }
+
         // Upload main image
         // $data['main_image'] = $request->file('main_image')->store('jobs/main', 'public');
         // Plan
-        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
-            $data['plan_expires_at'] = now()->addDays((int) $request->plan_days);
-        }
+        // if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+        //     $data['plan_expires_at'] = now()->addDays((int) $request->plan_days);
+        // }
 
         // Manual approval setting (reuse SystemSetting key manual_approval_mode)
         $manualApproval = cache()->rememberForever('setting_manual_approval_mode', function () {
@@ -243,17 +256,17 @@ class JobsAdController extends Controller
             'address' => 'sometimes|nullable|string|max:500',
             // 'main_image'      => 'sometimes|image|max:5120',
             // Plan
-            'plan_type' => 'sometimes|nullable|string|max:50',
-            'plan_days' => 'sometimes|nullable|integer|min:0',
-            'plan_expires_at' => 'sometimes|nullable|date',
-            'payment'=>'sometimes|nullable|boolean',
+            // 'plan_type' => 'sometimes|nullable|string|max:50',
+            // 'plan_days' => 'sometimes|nullable|integer|min:0',
+            // 'plan_expires_at' => 'sometimes|nullable|date',
+            'payment' => 'sometimes|nullable|boolean',
         ]);
 
 
         $updateFields = $request->except(['main_image']);
-        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
-            $updateFields['plan_expires_at'] = now()->addDays((int) $request->plan_days);
-        }
+        // if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+        //     $updateFields['plan_expires_at'] = now()->addDays((int) $request->plan_days);
+        // }
 
         $jobAd->update($updateFields);
         $updateData = [];

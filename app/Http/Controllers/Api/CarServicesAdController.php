@@ -7,6 +7,7 @@ use App\Models\CarServicesAd;
 use App\Traits\HasRank;
 use App\Traits\PackageHelper;
 use App\Models\CarServiceType;
+use App\Models\SystemSetting;
 // use App\Models\SystemSetting; // removed: no longer needed here
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -209,9 +210,10 @@ class CarServicesAdController extends Controller
             'main_image' => 'required|image|max:5120', // 5MB max
             'thumbnail_images.*' => 'image|max:5120',
             // --- Plan fields: optional and open for client control ---
-            'plan_type' => 'nullable|string|max:50',
-            'plan_days' => 'nullable|integer|min:0',
-            'plan_expires_at' => 'nullable|date',
+            'plan_type' => 'nullable|string|max:50|in:featured,premium_star,premium,free',
+
+            // 'plan_days' => 'nullable|integer|min:0',
+            // 'plan_expires_at' => 'nullable|date',
             'payment' => 'nullable|boolean',
         ]);
 
@@ -230,6 +232,7 @@ class CarServicesAdController extends Controller
             'location' => $validatedData['location'] ?? null,
             'user_id' => $user->id,
             'add_category' => 'Car Services',
+            "plan_type" => $validatedData['plan_type'] ?? "free"
         ];
         if (!empty($validatedData['plan_type']) && $validatedData['plan_type'] !== 'free') {
             $packageResult = $this->autoDeductAd($user, $validatedData['plan_type']);
@@ -238,9 +241,8 @@ class CarServicesAdController extends Controller
                 $data['plan_type'] = $packageResult['package_type'];
                 $data['payment'] = false;
             } else {
-                if (!empty($validatedData['payment']) && $validatedData['payment'] == true) {
+                if (!empty($validated['payment']) && $validatedData['payment'] == true) {
                     $data['plan_type'] = $validatedData['plan_type'];
-                    // $data['payment'] = true;
                 } else {
                     return response()->json([
                         'success' => false,
@@ -249,6 +251,18 @@ class CarServicesAdController extends Controller
                 }
             }
         } else {
+            $freeAdsLimit = SystemSetting::where('key', 'free_ads_limit')->value('value') ?? 0;
+
+            $userFreeAdsCount = CarServicesAd::where('user_id', $user->id)
+                ->where('plan_type', 'free')
+                ->count();
+
+            if ($userFreeAdsCount >= (int)$freeAdsLimit) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have reached the maximum number of free ads allowed.',
+                ], 403);
+            }
 
             $data['plan_type'] = 'free';
             $data['payment'] = false;
@@ -273,18 +287,18 @@ class CarServicesAdController extends Controller
         $data['thumbnail_images'] = $thumbnailPaths;
 
         // --- Plan fields: allow client to set or override values ---
-        if ($request->filled('plan_type')) {
-            $data['plan_type'] = $request->input('plan_type');
-        }
-        if ($request->has('plan_days')) { // allow 0
-            $data['plan_days'] = (int) $request->input('plan_days');
-            if (!$request->filled('plan_expires_at')) {
-                $data['plan_expires_at'] = now()->addDays($data['plan_days']);
-            }
-        }
-        if ($request->filled('plan_expires_at')) {
-            $data['plan_expires_at'] = $request->input('plan_expires_at');
-        }
+        // if ($request->filled('plan_type')) {
+        //     $data['plan_type'] = $request->input('plan_type');
+        // }
+        // if ($request->has('plan_days')) { // allow 0
+        //     $data['plan_days'] = (int) $request->input('plan_days');
+        //     if (!$request->filled('plan_expires_at')) {
+        //         $data['plan_expires_at'] = now()->addDays($data['plan_days']);
+        //     }
+        // }
+        // if ($request->filled('plan_expires_at')) {
+        //     $data['plan_expires_at'] = $request->input('plan_expires_at');
+        // }
 
 
 
@@ -317,17 +331,7 @@ class CarServicesAdController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم إضافة الإعلان بنجاح',
-            'data' => [
-                'id' => $ad->id,
-                'title' => $ad->title,
-                'service_type' => $ad->service_type,
-                'advertiser_name' => $ad->advertiser_name,
-                'phone_number' => $ad->phone_number,
-                'whatsapp' => $ad->whatsapp,
-                'price' => $ad->price,
-                'main_image' => $ad->main_image,
-                'thumbnail_images_urls' => $thumbnailPaths
-            ]
+            'data' =>$data
         ], 201);
     }
 
@@ -376,9 +380,9 @@ class CarServicesAdController extends Controller
             'main_image' => 'sometimes|image|max:5120',
             'thumbnail_images.*' => 'sometimes|image|max:5120',
             // --- Plan fields: optional and open for client control ---
-            'plan_type' => 'sometimes|nullable|string|max:50',
-            'plan_days' => 'sometimes|nullable|integer|min:0',
-            'plan_expires_at' => 'sometimes|nullable|date',
+            // 'plan_type' => 'sometimes|nullable|string|max:50',
+            // 'plan_days' => 'sometimes|nullable|integer|min:0',
+            // 'plan_expires_at' => 'sometimes|nullable|date',
             'payment' => 'sometimes|nullable|boolean',
         ]);
 
@@ -386,10 +390,10 @@ class CarServicesAdController extends Controller
         // بدلاً من التحديث المباشر، نبني مصفوفة قابلة للتعديل لإضافة منطق plan
         $updateFields = $request->except(['main_image', 'thumbnail_images']);
 
-        // إذا تم تمرير plan_days بدون plan_expires_at، احسب تاريخ الانتهاء تلقائياً
-        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
-            $updateFields['plan_expires_at'] = now()->addDays((int) $request->input('plan_days'));
-        }
+        // // إذا تم تمرير plan_days بدون plan_expires_at، احسب تاريخ الانتهاء تلقائياً
+        // if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+        //     $updateFields['plan_expires_at'] = now()->addDays((int) $request->input('plan_days'));
+        // }
 
         $carServicesAd->update($updateFields);
 

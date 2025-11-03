@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CarRentAd;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use App\Traits\HasRank;
 use App\Traits\PackageHelper;
@@ -203,9 +204,9 @@ class CarRentAdController extends Controller
             'whatsapp' => 'nullable|string|max:20',
             'main_image' => 'required|image|max:5120',
             'thumbnail_images.*' => 'image|max:5120',
-            'plan_type' => 'nullable|string|max:50',
-            'plan_days' => 'nullable|integer|min:0',
-            'plan_expires_at' => 'nullable|date',
+            'plan_type' => 'nullable|string|max:50|in:featured,premium_star,premium,free',
+            // 'plan_days' => 'nullable|integer|min:0',
+            // 'plan_expires_at' => 'nullable|date',
             'payment' => 'nullable|boolean',
         ]);
 
@@ -236,6 +237,7 @@ class CarRentAdController extends Controller
             'location' => $validated['location'] ?? null,
             'user_id' => $user->id,
             'add_category' => 'Car Rent',
+            'plan_type' => $validated['plan_type'] ?? "free"
         ];
 
         $data['advertiser_name'] = $validated['advertiser_name'];
@@ -251,7 +253,6 @@ class CarRentAdController extends Controller
             } else {
                 if (!empty($validated['payment']) && $validated['payment'] == true) {
                     $data['plan_type'] = $validated['plan_type'];
-                    // $data['payment'] = true;
                 } else {
                     return response()->json([
                         'success' => false,
@@ -260,6 +261,18 @@ class CarRentAdController extends Controller
                 }
             }
         } else {
+            $freeAdsLimit = SystemSetting::where('key', 'free_ads_limit')->value('value') ?? 0;
+
+            $userFreeAdsCount = CarRentAd::where('user_id', $user->id)
+                ->where('plan_type', 'free')
+                ->count();
+
+            if ($userFreeAdsCount >= (int)$freeAdsLimit) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have reached the maximum number of free ads allowed.',
+                ], 403);
+            }
 
             $data['plan_type'] = 'free';
             $data['payment'] = false;
@@ -280,15 +293,15 @@ class CarRentAdController extends Controller
         if ($request->filled('plan_type')) {
             $data['plan_type'] = $request->input('plan_type');
         }
-        if ($request->has('plan_days')) {
-            $data['plan_days'] = (int) $request->input('plan_days');
-            if (!$request->filled('plan_expires_at')) {
-                $data['plan_expires_at'] = now()->addDays($data['plan_days']);
-            }
-        }
-        if ($request->filled('plan_expires_at')) {
-            $data['plan_expires_at'] = $request->input('plan_expires_at');
-        }
+        // if ($request->has('plan_days')) {
+        //     $data['plan_days'] = (int) $request->input('plan_days');
+        //     if (!$request->filled('plan_expires_at')) {
+        //         $data['plan_expires_at'] = now()->addDays($data['plan_days']);
+        //     }
+        // }
+        // if ($request->filled('plan_expires_at')) {
+        //     $data['plan_expires_at'] = $request->input('plan_expires_at');
+        // }
 
         // manual approval mode (car_rent specific or global fallback)
         // اتّباع نفس منطق الأقسام الأخرى: استخدام الإعداد العام مع Cache
@@ -313,17 +326,7 @@ class CarRentAdController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم إضافة الإعلان بنجاح',
-            'data' => [
-                'id' => $ad->id,
-                'title' => $ad->title,
-                'make' => $ad->make,
-                'model' => $ad->model,
-                'trim' => $ad->trim,
-                'year' => $ad->year,
-                'price' => $ad->price,
-                'main_image' => $ad->main_image,
-                'thumbnail_images_urls' => $thumbnailPaths,
-            ]
+            'data' => $data
         ], 201);
     }
 
@@ -363,9 +366,9 @@ class CarRentAdController extends Controller
             'whatsapp' => 'nullable|string|max:20',
             'main_image' => 'sometimes|image|max:5120',
             'thumbnail_images.*' => 'sometimes|image|max:5120',
-            'plan_type' => 'nullable|string|max:50',
-            'plan_days' => 'nullable|integer|min:0',
-            'plan_expires_at' => 'nullable|date',
+            // 'plan_type' => 'nullable|string|max:50',
+            // 'plan_days' => 'nullable|integer|min:0',
+            // 'plan_expires_at' => 'nullable|date',
             'payment' => 'sometimes|nullable|boolean',
         ]);
 
@@ -406,21 +409,21 @@ class CarRentAdController extends Controller
             $carRentAd->thumbnail_images = array_values($oldThumbs);
         }
 
-        // ✅ تحديث بيانات الباقة (plan)
-        if ($request->filled('plan_type')) {
-            $carRentAd->plan_type = $request->input('plan_type');
-        }
+        // // ✅ تحديث بيانات الباقة (plan)
+        // if ($request->filled('plan_type')) {
+        //     $carRentAd->plan_type = $request->input('plan_type');
+        // }
 
-        if ($request->has('plan_days')) {
-            $carRentAd->plan_days = (int) $request->input('plan_days');
-            if (!$request->filled('plan_expires_at')) {
-                $carRentAd->plan_expires_at = now()->addDays($carRentAd->plan_days);
-            }
-        }
+        // if ($request->has('plan_days')) {
+        //     $carRentAd->plan_days = (int) $request->input('plan_days');
+        //     if (!$request->filled('plan_expires_at')) {
+        //         $carRentAd->plan_expires_at = now()->addDays($carRentAd->plan_days);
+        //     }
+        // }
 
-        if ($request->filled('plan_expires_at')) {
-            $carRentAd->plan_expires_at = $request->input('plan_expires_at');
-        }
+        // if ($request->filled('plan_expires_at')) {
+        //     $carRentAd->plan_expires_at = $request->input('plan_expires_at');
+        // }
 
         // ✅ حفظ البيانات بعد كل التحديثات
         $carRentAd->save();

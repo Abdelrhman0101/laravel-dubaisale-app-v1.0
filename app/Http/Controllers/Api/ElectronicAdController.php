@@ -245,16 +245,18 @@ class ElectronicAdController extends Controller
             'thumbnail_images.*' => 'image|max:5120',
 
             // Plan
-            'plan_type' => 'nullable|string|max:50',
-            'plan_days' => 'nullable|integer|min:0',
-            'plan_expires_at' => 'nullable|date',
-            'payment' => 'nullable|boolean',
+            'plan_type' => 'nullable|string|max:50|in:featured,premium_star,premium,free',
+            // 'plan_days' => 'nullable|integer|min:0',
+            // 'plan_expires_at' => 'nullable|date',
         ]);
-
-        $data = $validated;
         $user = $request->user();
+        $data = $validated;
         $data['user_id'] = $request->user()->id;
         $data['add_category'] = 'Electronics';
+
+
+
+
         if (!empty($validated['plan_type']) && $validated['plan_type'] !== 'free') {
             $packageResult = $this->autoDeductAd($user, $validated['plan_type']);
 
@@ -264,7 +266,6 @@ class ElectronicAdController extends Controller
             } else {
                 if (!empty($validated['payment']) && $validated['payment'] == true) {
                     $data['plan_type'] = $validated['plan_type'];
-                    // $data['payment'] = true;
                 } else {
                     return response()->json([
                         'success' => false,
@@ -273,10 +274,23 @@ class ElectronicAdController extends Controller
                 }
             }
         } else {
+            $freeAdsLimit = SystemSetting::where('key', 'free_ads_limit')->value('value') ?? 0;
+
+            $userFreeAdsCount = electronicAd::where('user_id', $user->id)
+                ->where('plan_type', 'free')
+                ->count();
+
+            if ($userFreeAdsCount >= (int)$freeAdsLimit) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have reached the maximum number of free ads allowed.',
+                ], 403);
+            }
 
             $data['plan_type'] = 'free';
             $data['payment'] = false;
         }
+
         // Upload images
         $data['main_image'] = $request->file('main_image')->store('electronics/main', 'public');
         $thumbs = [];
@@ -287,11 +301,10 @@ class ElectronicAdController extends Controller
         }
         $data['thumbnail_images'] = $thumbs;
 
-        // Plan
-        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
-            $data['plan_expires_at'] = now()->addDays((int) $request->plan_days);
-        }
-
+        // // Plan
+        // if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+        //     $data['plan_expires_at'] = now()->addDays((int) $request->plan_days);
+        // }
 
         // Manual approval check
         $manualApproval = cache()->rememberForever('setting_manual_approval_mode', function () {
@@ -341,17 +354,17 @@ class ElectronicAdController extends Controller
             'main_image' => 'sometimes|image|max:5120',
             'thumbnail_images.*' => 'sometimes|image|max:5120',
 
-            'plan_type' => 'sometimes|nullable|string|max:50',
-            'plan_days' => 'sometimes|nullable|integer|min:0',
-            'plan_expires_at' => 'sometimes|nullable|date',
-            'payment'=>'sometimes|nullable|boolean',
+            // 'plan_type' => 'sometimes|nullable|string|max:50',
+            // 'plan_days' => 'sometimes|nullable|integer|min:0',
+            // 'plan_expires_at' => 'sometimes|nullable|date',
+            'payment' => 'sometimes|nullable|boolean',
         ]);
 
         // prepare update fields
         $updateFields = $request->except(['main_image', 'thumbnail_images']);
-        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
-            $updateFields['plan_expires_at'] = now()->addDays((int) $request->plan_days);
-        }
+        // if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+        //     $updateFields['plan_expires_at'] = now()->addDays((int) $request->plan_days);
+        // }
         $electronicAd->update($updateFields);
 
         // handle images

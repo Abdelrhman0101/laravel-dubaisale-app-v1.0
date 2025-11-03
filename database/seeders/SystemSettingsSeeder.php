@@ -31,5 +31,14 @@ class SystemSettingsSeeder extends Seeder
                 'description' => 'الصورة الافتراضية لإعلانات Job Seeker.'
             ]
         );
+
+        DB::table('system_settings')->updateOrInsert(
+            ['key' => 'free_ads_limit'],
+            [
+                'value' => 3,
+                'type' => 'integer',
+                'description' => 'الحد الأقصى لعدد الإعلانات المجانية لكل مستخدم.'
+            ]
+        );
     }
 }

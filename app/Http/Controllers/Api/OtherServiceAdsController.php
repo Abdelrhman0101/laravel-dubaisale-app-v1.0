@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\HasRank;
 use Illuminate\Http\Request;
 use App\Models\OtherServiceAds;
+use App\Models\SystemSetting;
 use App\Traits\PackageHelper;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -141,9 +142,9 @@ class OtherServiceAdsController extends Controller
             'address' => 'nullable|string|max:500',
             'main_image' => 'required|image|max:5120',
             // Plan
-            'plan_type' => 'nullable|string|max:50',
-            'plan_days' => 'nullable|integer|min:0',
-            'plan_expires_at' => 'nullable|date',
+            'plan_type' => 'nullable|string|max:50|in:featured,premium_star,premium,free',
+            // 'plan_days' => 'nullable|integer|min:0',
+            // 'plan_expires_at' => 'nullable|date',
             'payment' => 'nullable|boolean',
         ]);
 
@@ -151,6 +152,8 @@ class OtherServiceAdsController extends Controller
         $data = $validated;
         $data['user_id'] = $user->id;
         $data['add_category'] = 'Other Services';
+
+
         if (!empty($validated['plan_type']) && $validated['plan_type'] !== 'free') {
             $packageResult = $this->autoDeductAd($user, $validated['plan_type']);
 
@@ -160,7 +163,6 @@ class OtherServiceAdsController extends Controller
             } else {
                 if (!empty($validated['payment']) && $validated['payment'] == true) {
                     $data['plan_type'] = $validated['plan_type'];
-                    // $data['payment'] = true;
                 } else {
                     return response()->json([
                         'success' => false,
@@ -169,41 +171,46 @@ class OtherServiceAdsController extends Controller
                 }
             }
         } else {
+            $freeAdsLimit = SystemSetting::where('key', 'free_ads_limit')->value('value') ?? 0;
+
+            $userFreeAdsCount = OtherServiceAds::where('user_id', $user->id)
+                ->where('plan_type', 'free')
+                ->count();
+
+            if ($userFreeAdsCount >= (int)$freeAdsLimit) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have reached the maximum number of free ads allowed.',
+                ], 403);
+            }
 
             $data['plan_type'] = 'free';
             $data['payment'] = false;
         }
 
 
-
-        // $data = $validated;
-        // $data['user_id'] = $request->user()->id;
-        // $data['add_category'] = 'Other Services';
-
-        // Upload images
         $data['main_image'] = $request->file('main_image')->store('other_services/main', 'public');
 
 
-        // Plan expiry
-        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
-            $data['plan_expires_at'] = now()->addDays((int) $request->plan_days);
-        }
-
-        // Manual approval check
         $manualApproval = cache()->rememberForever(
             'setting_manual_approval_mode',
             fn() =>
-            \App\Models\SystemSetting::where('key', 'manual_approval_mode')->value('value') ?? 'true'
+            SystemSetting::where('key', 'manual_approval_mode')->value('value') ?? 'true'
         );
+
         $data['add_status'] = filter_var($manualApproval, FILTER_VALIDATE_BOOLEAN) ? 'Pending' : 'Valid';
         $data['admin_approved'] = $data['add_status'] === 'Valid';
 
+
         $rank = $this->getNextRank(OtherServiceAds::class);
         $data['rank'] = $rank;
+
+
         $ad = OtherServiceAds::create($data);
 
         return response()->json($ad, 201);
     }
+
 
     /**
      * PUT/PATCH /other-services/{id}
@@ -227,18 +234,18 @@ class OtherServiceAdsController extends Controller
             'whatsapp_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'main_image' => 'nullable|image|max:5120',
-            // Plan
-            'plan_type' => 'nullable|string|max:50',
-            'plan_days' => 'nullable|integer|min:0',
-            'plan_expires_at' => 'nullable|date',
+            // // Plan
+            // 'plan_type' => 'nullable|string|max:50',
+            // 'plan_days' => 'nullable|integer|min:0',
+            // 'plan_expires_at' => 'nullable|date',
             'payment' => 'sometimes|nullable|boolean',
         ]);
         $updateData = $validated;
 
-        // Plan expiry
-        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
-            $updateData['plan_expires_at'] = now()->addDays((int) $request->plan_days);
-        }
+        // // Plan expiry
+        // if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+        //     $updateData['plan_expires_at'] = now()->addDays((int) $request->plan_days);
+        // }
 
         // Images
         if ($request->hasFile('main_image')) {

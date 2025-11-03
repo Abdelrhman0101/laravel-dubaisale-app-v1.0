@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
 use App\Models\CarMake;
+use App\Models\SystemSetting;
 
 class CarSalesAdController extends Controller
 {
@@ -246,9 +247,10 @@ class CarSalesAdController extends Controller
             'main_image' => 'required|image|max:5120',
             'thumbnail_images.*' => 'image|max:5120',
             // --- Plan fields: optional and open for client control ---
-            'plan_type' => 'nullable|string|max:50',
-            'plan_days' => 'nullable|integer|min:0',
-            'plan_expires_at' => 'nullable|date',
+            'plan_type' => 'nullable|string|max:50|in:featured,premium_star,premium,free',
+
+            // 'plan_days' => 'nullable|integer|min:0',
+            // 'plan_expires_at' => 'nullable|date',
             'payment' => 'nullable|boolean',
         ]);
 
@@ -266,7 +268,6 @@ class CarSalesAdController extends Controller
             } else {
                 if (!empty($validated['payment']) && $validated['payment'] == true) {
                     $data['plan_type'] = $validated['plan_type'];
-                    // $data['payment'] = true;
                 } else {
                     return response()->json([
                         'success' => false,
@@ -275,11 +276,23 @@ class CarSalesAdController extends Controller
                 }
             }
         } else {
+            $freeAdsLimit = SystemSetting::where('key', 'free_ads_limit')->value('value') ?? 0;
+
+            $userFreeAdsCount = CarSalesAd::where('user_id', $user->id)
+                ->where('plan_type', 'free')
+                ->count();
+
+            if ($userFreeAdsCount >= (int)$freeAdsLimit) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have reached the maximum number of free ads allowed.',
+                ], 403);
+            }
 
             $data['plan_type'] = 'free';
             $data['payment'] = false;
         }
-        // (هذا الجزء الخاص بالصلاحيات مؤقت وغير مثالي، الأفضل معالجته على مستوى الخادم)
+
         $fixPermissions = function ($path) { /* ... */
         };
 
@@ -297,18 +310,18 @@ class CarSalesAdController extends Controller
         }
 
         // --- Plan fields: allow client to set or override values ---
-        if ($request->filled('plan_type')) {
-            $data['plan_type'] = $request->input('plan_type');
-        }
-        if ($request->has('plan_days')) { // allow 0
-            $data['plan_days'] = (int) $request->input('plan_days');
-            if (!$request->filled('plan_expires_at')) {
-                $data['plan_expires_at'] = now()->addDays($data['plan_days']);
-            }
-        }
-        if ($request->filled('plan_expires_at')) {
-            $data['plan_expires_at'] = $request->input('plan_expires_at');
-        }
+        // if ($request->filled('plan_type')) {
+        //     $data['plan_type'] = $request->input('plan_type');
+        // }
+        // if ($request->has('plan_days')) { // allow 0
+        //     $data['plan_days'] = (int) $request->input('plan_days');
+        //     if (!$request->filled('plan_expires_at')) {
+        //         $data['plan_expires_at'] = now()->addDays($data['plan_days']);
+        //     }
+        // }
+        // if ($request->filled('plan_expires_at')) {
+        //     $data['plan_expires_at'] = $request->input('plan_expires_at');
+        // }
 
 
 
@@ -379,9 +392,9 @@ class CarSalesAdController extends Controller
             'main_image' => 'sometimes|image|max:5120',
             'thumbnail_images.*' => 'sometimes|image|max:5120',
             // --- Plan fields: optional and open for client control ---
-            'plan_type' => 'sometimes|nullable|string|max:50',
-            'plan_days' => 'sometimes|nullable|integer|min:0',
-            'plan_expires_at' => 'sometimes|nullable|date',
+            // 'plan_type' => 'sometimes|nullable|string|max:50',
+            // 'plan_days' => 'sometimes|nullable|integer|min:0',
+            // 'plan_expires_at' => 'sometimes|nullable|date',
             'payment' => 'sometimes|nullable|boolean',
         ]);
 
@@ -390,9 +403,9 @@ class CarSalesAdController extends Controller
         $updateFields = $request->except(['main_image', 'thumbnail_images']);
 
         // إذا تم تمرير plan_days بدون plan_expires_at، احسب تاريخ الانتهاء تلقائياً
-        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
-            $updateFields['plan_expires_at'] = now()->addDays((int) $request->input('plan_days'));
-        }
+        // if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+        //     $updateFields['plan_expires_at'] = now()->addDays((int) $request->input('plan_days'));
+        // }
 
         $carSalesAd->update($updateFields);
 

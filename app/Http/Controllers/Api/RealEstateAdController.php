@@ -6,9 +6,11 @@ use App\Traits\HasRank;
 use App\Traits\PackageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\RealEstateAd;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use PHPUnit\Event\Telemetry\SystemStopWatch;
 
 class RealEstateAdController extends Controller
 {
@@ -223,9 +225,9 @@ class RealEstateAdController extends Controller
             'main_image' => 'required|image|max:5120',
             'thumbnail_images.*' => 'image|max:5120',
             // Plan
-            'plan_type' => 'nullable|string|max:50',
-            'plan_days' => 'nullable|integer|min:0',
-            'plan_expires_at' => 'nullable|date',
+            'plan_type' => 'nullable|string|max:50|in:featured,premium_star,premium,free',
+            // 'plan_days' => 'nullable|integer|min:0',
+            // 'plan_expires_at' => 'nullable|date',
             'payment' => 'nullable|boolean',
         ]);
 
@@ -244,7 +246,6 @@ class RealEstateAdController extends Controller
             } else {
                 if (!empty($validated['payment']) && $validated['payment'] == true) {
                     $data['plan_type'] = $validated['plan_type'];
-                    // $data['payment'] = true;
                 } else {
                     return response()->json([
                         'success' => false,
@@ -253,10 +254,23 @@ class RealEstateAdController extends Controller
                 }
             }
         } else {
+            $freeAdsLimit = SystemSetting::where('key', 'free_ads_limit')->value('value') ?? 0;
+
+            $userFreeAdsCount = RealEstateAd::where('user_id', $user->id)
+                ->where('plan_type', 'free')
+                ->count();
+
+            if ($userFreeAdsCount >= (int)$freeAdsLimit) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You have reached the maximum number of free ads allowed.',
+                ], 403);
+            }
 
             $data['plan_type'] = 'free';
             $data['payment'] = false;
         }
+
         // Upload images
         $data['main_image'] = $request->file('main_image')->store('real_estates/main', 'public');
         $thumbs = [];
@@ -267,10 +281,10 @@ class RealEstateAdController extends Controller
         }
         $data['thumbnail_images'] = $thumbs;
 
-        // Plan
-        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
-            $data['plan_expires_at'] = now()->addDays((int) $request->plan_days);
-        }
+        // // Plan
+        // if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+        //     $data['plan_expires_at'] = now()->addDays((int) $request->plan_days);
+        // }
         // Manual approval check
         $manualApproval = cache()->rememberForever('setting_manual_approval_mode', function () {
             return \App\Models\SystemSetting::where('key', 'manual_approval_mode')->first()->value ?? 'true';
@@ -314,16 +328,16 @@ class RealEstateAdController extends Controller
             'main_image' => 'sometimes|image|max:5120',
             'thumbnail_images.*' => 'sometimes|image|max:5120',
             // Plan
-            'plan_type' => 'sometimes|nullable|string|max:50',
-            'plan_days' => 'sometimes|nullable|integer|min:0',
-            'plan_expires_at' => 'sometimes|nullable|date',
+            // 'plan_type' => 'sometimes|nullable|string|max:50',
+            // 'plan_days' => 'sometimes|nullable|integer|min:0',
+            // 'plan_expires_at' => 'sometimes|nullable|date',
             'payment' => 'sometimes|nullable|boolean',
         ]);
 
         $updateFields = $request->except(['main_image', 'thumbnail_images']);
-        if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
-            $updateFields['plan_expires_at'] = now()->addDays((int) $request->plan_days);
-        }
+        // if ($request->has('plan_days') && !$request->filled('plan_expires_at')) {
+        //     $updateFields['plan_expires_at'] = now()->addDays((int) $request->plan_days);
+        // }
         $realEstateAd->update($updateFields);
 
         $updateData = [];
