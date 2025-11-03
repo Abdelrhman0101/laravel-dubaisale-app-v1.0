@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
 
-            $table->string('advertiser_logo')->nullable()->after('advertiser_type'); // لتخزين مسار الصورة
-
+            if (!Schema::hasColumn('users', 'advertiser_logo')) {
+                $table->string('advertiser_logo')->nullable()->after('advertiser_type');
+            } 
         });
     }
 
@@ -24,7 +25,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('advertiser_logo');
+            if (Schema::hasColumn('users', 'advertiser_logo')) {
+                $table->dropColumn('advertiser_logo');
+            }
         });
     }
 };
