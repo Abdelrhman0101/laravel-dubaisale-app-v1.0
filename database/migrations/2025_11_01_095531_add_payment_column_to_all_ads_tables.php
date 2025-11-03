@@ -11,29 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('all_ads_tables', function (Blueprint $table) {
-            $tables = [
-                'car_services_ads',
-                'car_sales_ads',
-                'car_rent_ads',
-                'other_service_ads',
-                'job_ads',
-                'electronics_home_ads',
-                'real_estate_ads',
-                'restaurant_ads'
-            ];
+        $tables = [
+            'car_services_ads',
+            'car_sales_ads',
+            'car_rent_ads',
+            'other_service_ads',
+            'job_ads',
+            'electronics_home_ads',
+            'real_estate_ads',
+            'restaurant_ads'
+        ];
 
-
-            foreach ($tables as $table) {
-                if (Schema::hasTable($table) && !Schema::hasColumn($table, 'payment')) {
-                    Schema::table($table, function (Blueprint $table) {
-                        $table->boolean('payment')
-                            ->default(false)->nullable();
-                            // ->after('price');
-                    });
-                }
+        foreach ($tables as $tableName) {
+            if (Schema::hasTable($tableName) && !Schema::hasColumn($tableName, 'payment')) {
+                Schema::table($tableName, function (Blueprint $table) {
+                    $table->boolean('payment')->default(false);
+                });
             }
-        });
+        }
     }
 
     /**
@@ -41,24 +36,23 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('all_ads_tables', function (Blueprint $table) {
-            $tables = [
-                'car_services_ads',
-                'car_sales_ads',
-                'car_rent_ads',
-                'other_service_ads',
-                'job_ads',
-                'electronics_home_ads',
-                'real_estate_ads',
-                'restaurant_ads'
-            ];
-            foreach ($tables as $table) {
-                if (Schema::hasTable($table) && Schema::hasColumn($table, 'payment')) {
-                    Schema::table($table, function (Blueprint $table) {
-                        $table->dropColumn('payment');
-                    });
-                }
+        $tables = [
+            'car_services_ads',
+            'car_sales_ads',
+            'car_rent_ads',
+            'other_service_ads',
+            'job_ads',
+            'electronics_home_ads',
+            'real_estate_ads',
+            'restaurant_ads'
+        ];
+
+        foreach ($tables as $tableName) {
+            if (Schema::hasTable($tableName) && Schema::hasColumn($tableName, 'payment')) {
+                Schema::table($tableName, function (Blueprint $table) {
+                    $table->dropColumn('payment');
+                });
             }
-        });
+        }
     }
 };
