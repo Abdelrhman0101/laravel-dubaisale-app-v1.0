@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\FeaturedContentController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\Api\OfferBoxActivationController;
 use App\Http\Controllers\Api\PublicSettingsController;
+use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\RestaurantAdController;
 use App\Http\Controllers\Api\CarRentAdController;
 use App\Http\Controllers\Api\RealEstateAdController;
@@ -96,6 +97,8 @@ Route::get('/best-advertisers/{categorySlug}', [FeaturedContentController::class
 Route::get('/users/{user}/ads/{category}', [FeaturedContentController::class, 'getUserAdsByCategory']);
 Route::get('/offers-box/{category}', [FeaturedContentController::class, 'getOfferBoxAds']);
 Route::get('/settings', [PublicSettingsController::class, 'index']);
+Route::get('/support/number', [\App\Http\Controllers\Api\SupportController::class, 'getSupportNumber']);
+Route::get('/support/info', [\App\Http\Controllers\Api\SupportController::class, 'getSupportInfo']);
 Route::get('/locations/emirates', [\App\Http\Controllers\Api\LocationsController::class, 'index']);
 
 // --- Restaurants (Public) ---

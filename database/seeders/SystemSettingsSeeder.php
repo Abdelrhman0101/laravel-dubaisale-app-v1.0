@@ -40,5 +40,15 @@ class SystemSettingsSeeder extends Seeder
                 'description' => 'الحد الأقصى لعدد الإعلانات المجانية لكل مستخدم.'
             ]
         );
+
+        // إضافة رقم الدعم الفني كإعداد افتراضي
+        DB::table('system_settings')->updateOrInsert(
+            ['key' => 'support_number'],
+            [
+                'value' => '+971508236561',
+                'type' => 'string',
+                'description' => 'رقم دعم العملاء للنظام - يمكن للمدراء تعديله من لوحة التحكم.'
+            ]
+        );
     }
 }

@@ -20,9 +20,9 @@ return new class extends Migration {
 
         DB::table('system_settings')->updateOrInsert([
             'key' => 'support_number',
-            'value' => '+971545194553',
+            'value' => '+971508236561',
             'type' => 'string',
-            'description' => 'رقم دعم العملاء للنظام.'
+            'description' => 'رقم دعم العملاء للنظام - يمكن للمدراء تعديله من لوحة التحكم.'
         ]);
     }
 
