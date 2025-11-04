@@ -56,11 +56,13 @@ class OtherServiceAdsController extends Controller
             $query->inOffersBox();
         }
 
-        $perPage = min(max((int) $request->query('per_page', 15), 1), 50);
+        // $perPage = min(max((int) $request->query('per_page', 15), 1), 50);
 
-        return response()->json(
-            $query->get()
-        );
+        $data = $query->get();
+        foreach ($data as $ad) {
+            $ad->incrementViews();
+        };
+        return response()->json($data);
     }
 
 
@@ -101,9 +103,11 @@ class OtherServiceAdsController extends Controller
         };
 
         // Return all results (no pagination)
-        return response()->json(
-            $query->get()
-        );
+        $data = $query->get();
+        foreach ($data as $ad) {
+            $ad->incrementViews();
+        };
+        return response()->json($data);
     }
 
 

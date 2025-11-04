@@ -58,8 +58,12 @@ class JobsAdController extends Controller
                 break;
         }
 
-        $perPage = (int) ($request->query('per_page', 15));
-        return response()->json($query->get());
+        // $perPage = (int) ($request->query('per_page', 15));
+        $data = $query->get();
+        foreach ($data as $ad) {
+            $ad->incrementViews();
+        };
+        return response()->json($data);
     }
 
     /**
@@ -115,10 +119,14 @@ class JobsAdController extends Controller
             $query->orderedByRank();
         }
 
-        $limit = (int) $request->query('limit', 10);
-        $ads = $query->limit($limit)->get();
+        // $limit = (int) $request->query('limit', 10);
+        // $ads = $query->limit($limit)->get();
 
-        return response()->json($ads);
+        $data = $query->get();
+        foreach ($data as $ad) {
+            $ad->incrementViews();
+        };
+        return response()->json($data);
     }
 
     /**

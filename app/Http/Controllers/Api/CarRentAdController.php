@@ -65,8 +65,11 @@ class CarRentAdController extends Controller
         }
 
         // $ads = $query->paginate(15)->withQueryString();
-        $ads = $query->get();
-        return response()->json($ads);
+        $data = $query->get();
+        foreach ($data as $ad) {
+            $ad->incrementViews();
+        };
+        return response()->json($data);
     }
 
     /**
@@ -163,10 +166,11 @@ class CarRentAdController extends Controller
             });
         });
 
-        $limit = $request->query('limit', 10);
-        $ads = $query->inRandomOrder()->limit($limit)->get();
-
-        return response()->json($ads);
+        $data = $query->get();
+        foreach ($data as $ad) {
+            $ad->incrementViews();
+        };
+        return response()->json($data);
     }
 
     // Public: show

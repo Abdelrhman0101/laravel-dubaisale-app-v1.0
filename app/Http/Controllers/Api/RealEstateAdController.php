@@ -84,10 +84,14 @@ class RealEstateAdController extends Controller
             $query->inOffersBox();
         }
 
-        $perPage = $request->query('per_page', 15);
-        $perPage = min(max($perPage, 1), 50); // Between 1 and 50
+        // $perPage = $request->query('per_page', 15);
+        // $perPage = min(max($perPage, 1), 50); // Between 1 and 50
 
-        return response()->json($query->get());
+        $data = $query->get();
+        foreach ($data as $ad) {
+            $ad->incrementViews();
+        };
+        return response()->json($data);
     }
 
     /**
@@ -183,10 +187,14 @@ class RealEstateAdController extends Controller
                 break;
         }
 
-        $perPage = $request->query('per_page', 15);
-        $perPage = min(max($perPage, 1), 50);
+        // $perPage = $request->query('per_page', 15);
+        // $perPage = min(max($perPage, 1), 50);
 
-        return response()->json($query->paginate($perPage)->withQueryString());
+        $data = $query->get();
+        foreach ($data as $ad) {
+            $ad->incrementViews();
+        };
+        return response()->json($data);
     }
 
     /**
