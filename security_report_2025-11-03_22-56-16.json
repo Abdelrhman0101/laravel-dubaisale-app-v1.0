@@ -1,0 +1,70 @@
+{
+    "timestamp": "2025-11-03 22:56:16",
+    "vulnerabilities": [
+        "🚨 خطر أمني عالي: حقول latitude و longitude قابلة للتعديل المباشر في نموذج User",
+        "⚠️ CarRentAd يستخدم guarded = [] مما يعني أن جميع الحقول قابلة للتعديل بما في ذلك latitude\/longitude",
+        "⚠️ RealEstateAd يستخدم guarded = [] مما يعني أن جميع الحقول قابلة للتعديل بما في ذلك latitude\/longitude",
+        "⚠️ CarSalesAd يستخدم guarded = [] مما يعني أن جميع الحقول قابلة للتعديل بما في ذلك latitude\/longitude",
+        "⚠️ ProfileController لا يحتوي على validation لحقول latitude\/longitude"
+    ],
+    "recommendations": [
+        "🔧 يجب إزالة latitude\/longitude من fillable أو إضافة validation قوي",
+        "🔧 يُنصح بتحديد fillable بدلاً من استخدام guarded فارغ في CarRentAd",
+        "🔧 يُنصح بتحديد fillable بدلاً من استخدام guarded فارغ في RealEstateAd",
+        "🔧 يُنصح بتحديد fillable بدلاً من استخدام guarded فارغ في CarSalesAd",
+        "🔧 يجب إضافة validation لحقول latitude\/longitude في ProfileController",
+        "✅ AdminUserController يحتوي على validation مناسب لحقول الموقع",
+        "📊 تم العثور على 3 ملف migration يحتوي على حقول latitude\/longitude"
+    ],
+    "results": {
+        "user_model": {
+            "latitude_fillable": true,
+            "longitude_fillable": true,
+            "fillable_content": "'username',\n        'email',\n        'phone',\n        'whatsapp',\n        'password',\n        'referral_code',\n        'is_active',\n        'email_verified_at',\n        'role',\n        'advertiser_name',\n        'advertiser_type',\n        'advertiser_logo',\n        'advertiser_location',\n        'otp_phone',\n        'otp_expires_at',\n        'user_type',\n        'otp_verified',\n        'referral_code_list',\n        'latitude',\n        'longitude',\n        'advertiser_logo'\n        \/\/ 'is_active',\n        \/\/ 'otp_verified',",
+            "guarded_content": ""
+        },
+        "ad_models": {
+            "CarRentAd": {
+                "uses_empty_guarded": true,
+                "fillable_content": ""
+            },
+            "RealEstateAd": {
+                "uses_empty_guarded": true,
+                "fillable_content": ""
+            },
+            "CarSalesAd": {
+                "uses_empty_guarded": true,
+                "fillable_content": ""
+            }
+        },
+        "controllers": {
+            "ProfileController": {
+                "has_latitude_validation": false,
+                "has_longitude_validation": false,
+                "has_set_address_method": false,
+                "has_proper_validation_rules": false
+            },
+            "AdminUserController": {
+                "has_latitude_validation": true,
+                "has_longitude_validation": true,
+                "has_set_address_method": true,
+                "has_proper_validation_rules": true
+            },
+            "CarRentAdController": {
+                "has_latitude_validation": false,
+                "has_longitude_validation": false,
+                "has_set_address_method": false,
+                "has_proper_validation_rules": false
+            }
+        },
+        "migrations": {
+            "files_with_lat_lng": [
+                "2025_09_20_111146_create_real_estate_ads_table.php",
+                "2025_09_27_070434_create_other_service_ads_table.php",
+                "2025_09_29_104019_add_common_fields_to_all_tables.php"
+            ],
+            "total_migration_files": 67
+        }
+    },
+    "risk_level": 5
+}
