@@ -215,6 +215,8 @@ class CarServicesAdController extends Controller
             // 'plan_days' => 'nullable|integer|min:0',
             // 'plan_expires_at' => 'nullable|date',
             'payment' => 'nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $user = $request->user();
@@ -232,7 +234,9 @@ class CarServicesAdController extends Controller
             'location' => $validatedData['location'] ?? null,
             'user_id' => $user->id,
             'add_category' => 'Car Services',
-            "plan_type" => $validatedData['plan_type'] ?? "free"
+            "plan_type" => $validatedData['plan_type'] ?? "free",
+            'latitude' => $validatedData['latitude'] ?? null,
+            'longitude' => $validatedData['longitude'] ?? null
         ];
         if (!empty($validatedData['plan_type']) && $validatedData['plan_type'] !== 'free') {
             $packageResult = $this->autoDeductAd($user, $validatedData['plan_type']);
@@ -317,8 +321,8 @@ class CarServicesAdController extends Controller
         // 3. تحديد حالة الإعلان بناءً على الإعداد
         if ($isManualApprovalActive) {
             // إذا كانت الموافقة اليدوية مفعلة، الإعلان ينتظر المراجعة
-            $data['add_status'] = 'Pending';
-            $data['admin_approved'] = false;
+             $data['add_status'] = 'Pending';
+             $data['admin_approved'] = false;
         } else {
             // إذا كانت الموافقة اليدوية معطلة، الإعلان يتم نشره تلقائيًا
             $data['add_status'] = 'Valid';
@@ -331,7 +335,7 @@ class CarServicesAdController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم إضافة الإعلان بنجاح',
-            'data' =>$data
+            'data' => $data
         ], 201);
     }
 
@@ -384,6 +388,8 @@ class CarServicesAdController extends Controller
             // 'plan_days' => 'sometimes|nullable|integer|min:0',
             // 'plan_expires_at' => 'sometimes|nullable|date',
             'payment' => 'sometimes|nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         // 3. تحديث الحقول النصية

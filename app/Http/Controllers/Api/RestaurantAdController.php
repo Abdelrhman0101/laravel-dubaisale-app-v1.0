@@ -195,6 +195,8 @@ class RestaurantAdController extends Controller
             // 'plan_days' => 'nullable|integer|min:0',
             // 'plan_expires_at' => 'nullable|date',
             'payment' => 'nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $data = [
@@ -211,7 +213,9 @@ class RestaurantAdController extends Controller
             'address' => $validated['address'],
             'user_id' => $request->user()->id,
             'add_category' => 'restaurant',
-            'plan_type' => $validated['plan_type'] ?? "free"
+            'plan_type' => $validated['plan_type'] ?? "free",
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
         ];
         $user = $request->user();
         if (!empty($validated['plan_type']) && $validated['plan_type'] !== 'free') {
@@ -319,6 +323,8 @@ class RestaurantAdController extends Controller
             // 'plan_days' => 'sometimes|nullable|integer|min:0',
             // 'plan_expires_at' => 'sometimes|nullable|date',
             'payment' => 'sometimes|nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $updateFields = $request->except(['main_image', 'thumbnail_images']);

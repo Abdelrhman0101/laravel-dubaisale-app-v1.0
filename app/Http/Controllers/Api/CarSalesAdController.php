@@ -252,6 +252,8 @@ class CarSalesAdController extends Controller
             // 'plan_days' => 'nullable|integer|min:0',
             // 'plan_expires_at' => 'nullable|date',
             'payment' => 'nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $data = $request->all();
@@ -396,6 +398,8 @@ class CarSalesAdController extends Controller
             // 'plan_days' => 'sometimes|nullable|integer|min:0',
             // 'plan_expires_at' => 'sometimes|nullable|date',
             'payment' => 'sometimes|nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         // 3. تحديث الحقول النصية

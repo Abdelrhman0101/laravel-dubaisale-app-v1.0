@@ -3,6 +3,8 @@
 namespace App\Traits;
 
 use App\Models\SearchIndex;
+use Illuminate\Support\Facades\Log;
+
 
 trait HandlesSearchIndex
 {
@@ -13,29 +15,50 @@ trait HandlesSearchIndex
         });
 
         static::updated(function ($model) {
-            static::syncSearchIndex($model);
+            $type = static::getSearchType();
+
+            SearchIndex::where('item_type', $type)
+                ->where('item_id', $model->getKey())
+                ->update([
+                    'title' => $model->title,
+                    'category_slug' => $type,
+                ]);
         });
+
 
         static::deleted(function ($model) {
             SearchIndex::where('item_type', static::getSearchType())
-                ->where('item_id', $model->id)
+                ->where('item_id', $model->getKey())
                 ->delete();
         });
     }
 
     protected static function syncSearchIndex($model)
     {
-        SearchIndex::updateOrCreate(
-            [
-                'item_type' => static::getSearchType(),
-                'item_id' => $model->id,
-            ],
-            [
-                'category_slug' => static::getSearchType(),
+        if ($model->add_status !== 'Valid') {
+            return; 
+        }
+        $type = static::getSearchType();
+
+        $existing = SearchIndex::where('item_type', $type)
+            ->where('item_id', $model->getKey())
+            ->first();
+
+        if ($existing) {
+            $existing->update([
+                'category_slug' => $type,
                 'title' => $model->title,
-            ]
-        );
+            ]);
+        } else {
+            SearchIndex::create([
+                'item_type' => $type,
+                'item_id' => $model->getKey(),
+                'category_slug' => $type,
+                'title' => $model->title,
+            ]);
+        }
     }
+
 
     /**
      * Get the search type for the model.
@@ -50,7 +73,7 @@ trait HandlesSearchIndex
             $class = static::class;
             return $class::$searchType;
         }
-        
+
         return class_basename(static::class);
     }
 }

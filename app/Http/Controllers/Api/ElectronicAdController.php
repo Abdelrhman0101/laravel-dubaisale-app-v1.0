@@ -248,6 +248,8 @@ class ElectronicAdController extends Controller
             'plan_type' => 'nullable|string|max:50|in:featured,premium_star,premium,free',
             // 'plan_days' => 'nullable|integer|min:0',
             // 'plan_expires_at' => 'nullable|date',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric'
         ]);
         $user = $request->user();
         $data = $validated;
@@ -358,6 +360,8 @@ class ElectronicAdController extends Controller
             // 'plan_days' => 'sometimes|nullable|integer|min:0',
             // 'plan_expires_at' => 'sometimes|nullable|date',
             'payment' => 'sometimes|nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric'
         ]);
 
         // prepare update fields

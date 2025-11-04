@@ -208,6 +208,8 @@ class CarRentAdController extends Controller
             // 'plan_days' => 'nullable|integer|min:0',
             // 'plan_expires_at' => 'nullable|date',
             'payment' => 'nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         $user = $request->user();
@@ -237,7 +239,9 @@ class CarRentAdController extends Controller
             'location' => $validated['location'] ?? null,
             'user_id' => $user->id,
             'add_category' => 'Car Rent',
-            'plan_type' => $validated['plan_type'] ?? "free"
+            'plan_type' => $validated['plan_type'] ?? "free",
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
         ];
 
         $data['advertiser_name'] = $validated['advertiser_name'];
@@ -370,6 +374,8 @@ class CarRentAdController extends Controller
             // 'plan_days' => 'nullable|integer|min:0',
             // 'plan_expires_at' => 'nullable|date',
             'payment' => 'sometimes|nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         // ✅ تحديث الحقول النصية

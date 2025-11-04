@@ -161,6 +161,8 @@ class JobsAdController extends Controller
             'plan_days' => 'nullable|integer|min:0',
             'plan_expires_at' => 'nullable|date',
             'payment' => 'nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
 
 
         ]);
@@ -199,6 +201,10 @@ class JobsAdController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'You have reached the maximum number of free ads allowed.',
+                    'data' => [
+                        'free_ads_limit' => $freeAdsLimit,
+                        'user_free_ads_count' => $userFreeAdsCount,
+                    ]
                 ], 403);
             }
 
@@ -260,6 +266,8 @@ class JobsAdController extends Controller
             // 'plan_days' => 'sometimes|nullable|integer|min:0',
             // 'plan_expires_at' => 'sometimes|nullable|date',
             'payment' => 'sometimes|nullable|boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
 
