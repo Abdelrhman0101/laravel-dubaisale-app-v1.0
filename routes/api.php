@@ -1,6 +1,6 @@
 <?php
 
-
+use App\Http\Controllers\AgentCodeController;
 use App\Http\Controllers\Api\OtherServiceAdsController;
 use App\Http\Controllers\ElectronicAdOptionController;
 use App\Http\Controllers\FavoritesController;
@@ -84,6 +84,11 @@ Route::get('/smart-search', [SmartSearchController::class, 'search']);
 //pages
 Route::get('/pages', [PageController::class, 'index']);
 Route::get('/pages/{type}', [PageController::class, 'show']);
+
+//Agent code
+    Route::post('/agent-code',[AgentCodeController::class,'store']);
+    Route::get('/agent-code',[AgentCodeController::class,'index']);
+
 
 
 //favorites
@@ -233,9 +238,7 @@ Route::middleware([
     //Packages
     Route::get('/user-packages', [UserPackageController::class, 'index']);
 
-
-
-
+    
     // --- User's Ads & Offers Management ---
     Route::get('/my-ads', [MyAdsController::class, 'index']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class)->except(['index', 'show']);

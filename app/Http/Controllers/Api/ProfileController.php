@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AgentCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -35,14 +36,11 @@ class ProfileController extends Controller
 
 
 
-        // 2. تعامل مع رفع صورة الشعار (إذا تم إرسالها)
         if ($request->hasFile('advertiser_logo')) {
-            // أ. احذف الشعار القديم إذا كان موجودًا
             if ($user->advertiser_logo) {
                 Storage::disk('public')->delete($user->advertiser_logo);
             }
 
-            // ب. ارفع الشعار الجديد واحصل على مساره
             $path = $request->file('advertiser_logo')->store('logos', 'public');
 
 
@@ -50,23 +48,26 @@ class ProfileController extends Controller
         }
 
         if (!empty($validatedData['referral_code'])) {
-            $referralId = (int) $validatedData['referral_code'];
-            if ($referralId == $request->user()->id) {
+            $agentCode = AgentCode::where('user_id', $validatedData['referral_code'])->first();
+            if (!$agentCode) {
                 return response()->json([
-                    'error' => "You can't add yourself as a referral",
-                ], 400);
-            }
-            $userReferral = User::where('id', $referralId)->first();
-            if ($userReferral) {
-                $referrals = $userReferral->referral_code_list ?? [];
-                $referrals[] = $request->user()->id;
-                $userReferral->referral_code_list = $referrals;
-                $userReferral->save();
-            } else {
+                    "message" => "Agent Code Not Found"
+                ]);
+            };
+            $clients = $agentCode->clients ?? []; 
+
+            
+            if (in_array($user->id, $clients)) {
                 return response()->json([
-                    'error' => "Referral ID {$referralId} Not found",
-                ], 400);
+                    "message" => "You have already used this referral code."
+                ]);
             }
+
+            $clients[] = $user->id;
+
+            
+            $agentCode->clients = $clients;
+            $agentCode->save();
         }
 
 
