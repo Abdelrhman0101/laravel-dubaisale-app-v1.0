@@ -217,29 +217,37 @@ document.getElementById('scheduleNotification')?.addEventListener('change', func
 // Target Section Functionality
 let selectedUsers = [];
 let tempSelectedUsers = [];
-
-// Sample users data (replace with actual API call)
-const sampleUsers = [
-    { id: 1, name: 'أحمد محمد - Ahmed Mohamed', email: 'ahmed@example.com', type: 'admin' },
-    { id: 2, name: 'فاطمة علي - Fatima Ali', email: 'fatima@example.com', type: 'visitor' },
-    { id: 3, name: 'محمد حسن - Mohamed Hassan', email: 'mohamed@example.com', type: 'admin' },
-    { id: 4, name: 'سارة أحمد - Sara Ahmed', email: 'sara@example.com', type: 'visitor' },
-    { id: 5, name: 'علي محمود - Ali Mahmoud', email: 'ali@example.com', type: 'admin' },
-    { id: 6, name: 'نور الدين - Nour Aldin', email: 'nour@example.com', type: 'visitor' },
-    { id: 7, name: 'ليلى حسام - Layla Hossam', email: 'layla@example.com', type: 'admin' },
-    { id: 8, name: 'يوسف عبدالله - Youssef Abdullah', email: 'youssef@example.com', type: 'visitor' }
-];
+let searchResults = []; // Store fetched users
+let isSelectAll = false; // Flag for "Select All" mode
 
 // Select All Button
 document.getElementById('selectAllBtn').addEventListener('click', function() {
-    selectedUsers = [...sampleUsers];
-    updateSelectedUsersDisplay();
+    isSelectAll = true;
+    selectedUsers = []; // Clear specific selections
+    updateSelectedUsersDisplay(); // This needs to handle "All" state
     this.classList.add('active');
     document.getElementById('selectBtn').classList.remove('active');
+    
+    // Visual feedback for "All Selected"
+    const displayContainer = document.getElementById('selectedUsersDisplay');
+    const countElement = document.getElementById('selectedCount');
+    const listElement = document.getElementById('selectedUsersList');
+    
+    displayContainer.style.display = 'block';
+    countElement.textContent = 'تم تحديد جميع المستخدمين - All users selected';
+    listElement.innerHTML = `
+        <div class="alert alert-info w-100">
+            <i class="fas fa-users me-2"></i>
+            سيتم إرسال الإشعار إلى جميع المستخدمين المسجلين في النظام.
+            <br>
+            The notification will be sent to all registered users.
+        </div>
+    `;
 });
 
 // Select Button (Open Modal)
 document.getElementById('selectBtn').addEventListener('click', function() {
+    isSelectAll = false;
     tempSelectedUsers = [...selectedUsers];
     updateModalSelectedUsers();
     const modal = new bootstrap.Modal(document.getElementById('userSelectionModal'));
@@ -250,7 +258,7 @@ document.getElementById('selectBtn').addEventListener('click', function() {
 
 // Search functionality with loading animation
 document.getElementById('userSearchInput').addEventListener('input', function() {
-    const searchTerm = this.value.toLowerCase();
+    const searchTerm = this.value; // Don't lowerCase here, let backend handle
     const loadingElement = document.getElementById('searchLoading');
     
     if (searchTerm.length === 0) {
@@ -269,15 +277,22 @@ document.getElementById('userSearchInput').addEventListener('input', function() 
     // Show loading
     loadingElement.style.display = 'block';
     
-    // Simulate API delay
-    setTimeout(() => {
-        const filteredUsers = sampleUsers.filter(user => 
-            user.name.toLowerCase().includes(searchTerm) || 
-            user.email.toLowerCase().includes(searchTerm)
-        );
-        displaySearchResults(filteredUsers);
-        loadingElement.style.display = 'none';
-    }, 300);
+    // Debounce or just simple timeout for now
+    if (this.searchTimeout) clearTimeout(this.searchTimeout);
+    
+    this.searchTimeout = setTimeout(() => {
+        fetch(`/admin/users/search?q=${encodeURIComponent(searchTerm)}`)
+            .then(response => response.json())
+            .then(data => {
+                searchResults = data; // Update global results
+                displaySearchResults(data);
+                loadingElement.style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error searching users:', error);
+                loadingElement.style.display = 'none';
+            });
+    }, 500);
 });
 
 // Display search results with modern design
@@ -308,9 +323,9 @@ function displaySearchResults(users) {
                         <i class="fas fa-user"></i>
                     </div>
                     <div class="user-details">
-                        <div class="user-name">${user.name}</div>
+                        <div class="user-name">${user.name || 'No Name'}</div>
                         <div class="user-email">${user.email}</div>
-                        <span class="user-type-badge ${user.type}">${user.type === 'admin' ? 'إدارة - Admin' : 'زائر - Visitor'}</span>
+                        <span class="user-type-badge ${user.type}">${user.type === 'admin' ? 'إدارة - Admin' : 'مستخدم - User'}</span>
                     </div>
                     <div class="user-actions">
                         <button type="button" class="btn select-user-btn-modern ${tempSelectedUsers.find(u => u.id === user.id) ? 'selected' : ''}" data-user-id="${user.id}">
@@ -343,23 +358,23 @@ function displaySearchResults(users) {
 // Toggle user selection
 function toggleUserSelection(userId) {
     const userIndex = tempSelectedUsers.findIndex(u => u.id === userId);
-    const user = sampleUsers.find(u => u.id === userId);
+    // Find user in searchResults instead of sampleUsers
+    const user = searchResults.find(u => u.id === userId);
     
+    // Safety check if user not found in current search results but might be in temp
+    if (!user && userIndex === -1) return; 
+
     if (userIndex > -1) {
         tempSelectedUsers.splice(userIndex, 1);
     } else {
-        tempSelectedUsers.push(user);
+        if(user) tempSelectedUsers.push(user);
     }
     
     updateModalSelectedUsers();
     // Refresh search results to update selection state
-    const searchTerm = document.getElementById('userSearchInput').value.toLowerCase();
-    const filteredUsers = sampleUsers.filter(user => 
-        user.name.toLowerCase().includes(searchTerm) || 
-        user.email.toLowerCase().includes(searchTerm)
-    );
-    displaySearchResults(filteredUsers);
+    displaySearchResults(searchResults);
 }
+
 
 // Update modal selected users with modern design
 function updateModalSelectedUsers() {
@@ -448,7 +463,7 @@ function updateSelectedUsersDisplay() {
 
 // Send notification button
 document.getElementById('sendNotificationBtn').addEventListener('click', function() {
-    if (selectedUsers.length === 0) {
+    if (!isSelectAll && selectedUsers.length === 0) {
         alert('يرجى تحديد المستخدمين أولاً - Please select users first');
         return;
     }
@@ -462,9 +477,15 @@ document.getElementById('sendNotificationBtn').addEventListener('click', functio
         alert('يرجى ملء جميع الحقول - Please fill all fields');
         return;
     }
+
+    const thisBtn = this;
+    const originalText = thisBtn.innerHTML;
+    thisBtn.disabled = true;
+    thisBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> جاري الإرسال - Sending...';
     
     const notificationData = {
-        users: selectedUsers,
+        users: selectedUsers.map(u => u.id),
+        select_all: isSelectAll,
         arabic: {
             title: arabicTitle,
             description: arabicDescription
@@ -475,8 +496,37 @@ document.getElementById('sendNotificationBtn').addEventListener('click', functio
         }
     };
     
-    console.log('Sending notification:', notificationData);
-    alert('تم إرسال الإشعار بنجاح - Notification sent successfully');
+    fetch('/admin/notifications/send', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: JSON.stringify(notificationData)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(data => {
+        alert('تم إرسال الإشعار بنجاح - Notification sent successfully');
+        // Reset form
+        document.getElementById('arabicTitle').value = '';
+        document.getElementById('arabicDescription').value = '';
+        document.getElementById('englishTitle').value = '';
+        document.getElementById('englishDescription').value = '';
+        selectedUsers = [];
+        isSelectAll = false;
+        updateSelectedUsersDisplay();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('حدث خطأ أثناء إرسال الإشعار - Error sending notification');
+    })
+    .finally(() => {
+        thisBtn.disabled = false;
+        thisBtn.innerHTML = originalText;
+    });
 });
 
 // Clear modal on close

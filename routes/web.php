@@ -15,10 +15,9 @@ use Illuminate\Support\Facades\Route;
 
 // --- صفحة تسجيل الدخول (Route عام) ---
 // هذه الصفحة هي الوحيدة التي لا تحتاج إلى "حارس حماية" في الـ JavaScript.
-Route::get('/login', function () {
-    // تأكد من أن ملفك موجود في `resources/views/auth/login-custom.blade.php`
-    return view('auth.login-custom');
-})->name('login');
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'authenticate'])->name('login.post');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 // --- صفحات الداش بورد (Routes محمية عبر JavaScript) ---
@@ -38,7 +37,14 @@ Route::get('/accounts', function () {
     return view('accounts');
 })->name('accounts');
 
-// صفحة الطلبات (Requests)
+use App\Http\Controllers\Admin\SectionBannerController;
+use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\LoginController;
+
+// صفحة إدارة لافتات الأقسام
+Route::get('/section-banners', [SectionBannerController::class, 'index'])->name('section-banners');
+Route::post('/section-banners/store', [SectionBannerController::class, 'store'])->name('section-banners.store');
+Route::post('/section-banners/delete', [SectionBannerController::class, 'destroy'])->name('section-banners.delete');
 Route::get('/requests', function () {
     return view('requests');
 })->name('requests');
@@ -74,14 +80,15 @@ Route::get('/section-banners', function () {
 })->name('section-banners');
 
 // صفحة إدارة الإعلانات
-Route::get('/ads-management', function () {
-    return view('ads-management');
-})->name('ads-management');
+Route::get('/ads-management', [DashboardController::class, 'adsManagement'])->name('ads-management');
 
 // صفحة أفضل المعلنين
-Route::get('/best-advertisers', function () {
-    return view('best-advertisers');
-})->name('best-advertisers');
+Route::get('/best-advertisers', [DashboardController::class, 'bestAdvertisers'])->name('best-advertisers');
+
+// Notifications
+use App\Http\Controllers\Admin\AdminNotificationController;
+Route::get('/admin/users/search', [AdminNotificationController::class, 'searchUsers'])->name('admin.users.search');
+Route::post('/admin/notifications/send', [AdminNotificationController::class, 'sendNotification'])->name('admin.notifications.send');
 
 // صفحة إرسال الإشعارات
 Route::get('/send-notification', function () {

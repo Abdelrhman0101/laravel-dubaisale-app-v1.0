@@ -367,7 +367,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     console.log("Submitting login form with:", { username, password });
 
     try {
-        const response = await fetch('/api/login', {
+        const response = await fetch('/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -383,14 +383,17 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         const data = await response.json();
         console.log("Parsed response JSON:", data);
 
-        if (data.message === "Login successful." && data.user && data.user.role === 'admin') {
-            console.log("Login successful! Storing token and user data in localStorage...");
-            localStorage.setItem('token', data.access_token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            console.log("Token:", data.access_token);
-            console.log("User:", data.user);
-            console.log("Redirecting to /dashboard...");
-            window.location.href = '/dashboard';
+        if (response.ok) {
+            console.log("Login successful! Redirecting...");
+            // Clear any old API tokens to avoid confusion
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            } else {
+                window.location.href = '/dashboard';
+            }
         } else {
             console.log("Login failed! Message:", data.message);
             document.getElementById('errorMsg').innerText = data.message || 'Login failed';

@@ -20,9 +20,33 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::with('bestAdvertiser') // load 
+        return User::with('bestAdvertiser')
+            ->withCount([
+                'carSalesAds',
+                'carServicesAds',
+                'restaurantAds',
+                'carRentAds',
+                'jobAds',
+                'electronicAds',
+                'otherServiceAds',
+                'realEstateAds'
+            ])
             ->latest()
             ->paginate(20);
+    }
+
+    /**
+     * [Admin] Toggle user block status.
+     */
+    public function toggleBlock(User $user)
+    {
+        $user->is_active = !$user->is_active;
+        $user->save();
+        
+        return response()->json([
+            'message' => $user->is_active ? 'User Unblocked successfully' : 'User Blocked successfully',
+            'is_active' => $user->is_active
+        ]);
     }
 
     /**

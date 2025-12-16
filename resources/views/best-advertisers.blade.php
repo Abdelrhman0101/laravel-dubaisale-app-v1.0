@@ -239,28 +239,28 @@
             <i class="bi bi-shop" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
             <h5 style="margin-bottom: 0.5rem;">المطاعم</h5>
             <small style="opacity: 0.9; display: block; margin-bottom: 1rem;">Restaurants</small>
-            <div style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">15</div>
+            <div style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">{{ $counts['restaurant'] ?? 0 }}</div>
         </div>
         
         <div class="section-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1.5rem; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 40px rgba(240, 147, 251, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(240, 147, 251, 0.3)'">
             <i class="bi bi-tools" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
             <h5 style="margin-bottom: 0.5rem;">خدمات السيارات</h5>
             <small style="opacity: 0.9; display: block; margin-bottom: 1rem;">Car Services</small>
-            <div style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">8</div>
+            <div style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">{{ $counts['car_services'] ?? 0 }}</div>
         </div>
         
         <div class="section-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 1.5rem; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 40px rgba(79, 172, 254, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(79, 172, 254, 0.3)'">
             <i class="bi bi-car-front" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
             <h5 style="margin-bottom: 0.5rem;">تأجير السيارات</h5>
             <small style="opacity: 0.9; display: block; margin-bottom: 1rem;">Car Rent</small>
-            <div style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">12</div>
+            <div style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">{{ $counts['car_rent'] ?? 0 }}</div>
         </div>
         
         <div class="section-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 1.5rem; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(250, 112, 154, 0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 40px rgba(250, 112, 154, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(250, 112, 154, 0.3)'">
             <i class="bi bi-briefcase" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
             <h5 style="margin-bottom: 0.5rem;">الوظائف</h5>
             <small style="opacity: 0.9; display: block; margin-bottom: 1rem;">Jobs</small>
-            <div style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">23</div>
+            <div style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">{{ $counts['jobs'] ?? 0 }}</div>
         </div>
         
         <!-- الصف الثاني -->
@@ -268,28 +268,28 @@
             <i class="bi bi-tv" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
             <h5 style="margin-bottom: 0.5rem;">الإلكترونيات والمنزل</h5>
             <small style="opacity: 0.8; display: block; margin-bottom: 1rem;">Electronics & Home</small>
-            <div style="background: rgba(44, 62, 80, 0.1); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">18</div>
+            <div style="background: rgba(44, 62, 80, 0.1); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">{{ $counts['electronics'] ?? 0 }}</div>
         </div>
         
         <div class="section-card" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); color: #2c3e50; padding: 1.5rem; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(255, 236, 210, 0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 40px rgba(255, 236, 210, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(255, 236, 210, 0.3)'">
             <i class="bi bi-building" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
             <h5 style="margin-bottom: 0.5rem;">العقارات</h5>
             <small style="opacity: 0.8; display: block; margin-bottom: 1rem;">Real Estate</small>
-            <div style="background: rgba(44, 62, 80, 0.1); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">9</div>
+            <div style="background: rgba(44, 62, 80, 0.1); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">{{ $counts['real-estate'] ?? 0 }}</div>
         </div>
         
         <div class="section-card" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #2c3e50; padding: 1.5rem; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(255, 154, 158, 0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 40px rgba(255, 154, 158, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(255, 154, 158, 0.3)'">
             <i class="bi bi-car-front-fill" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
             <h5 style="margin-bottom: 0.5rem;">بيع السيارات</h5>
             <small style="opacity: 0.8; display: block; margin-bottom: 1rem;">Car Sale</small>
-            <div style="background: rgba(44, 62, 80, 0.1); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">14</div>
+            <div style="background: rgba(44, 62, 80, 0.1); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">{{ $counts['car_sales'] ?? 0 }}</div>
         </div>
         
         <div class="section-card" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); color: #2c3e50; padding: 1.5rem; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(161, 196, 253, 0.3); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 40px rgba(161, 196, 253, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(161, 196, 253, 0.3)'">
             <i class="bi bi-gear" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
             <h5 style="margin-bottom: 0.5rem;">خدمات أخرى</h5>
             <small style="opacity: 0.8; display: block; margin-bottom: 1rem;">Other Services</small>
-            <div style="background: rgba(44, 62, 80, 0.1); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">7</div>
+            <div style="background: rgba(44, 62, 80, 0.1); padding: 0.5rem 1rem; border-radius: 10px; font-weight: 700; font-size: 1.2rem;">{{ $counts['other_services'] ?? 0 }}</div>
         </div>
     </div>
     

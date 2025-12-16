@@ -56,6 +56,10 @@ class AuthController extends Controller
                 $message = 'Welcome back, guest.';
             } else if ($user->user_type === 'advertiser') {
 
+                if (!$user->is_active) {
+                    return response()->json(['message' => 'Your account is blocked.'], 403);
+                }
+
                 if (!Hash::check($request->password, $user->password)) {
                     return response()->json(['message' => 'Invalid credentials'], 401);
                 }
@@ -128,6 +132,10 @@ class AuthController extends Controller
                 return response()->json(['message' => 'Invalid phone or code'], 400);
             }
 
+            if (!$user->is_active) {
+                return response()->json(['message' => 'Your account is blocked.'], 403);
+            }
+
             if (!$user->otp_phone && $user->user_type === 'guest') {
                 return response()->json(['message' => 'Guest users do not require OTP verification'], 200);
             }
@@ -143,7 +151,7 @@ class AuthController extends Controller
             $user->otp_phone = null;
             $user->otp_expires_at = null;
             $user->user_type = 'advertiser';
-            $user->is_active = true;
+            // $user->is_active = true;
             $user->save();
 
             $token = $user->createToken('auth_token')->plainTextToken;
@@ -180,6 +188,9 @@ class AuthController extends Controller
 
             if (!$user) {
                 return response()->json(['message' => 'User not found'], 404);
+            }
+            if (!$user->is_active) {
+                return response()->json(['message' => 'Your account is blocked.'], 403);
             }
             if ($user->user_type === 'guest') {
                 return response()->json([
@@ -435,6 +446,10 @@ class AuthController extends Controller
                 return response()->json([
                     'message' => 'User not found. Please sign up first via /newSignin.'
                 ], 404);
+            }
+
+            if (!$user->is_active) {
+                return response()->json(['message' => 'Your account is blocked.'], 403);
             }
 
             // منع الإرسال المتكرر خلال 60 ثانية

@@ -7,6 +7,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\CarSalesAd;
+use App\Models\CarServicesAd;
+use App\Models\RestaurantAd;
+use App\Models\CarRentAd;
+use App\Models\JobAd;
+use App\Models\electronicAd;
+use App\Models\OtherServiceAds;
+use App\Models\RealEstateAd;
 use App\Models\UserContactInfo;
 use Illuminate\Support\Facades\Storage;
 
@@ -76,7 +83,7 @@ class User extends Authenticatable
     /**
      * Get the car sale ads for the user.
      */
-    protected $appends=['advertiser_logo_url'];
+    protected $appends=['advertiser_logo_url', 'total_ads_count'];
 
     public function getAdvertiserLogoUrlAttribute()
     {
@@ -85,6 +92,53 @@ class User extends Authenticatable
     public function carSalesAds()
     {
         return $this->hasMany(CarSalesAd::class);
+    }
+
+    public function carServicesAds()
+    {
+        return $this->hasMany(CarServicesAd::class);
+    }
+
+    public function restaurantAds()
+    {
+        return $this->hasMany(RestaurantAd::class);
+    }
+
+    public function carRentAds()
+    {
+        return $this->hasMany(CarRentAd::class);
+    }
+
+    public function jobAds()
+    {
+        return $this->hasMany(JobAd::class);
+    }
+
+    public function electronicAds()
+    {
+        return $this->hasMany(electronicAd::class);
+    }
+
+    public function otherServiceAds()
+    {
+        return $this->hasMany(OtherServiceAds::class);
+    }
+
+    public function realEstateAds()
+    {
+        return $this->hasMany(RealEstateAd::class);
+    }
+
+    public function getTotalAdsCountAttribute()
+    {
+        return $this->car_sales_ads_count +
+            $this->car_services_ads_count +
+            $this->restaurant_ads_count +
+            $this->car_rent_ads_count +
+            $this->job_ads_count +
+            $this->electronic_ads_count +
+            $this->other_service_ads_count +
+            $this->real_estate_ads_count;
     }
 
     public function bestCategories()

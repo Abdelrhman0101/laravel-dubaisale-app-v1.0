@@ -313,6 +313,7 @@ Route::middleware([
         // --- Admin: Full Users Management ---
         Route::apiResource('/users', UserController::class);
         Route::post('/users/{user}/toggle-best', [BestAdvertiserController::class, 'toggleStatus']);
+        Route::post('/users/{user}/toggle-block', [UserController::class, 'toggleBlock']);
 
         // --- Admin: Car Sale Filters (CRUD Operations) ---
         Route::prefix('filters/car-sale')->group(function () {
