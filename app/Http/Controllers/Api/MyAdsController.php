@@ -16,9 +16,44 @@ use App\Models\JobAd;
 // use App\Models\RealEstateAd;
 // use App\Models\JobAd;
 use Illuminate\Support\Collection;
+use App\Models\SystemSetting;
+use Carbon\Carbon;
 
 class MyAdsController extends Controller
 {
+    /**
+     * Helper to calculate expiry date based on plan type.
+     */
+    private function calculateExpiry($ad)
+    {
+        // 1. If stored in DB, use it
+        if (!empty($ad->plan_expires_at)) {
+            return $ad->plan_expires_at instanceof Carbon 
+                ? $ad->plan_expires_at->toDateTimeString() 
+                : $ad->plan_expires_at;
+        }
+
+        // 2. Otherwise Calculate based on plan settings
+        $planType = strtolower($ad->plan_type ?? 'free');
+        $settingKey = "plan_{$planType}_days"; 
+
+        // Try to get duration from settings (Default 30 days if not found)
+        // Note: You should ensure your SystemSettings have keys like:
+        // 'plan_free_days', 'plan_featured_days', 'plan_premium_days', etc.
+        $days = SystemSetting::getSetting($settingKey);
+        
+        if (!$days) {
+            // Fallback for known types if key missing or for 'Standard'
+             if ($planType === 'free' || $planType === 'standard') {
+                 $days = SystemSetting::getSetting('free_ad_duration', 30);
+             } else {
+                 $days = 30; // Global Default
+             }
+        }
+
+        return $ad->created_at->addDays((int)$days)->toDateTimeString();
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -55,7 +90,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'car_sales', // إضافة category_slug
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
-                'expires_at' => $ad->expires_at,
+                'expires_at' => $this->calculateExpiry($ad),
             ];
         });
 
@@ -77,7 +112,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'car_services', // إضافة category_slug
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
-                'expires_at' => $ad->expires_at,
+                'expires_at' => $this->calculateExpiry($ad),
             ];
         });
 
@@ -100,7 +135,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'restaurant', // إضافة category_slug
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
-                'expires_at' => $ad->expires_at,
+                'expires_at' => $this->calculateExpiry($ad),
             ];
         });
 
@@ -121,7 +156,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'car_rent',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
-                'expires_at' => $ad->expires_at,
+                'expires_at' => $this->calculateExpiry($ad),
             ];
         });
         //real Estate
@@ -143,7 +178,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'real-estate',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
-                'expires_at' => $ad->expires_at,
+                'expires_at' => $this->calculateExpiry($ad),
             ];
         });
         //Jobs 
@@ -164,7 +199,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'jobs',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
-                'expires_at' => $ad->expires_at,
+                'expires_at' => $this->calculateExpiry($ad),
             ];
         });
         //electronic
@@ -186,7 +221,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'electronics',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
-                'expires_at' => $ad->expires_at,
+                'expires_at' => $this->calculateExpiry($ad),
             ];
         });
         $formattedOtherServiceAds = $otherService->map(function ($ad) {
@@ -207,7 +242,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'other-services',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
-                'expires_at' => $ad->expires_at,
+                'expires_at' => $this->calculateExpiry($ad),
             ];
         });
 
