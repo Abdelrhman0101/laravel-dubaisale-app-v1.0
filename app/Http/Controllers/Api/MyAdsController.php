@@ -55,6 +55,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'car_sales', // إضافة category_slug
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
+                'expires_at' => $ad->expires_at,
             ];
         });
 
@@ -76,6 +77,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'car_services', // إضافة category_slug
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
+                'expires_at' => $ad->expires_at,
             ];
         });
 
@@ -98,6 +100,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'restaurant', // إضافة category_slug
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
+                'expires_at' => $ad->expires_at,
             ];
         });
 
@@ -118,6 +121,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'car_rent',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
+                'expires_at' => $ad->expires_at,
             ];
         });
         //real Estate
@@ -139,6 +143,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'real-estate',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
+                'expires_at' => $ad->expires_at,
             ];
         });
         //Jobs 
@@ -159,6 +164,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'jobs',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
+                'expires_at' => $ad->expires_at,
             ];
         });
         //electronic
@@ -180,6 +186,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'electronics',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
+                'expires_at' => $ad->expires_at,
             ];
         });
         $formattedOtherServiceAds = $otherService->map(function ($ad) {
@@ -200,6 +207,7 @@ class MyAdsController extends Controller
                 'category_slug' => 'other-services',
                 'created_at' => $ad->created_at->toDateTimeString(),
                 'created_at_timestamp' => $ad->created_at->timestamp,
+                'expires_at' => $ad->expires_at,
             ];
         });
 
