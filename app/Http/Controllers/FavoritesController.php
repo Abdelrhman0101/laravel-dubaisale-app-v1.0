@@ -45,7 +45,16 @@ class FavoritesController extends Controller
         $ad = $modelClass::find($fav->ad_id);
 
         if (!$ad) {
+            // If ad doesn't exist anymore, remove from favorites
+            $fav->delete();
             continue;
+        }
+
+        // If ad is not Valid (e.g. Expired, Pending, Rejected), remove from favorites list
+        if ($ad->add_status !== 'Valid') {
+             // Optional: Delete from DB if you want strict cleanup
+             // $fav->delete(); 
+             continue; 
         }
 
         $groupedFavorites[$fav->category_slug][] = [
