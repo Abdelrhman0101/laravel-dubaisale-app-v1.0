@@ -23,7 +23,7 @@ class ProfileController extends Controller
 
         // 1. التحقق من صحة البيانات المدخلة
         $validatedData = $request->validate([
-            'username' => 'sometimes|required|string|max:255|unique:users,username,' . $user->id,
+            'username' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|nullable|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'sometimes|nullable|string|max:30|unique:users,phone,' . $user->id,
             'whatsapp' => 'sometimes|nullable|string|max:20|unique:users,whatsapp,' . $user->id,

@@ -379,7 +379,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'username' => 'required|string',
+            'phone' => 'required|string',
             'password' => 'required|string',
         ]);
 
@@ -387,7 +387,7 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $user = User::where('username', $request->username)
+        $user = User::where('phone', $request->phone)
             // ->orWhere('phone', $request->identifier)
             // ->orWhere('whatsapp', $request->identifier)
             ->first();
