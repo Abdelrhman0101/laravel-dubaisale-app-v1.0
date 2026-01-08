@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\RealEstateAdController;
 use App\Http\Controllers\Api\JobsAdController;
 use App\Http\Controllers\Api\ElectronicAdController;
 use App\Http\Controllers\Api\RenewAdController;
+use App\Http\Controllers\Api\AdReportController;
 
 
 
@@ -214,9 +215,16 @@ Route::get('/other-services/offers-box/ads', [OtherServiceAdsController::class, 
 Route::get('/other-services/{id}', [OtherServiceAdsController::class, 'show']);
 
 
+
 Route::get('/locations/districts', [\App\Http\Controllers\Api\Admin\LocationsController::class, 'getAllDistricts']);
 Route::get('/system-settings/plans', [SystemSettingsController::class, 'getPlansSettings']);
 Route::get('/system-settings', [SystemSettingsController::class, 'index']);
+
+// --- Ad Reports (Public Routes) ---
+Route::get('/reports/reasons', [AdReportController::class, 'getReasons']);
+Route::get('/reports/ad-types', [AdReportController::class, 'getAdTypes']);
+Route::post('/reports', [AdReportController::class, 'store']); // يمكن للجميع الإبلاغ
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated User Routes (Requires Bearer Token from Sanctum)
@@ -289,6 +297,10 @@ Route::middleware([
     });
     // Set Rank =>1 
     Route::post('/make-rank-one', [SetRankOneController::class, 'makeRankOne']);
+    
+    // --- User: My Reports ---
+    Route::get('/reports/my-reports', [AdReportController::class, 'myReports']);
+    
     /*
     |--------------------------------------------------------------------------
     | Admin-Only Routes (Requires Admin Role)
@@ -419,5 +431,13 @@ Route::middleware([
             Route::post('/', [UserPackageController::class, 'storeOrUpdate']);
             Route::delete('/{id}', [UserPackageController::class, 'destroy']);
         });
+
+        // --- Admin: Ad Reports Management ---
+        Route::get('/reports/stats', [AdReportController::class, 'stats']);
+        Route::get('/reports', [AdReportController::class, 'index']);
+        Route::get('/reports/{report}', [AdReportController::class, 'show']);
+        Route::put('/reports/{report}', [AdReportController::class, 'update']);
+        Route::delete('/reports/{report}', [AdReportController::class, 'destroy']);
+
     });
 });
