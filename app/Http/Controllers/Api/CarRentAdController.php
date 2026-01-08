@@ -177,6 +177,7 @@ class CarRentAdController extends Controller
     public function show(CarRentAd $carRentAd)
     {
         $carRentAd->incrementViews();
+        $carRentAd->load('user');
         return response()->json($carRentAd);
     }
 

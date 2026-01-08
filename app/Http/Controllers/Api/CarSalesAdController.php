@@ -370,6 +370,9 @@ class CarSalesAdController extends Controller
         // Increment views count
         $carSalesAd->incrementViews();
 
+        // Load user relationship to include advertiser details
+        $carSalesAd->load('user');
+
         return response()->json($carSalesAd);
     }
 

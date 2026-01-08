@@ -213,6 +213,7 @@ class ElectronicAdController extends Controller
         try {
             $ad = electronicAd::active()->findOrFail($id);
             $ad->incrementViews();
+            $ad->load('user');
             return response()->json($ad);
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'Electronic ad not found'], 404);
