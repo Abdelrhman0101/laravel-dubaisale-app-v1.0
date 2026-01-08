@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\CarRentAdController;
 use App\Http\Controllers\Api\RealEstateAdController;
 use App\Http\Controllers\Api\JobsAdController;
 use App\Http\Controllers\Api\ElectronicAdController;
+use App\Http\Controllers\Api\RenewAdController;
 
 
 
@@ -241,6 +242,7 @@ Route::middleware([
     
     // --- User's Ads & Offers Management ---
     Route::get('/my-ads', [MyAdsController::class, 'index']);
+    Route::post('/ads/renew', [RenewAdController::class, 'renew']);
     Route::apiResource('car-sales-ads', CarSalesAdController::class)->except(['index', 'show']);
     Route::apiResource('car-services-ads', CarServicesAdController::class)->except(['index', 'show']);;
     Route::apiResource('car-rent-ads', CarRentAdController::class);

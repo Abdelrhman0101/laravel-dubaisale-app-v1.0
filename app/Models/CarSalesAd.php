@@ -24,7 +24,7 @@ class CarSalesAd extends Model
      */
     protected $casts = [
         'thumbnail_images' => 'array',
-        'warranty' => 'boolean',
+
         'admin_approved' => 'boolean',
         'active_offers_box_status' => 'boolean',
         'plan_expires_at' => 'datetime',

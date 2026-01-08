@@ -248,6 +248,7 @@ class CarSalesAdController extends Controller
             'phone_number' => 'required|string',
             'emirate' => 'required|string',
             'main_image' => 'required|image|max:5120',
+            'warranty' => 'nullable|string',
             'thumbnail_images.*' => 'image|max:5120',
             // --- Plan fields: optional and open for client control ---
             'plan_type' => 'nullable|string|max:50|in:featured,premium_star,premium,free',
@@ -393,6 +394,7 @@ class CarSalesAdController extends Controller
             'year' => 'sometimes|required|digits:4',
             'km' => 'sometimes|required|integer',
             'price' => 'sometimes|required|numeric',
+            'warranty' => 'nullable|string',
             // --- قواعد التحقق الخاصة بالصور ---
             'main_image' => 'sometimes|image|max:5120',
             'thumbnail_images.*' => 'sometimes|image|max:5120',
