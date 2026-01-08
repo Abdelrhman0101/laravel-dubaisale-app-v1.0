@@ -8,15 +8,22 @@
 2. ✅ `seats_no` (عدد المقاعد)
 3. ✅ `doors_no` (عدد الأبواب)
 4. ✅ `cylinders` (عدد الأسطوانات)
+5. ✅ `horsepower` (قوة الحصان)
+
 
 ---
 
-## 📁 الملف المنشأ
+## 📁 الملفات المنشأة
 
-**Migration**: 
+**Migrations**: 
 ```
-database/migrations/2026_01_08_211100_change_car_sales_fields_to_string.php
+1. database/migrations/2026_01_08_211100_change_car_sales_fields_to_string.php
+   (engine_capacity, seats_no, doors_no, cylinders)
+
+2. database/migrations/2026_01_08_212600_change_horsepower_to_string_in_car_sales_ads.php
+   (horsepower)
 ```
+
 
 ---
 
@@ -68,7 +75,8 @@ php artisan migrate:rollback --step=1
   "engine_capacity": 2500,
   "seats_no": 5,
   "doors_no": 4,
-  "cylinders": 6
+  "cylinders": 6,
+  "horsepower": 300
 }
 ```
 
@@ -78,9 +86,11 @@ php artisan migrate:rollback --step=1
   "engine_capacity": "2.5L Turbo",
   "seats_no": "5",
   "doors_no": "4",
-  "cylinders": "V6"
+  "cylinders": "V6",
+  "horsepower": "300 HP"
 }
 ```
+
 
 ---
 
